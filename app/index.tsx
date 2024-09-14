@@ -1,20 +1,23 @@
 import React from "react";
-import { FlatList, Text, View, StyleSheet, Image } from "react-native";
+import { FlatList, View, StyleSheet, Image } from "react-native";
+import TweetCard from "../components/twits/TweetCard";
+import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
 
 // Define the Tweet type
 type Tweet = {
   id: string;
   author: string;
   content: string;
+  date: string;
 };
 
 // Mock data for tweets
 const tweets: Tweet[] = [
-  { id: '1', author: 'Sergio Agüero', content: 'Messi is the GOAT! 🐐🇦🇷' },
-  { id: '2', author: 'Ángel Di María', content: 'Proud to play alongside Leo for Argentina! 🇦🇷⚽' },
-  { id: '3', author: 'Gerard Piqué', content: 'Missing those Barça days with Messi. What a player! 🔵🔴' },
-  { id: '4', author: 'Andrés Iniesta', content: 'The magic we created at Camp Nou was unforgettable. #Messi' },
-  { id: '5', author: 'Salomón Rondón', content: 'Respect to Messi, one of the greatest to ever play the game! 👏' },
+  { id: '1', author: 'Sergio Agüero', content: 'Messi is the GOAT! 🐐🇦🇷', date: '2021-08-05' },
+  { id: '2', author: 'Ángel Di María', content: 'Proud to play alongside Leo for Argentina! 🇦🇷⚽', date: '2021-08-04' },
+  { id: '3', author: 'Gerard Piqué', content: 'Missing those Barça days with Messi. What a player! 🔵🔴', date: '2021-08-03' },
+  { id: '4', author: 'Andrés Iniesta', content: 'The magic we created at Camp Nou was unforgettable. #Messi', date: '2021-08-02' },
+  { id: '5', author: 'Salomón Rondón', content: 'Respect to Messi, one of the greatest to ever play the game! 👏', date: '2021-08-01' },
 ];
 
 // Define props type for TweetItem
@@ -22,13 +25,6 @@ type TweetItemProps = {
   author: string;
   content: string;
 };
-
-const TweetItem: React.FC<Tweet> = ({ author, content }) => (
-  <View style={styles.tweetContainer}>
-    <Text style={styles.author}>{author}</Text>
-    <Text>{content}</Text>
-  </View>
-);
 
 export default function FeedScreen() {
   return (
@@ -40,9 +36,19 @@ export default function FeedScreen() {
           resizeMode="contain"
         />
       </View>
+      <TweetBoxFeed onTweetSend={(tweetContent) => console.log(tweetContent)} />
       <FlatList<Tweet>
         data={tweets}
-        renderItem={({ item }) => <TweetItem {...item} />}
+        renderItem={({ item }) => {
+            return (
+                <TweetCard
+                    profileImage={'../assets/images/no-profile-picture.png'}
+                    username={item.author}
+                    content={item.content}
+                    date={item.date}
+                />
+            );
+        }}
         keyExtractor={item => item.id}
       />
     </View>
@@ -61,14 +67,5 @@ const styles = StyleSheet.create({
   logo: {
     width: 150,
     height: 50,
-  },
-  tweetContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingVertical: 10,
-  },
-  author: {
-    fontWeight: 'bold',
-    marginBottom: 5,
   },
 });
