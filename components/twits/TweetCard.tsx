@@ -11,7 +11,8 @@ interface TweetCardProps {
 const TweetCard: React.FC<TweetCardProps> = ({ profileImage, username, content, date }) => {
     return (
         <View style={styles.container}>
-            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+            <Image source={{ uri: profileImage }}
+                   style={styles.profileImage} />
             <View style={styles.contentContainer}>
                 <Text style={styles.username}>{username} <Text style={styles.date}>{date}</Text></Text>
                 <Text style={styles.content}>{content}</Text>

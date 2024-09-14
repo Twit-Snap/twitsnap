@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, FlatList } from "react-native";
+import TweetCard from "@/components/twits/TweetCard";
 
 type Tweet = {
   id: string;
@@ -10,7 +11,7 @@ type Tweet = {
 const user = {
   name: "Lionel Messi",
   username: "@leomessi",
-  profilePhoto: require('../assets/images/messi.jpg'),
+  profilePhoto: '../assets/images/messi.jpg',
   bio: "Footballer | World Cup Winner | PSG Player",
   tweets: [
     { id: '1', content: "Fulbo", date: "2023-05-01" },
@@ -21,18 +22,12 @@ const user = {
   ],
 };
 
-const TweetItem: React.FC<Tweet> = ({ content, date }) => (
-  <View style={styles.tweetContainer}>
-    <Text style={styles.tweetContent}>{content}</Text>
-    <Text style={styles.tweetDate}>{date}</Text>
-  </View>
-);
-
 export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
-        <Image source={user.profilePhoto} style={styles.profilePhoto} />
+        <Image source={{uri: user.profilePhoto}}
+               style={styles.profilePhoto} />
         <View>
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.username}>{user.username}</Text>
@@ -42,9 +37,16 @@ export default function ProfileScreen() {
       <Text style={styles.tweetsHeader}>Recent Tweets</Text>
       <FlatList<Tweet>
         data={user.tweets}
-        renderItem={({ item }) => <TweetItem {...item} />}
-        keyExtractor={item => item.id}
-      />
+        renderItem={({ item }) => {
+          return (
+              <TweetCard profileImage={user.profilePhoto}
+                         username={user.name}
+                         content={item.content}
+                         date={item.date}
+              />
+        );
+        }}
+        />
     </View>
   );
 }
