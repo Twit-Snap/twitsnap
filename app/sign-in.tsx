@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import { Text, View, Image, StyleSheet, Button } from 'react-native';
-import { authenticatedAtom } from './atoms/loginAtom';
+import { authenticatedAtom } from './authAtoms/authAtom';
 
 
 export default function SignIn() {
@@ -17,7 +17,8 @@ export default function SignIn() {
                 />
                 <Text
                     onPress={() => {
-                    setIsAuthenticated(true);
+                    // call login API
+                    setIsAuthenticated({ email: 'emailInJWT@gmail.com', username: 'usernameInJWT', name: 'nameInJWT' });
                     // Navigate after signing in. You may want to tweak this to ensure sign-in is
                     // successful before navigating.
                     router.replace('/');
