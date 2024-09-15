@@ -1,16 +1,13 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Redirect, Stack, Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Ionicons } from '@expo/vector-icons';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAtom } from 'jotai';
 import { authenticatedAtom } from '../atoms/loginAtom';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
 
   const [isAuthenticated] = useAtom(authenticatedAtom);
 
@@ -19,7 +16,6 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Tabs>
         <Tabs.Screen
           name="index"
@@ -40,6 +36,5 @@ export default function RootLayout() {
           }}
         />
       </Tabs>
-    </ThemeProvider>
   );
 }
