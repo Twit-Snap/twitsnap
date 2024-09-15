@@ -1,7 +1,9 @@
 import React from 'react';
-import { FlatList, View, StyleSheet, Image } from 'react-native';
-import TweetCard from '../components/twits/TweetCard';
+import { FlatList, Image, StyleSheet, View } from 'react-native';
+
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
+
+import TweetCard from '../components/twits/TweetCard';
 
 // Define the Tweet type
 type Tweet = {

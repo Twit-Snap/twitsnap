@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, FlatList } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+
 import TweetCard from '@/components/twits/TweetCard';
 
 type Tweet = {
