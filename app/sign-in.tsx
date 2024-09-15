@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
-import { Text, View, Image, StyleSheet } from 'react-native';
+import { Text, View, Image, StyleSheet, Button } from 'react-native';
 import { authenticatedAtom } from './atoms/loginAtom';
 
 
@@ -25,6 +25,14 @@ export default function SignIn() {
                     Sign In
                 </Text>
             </View>
+            <View style={styles.buttonContainer}>
+                <Button
+                    title="Sign Up"
+                    onPress={() => {
+                        router.push('/sign-up');
+                    }}
+                />
+            </View>
         </View>
     );
 }
@@ -41,5 +49,8 @@ const styles = StyleSheet.create({
     logo: {
         width: 150,
         height: 50,
+    },
+    buttonContainer: {
+        alignItems: 'center',
     },
 });
