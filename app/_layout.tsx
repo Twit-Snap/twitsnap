@@ -19,7 +19,7 @@ export default function RootLayout() {
             title: 'Feed',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home-outline" size={size} color={color} />
-            ),
+            )
           }}
         />
         <Tabs.Screen
@@ -28,7 +28,7 @@ export default function RootLayout() {
             title: 'Profile',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="person-outline" size={size} color={color} />
-            ),
+            )
           }}
         />
       </Tabs>
