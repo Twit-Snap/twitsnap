@@ -1,5 +1,3 @@
 import { atom } from 'jotai'
 
-const loginAtom = atom({
-  authenticated : false
-})
+export const authenticatedAtom = atom(false)
