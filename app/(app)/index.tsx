@@ -1,6 +1,6 @@
 import React from "react";
 import { FlatList, View, StyleSheet, Image } from "react-native";
-import TweetCard from "../components/twits/TweetCard";
+import TweetCard from "../../components/twits/TweetCard";
 import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
 
 // Define the Tweet type
@@ -31,7 +31,7 @@ export default function FeedScreen() {
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
-          source={require('../assets/images/logo.jpg')}
+          source={require('../../assets/images/logo.jpg')}
           style={styles.logo}
           resizeMode="contain"
         />
