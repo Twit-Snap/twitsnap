@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
-import { Text, View, Image, StyleSheet, Button } from 'react-native';
+import { View, Image, StyleSheet, Button } from 'react-native';
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 
@@ -15,16 +15,18 @@ export default function SignIn() {
                     style={styles.logo}
                     resizeMode="contain"
                 />
-                <Text
-                    onPress={() => {
-                    // call login API
-                    setIsAuthenticated({ email: 'emailInJWT@gmail.com', username: 'usernameInJWT', name: 'nameInJWT' });
-                    // Navigate after signing in. You may want to tweak this to ensure sign-in is
-                    // successful before navigating.
-                    router.replace('/');
-                    }}>
-                    Sign In
-                </Text>
+                <View style={styles.buttonContainer}>
+                    <Button
+                        title="Sign In"
+                        onPress={() => {
+                            // call login API
+                            setIsAuthenticated({ email: 'emailInJWT@gmail.com', username: 'usernameInJWT', name: 'nameInJWT' });
+                            // Navigate after signing in. You may want to tweak this to ensure sign-in is
+                            // successful before navigating.
+                            router.replace('/');
+                        }}
+                   />
+                </View>
             </View>
             <View style={styles.buttonContainer}>
                 <Button
