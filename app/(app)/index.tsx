@@ -31,7 +31,7 @@ export default function FeedScreen() {
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
-          source={require('../../assets/images/logo.jpg')}
+          source={require('../../assets/images/logo_light.png')}
           style={styles.logo}
           resizeMode="contain"
         />
