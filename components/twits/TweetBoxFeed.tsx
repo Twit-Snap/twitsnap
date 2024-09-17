@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
 
 interface NewTweetInputProps {
     onTweetSend: (tweetContent: string) => void;
@@ -21,13 +22,19 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend }) => {
         <View style={styles.container}>
             <TextInput
                 style={styles.input}
+                mode = "outlined"
                 placeholder="What's happening?"
                 value={tweetContent}
                 onChangeText={setTweetContent}
                 multiline
                 maxLength={280} // Limit to 280 characters like Twitter
             />
-            <Button title="Send" onPress={handleSendTweet} />
+            <Button
+                mode="contained"
+                buttonColor={'#1494df'}
+                onPress={handleSendTweet}>
+                Send
+            </Button>
         </View>
     );
 };
