@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, View, StyleSheet, Image } from "react-native";
+import { FlatList, View, ScrollView, StyleSheet, Image } from "react-native";
 import TweetCard from "../../components/twits/TweetCard";
 import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
 
@@ -29,28 +29,30 @@ type TweetItemProps = {
 export default function FeedScreen() {
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../../assets/images/logo_light.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
-      <TweetBoxFeed onTweetSend={(tweetContent) => console.log(tweetContent)} />
-      <FlatList<Tweet>
-        data={tweets}
-        renderItem={({ item }) => {
-            return (
-                <TweetCard
-                    profileImage={'../assets/images/no-profile-picture.png'}
-                    username={item.author}
-                    content={item.content}
-                    date={item.date}
+        <ScrollView>
+          <View style={styles.logoContainer}>
+                <Image
+                  source={require('../../assets/images/logo_light.png')}
+                  style={styles.logo}
+                  resizeMode="contain"
                 />
-            );
-        }}
-        keyExtractor={item => item.id}
-      />
+          </View>
+          <TweetBoxFeed onTweetSend={(tweetContent) => console.log(tweetContent)} />
+          <FlatList<Tweet>
+            data={tweets}
+            renderItem={({ item }) => {
+                return (
+                    <TweetCard
+                        profileImage={'../assets/images/no-profile-picture.png'}
+                        username={item.author}
+                        content={item.content}
+                        date={item.date}
+                    />
+                );
+            }}
+            keyExtractor={item => item.id}
+          />
+        </ScrollView>
     </View>
   );
 }

@@ -14,14 +14,15 @@ interface ProfileHeader {
 const ProfileHeader: React.FC<ProfileHeader> = ({user}) => {
     return (
         <View>
-            <View style={styles.profileHeader}>
-                <View style={styles.textContainer}>
-                    <Image source={{uri: user.profilePhoto}} style={styles.profilePhoto}></Image>
-                    <Text style={styles.name}>{user.name}</Text>
-                    <Text style={styles.username}>{user.username}</Text>
+                <Image source={{ uri: user.bannerPhoto }} style={styles.bannerPhoto} />
+                <View style={styles.profileHeader}>
+                    <View style={styles.textContainer}>
+                        <Image source={{uri: user.profilePhoto}} style={styles.profilePhoto}></Image>
+                        <Text style={styles.name}>{user.name}</Text>
+                        <Text style={styles.username}>{user.username}</Text>
+                    </View>
                 </View>
-            </View>
-            <Text style={styles.bio}>{user.bio}</Text>
+                <Text style={styles.bio}>{user.bio}</Text>
         </View>
     )
 }
@@ -32,32 +33,40 @@ profileHeader: {
         alignItems: 'center',
         marginBottom: 20,
 },
-profilePhoto: {
-    width: 100,
-        height: 100,
-        borderRadius: 150 / 2,
-        overflow: "hidden",
+bannerPhoto: {
+    width: '100%',
+    height: 300,
+    resizeMode: "cover"
+    },
+    profilePhoto: {
+        width: 160,
+        height: 160,
+        borderRadius: 200,
         borderWidth: 3,
         borderColor: "black",
-        marginRight: 20,
-},
+        top: -85,
+        left: 20,
+    },
 name: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginTop: -75,
+    marginLeft: 25,
 },
 username: {
     fontSize: 16,
     color: '#666',
+    marginLeft: 25
 },
 bio: {
     fontSize: 16,
-        lineHeight: 24,
-        marginBottom: 5,
+    lineHeight: 24,
+    marginBottom: 5,
 },
 textContainer: {
     flex: 1,
     justifyContent: 'center',
-    },
+},
 });
 
 export default ProfileHeader;
