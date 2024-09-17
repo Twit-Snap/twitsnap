@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, FlatList } from "react-native";
+import { View, StyleSheet, FlatList } from "react-native";
 import TweetCard from "@/components/twits/TweetCard";
+import ProfileHeader from "@/components/profile/ProfileHeader";
 
 type Tweet = {
   id: string;
@@ -12,6 +13,7 @@ const user = {
   name: "Lionel Messi",
   username: "@leomessi",
   profilePhoto: '../assets/images/messi.jpg',
+  bannerPhoto: '../assets/images/messi-banner.jpg',
   bio: "Footballer | World Cup Winner | PSG Player",
   tweets: [
     { id: '1', content: "Fulbo", date: "2023-05-01" },
@@ -24,17 +26,8 @@ const user = {
 
 export default function ProfileScreen() {
   return (
-    <View style={styles.container}>
-      <View style={styles.profileHeader}>
-        <Image source={{uri: user.profilePhoto}}
-               style={styles.profilePhoto} />
-        <View>
-          <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.username}>{user.username}</Text>
-        </View>
-      </View>
-      <Text style={styles.bio}>{user.bio}</Text>
-      <Text style={styles.tweetsHeader}>Recent Tweets</Text>
+      <View style={styles.container}>
+      <ProfileHeader user={user} />
       <FlatList<Tweet>
         data={user.tweets}
         renderItem={({ item }) => {
@@ -46,7 +39,7 @@ export default function ProfileScreen() {
               />
         );
         }}
-        />
+        ></FlatList>
     </View>
   );
 }
@@ -55,47 +48,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  profilePhoto: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 15,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  username: {
-    fontSize: 16,
-    color: '#666',
-  },
-  bio: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 20,
-  },
-  tweetsHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  tweetContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingVertical: 10,
-  },
-  tweetContent: {
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  tweetDate: {
-    fontSize: 12,
-    color: '#666',
   },
 });
