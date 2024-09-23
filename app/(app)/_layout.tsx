@@ -9,7 +9,7 @@ export default function RootLayout() {
   const [isAuthenticated] = useAtom(authenticatedAtom);
 
   if (!isAuthenticated) {
-    return <Redirect href="/sign-in" />;
+    return <Redirect href="/front-page"/>;
   }
 
   return (
