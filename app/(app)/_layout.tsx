@@ -1,11 +1,8 @@
 import { Redirect, Tabs } from 'expo-router';
-//import * as SplashScreen from 'expo-splash-screen';
 import { Ionicons } from '@expo/vector-icons';
-
 import { useAtom } from 'jotai';
 import { authenticatedAtom } from '../authAtoms/authAtom';
 
-//SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 

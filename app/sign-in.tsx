@@ -5,13 +5,17 @@ import { Button } from 'react-native-paper';
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { SocialIcon } from 'react-native-elements'
 
+import { Dimensions } from 'react-native';
+
+const window = Dimensions.get('window');
+
 
 export default function SignIn() {
     const [_, setIsAuthenticated] = useAtom(authenticatedAtom);
 
     return (
         <View style={styles.container}>
-            <Text style={{ fontSize: 60, fontWeight: "300", textAlign: 'center', marginBottom: 20 }}>
+            <Text style={{ fontSize: 35, fontWeight: "300", textAlign: 'center', marginBottom: 10, marginVertical: 10 }}>
                 Everything you love about Twitter,
             </Text>
             <Text style={{ fontSize: 60, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>
@@ -42,7 +46,7 @@ export default function SignIn() {
                 </Button>
             </View>
             <View style={styles.buttonContainer}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>New to TwitSnap?</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>New to TwitSnap?</Text>
                 <Button
                     icon="account-plus-outline"
                     mode="contained"
@@ -86,23 +90,22 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     logoContainer: {
-        transform: [{ scale: 8.5 }],
+        transform: [{ scale: 5.5 }],
         position: 'absolute',
-        bottom: 195,
-        left : 195,
-
+        top: (window.height / 2) + 255,
+        left: (window.width / 2) - 95,
     },
     logo: {
         width: 150,
         height: 50,
     },
     buttonContent: {
-        height: 40,
+        height: 48,
         width: 350,
+        justifyContent: 'center',
     },
     buttonContainer: {
         alignItems: 'center',
         marginVertical: 10,
-        transform: [{ translateX: 300 }, {translateY : 50}],
     },
 });
