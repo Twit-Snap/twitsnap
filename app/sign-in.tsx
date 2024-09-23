@@ -3,8 +3,6 @@ import { useAtom } from 'jotai';
 import {View, Image, StyleSheet, Text} from 'react-native';
 import { Button } from 'react-native-paper';
 import { authenticatedAtom } from './authAtoms/authAtom';
-import { SocialIcon } from 'react-native-elements'
-
 import { Dimensions } from 'react-native';
 
 const window = Dimensions.get('window');
@@ -57,28 +55,6 @@ export default function SignIn() {
                     }}>
                     Sign up
                 </Button>
-            </View>
-            <View style={styles.buttonContainer}>
-                <SocialIcon
-                    title="Register with Google account"
-                    button
-                    type="google"
-                    style={styles.buttonContent}
-                    onPress={() => {
-                        router.push('/sign-up');
-                    }}
-                />
-            </View>
-            <View style={styles.buttonContainer}>
-            <SocialIcon
-                title="Register with Facebook Account"
-                button
-                type="facebook"
-                style={styles.buttonContent}
-                onPress={() => {
-                    router.push('/sign-up');
-                }}
-            />
             </View>
         </View>
     );
