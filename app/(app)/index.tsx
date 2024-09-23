@@ -3,6 +3,10 @@ import { FlatList, View, ScrollView, StyleSheet, Image } from "react-native";
 import TweetCard from "../../components/twits/TweetCard";
 import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
 
+const feed_images = {
+    logo: require('../../assets/images/logo_light.png'),
+}
+
 // Define the Tweet type
 type Tweet = {
   id: string;
@@ -32,7 +36,7 @@ export default function FeedScreen() {
         <ScrollView>
           <View style={styles.logoContainer}>
                 <Image
-                  source={require('../../assets/images/logo_light.png')}
+                  source={feed_images.logo}
                   style={styles.logo}
                   resizeMode="contain"
                 />
@@ -43,7 +47,7 @@ export default function FeedScreen() {
             renderItem={({ item }) => {
                 return (
                     <TweetCard
-                        profileImage={'../assets/images/no-profile-picture.png'}
+                        profileImage={''}
                         username={item.author}
                         content={item.content}
                         date={item.date}
@@ -51,6 +55,7 @@ export default function FeedScreen() {
                 );
             }}
             keyExtractor={item => item.id}
+            scrollEnabled={false}
           />
         </ScrollView>
     </View>

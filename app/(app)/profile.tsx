@@ -12,8 +12,8 @@ type Tweet = {
 const user = {
   name: "Lionel Messi",
   username: "@leomessi",
-  profilePhoto: '../assets/images/messi.jpg',
-  bannerPhoto: '../assets/images/messi-banner.jpeg',
+  profilePhoto: '',
+  bannerPhoto: '',
   bio: "Footballer | World Cup Winner | PSG Player",
   tweets: [
     { id: '1', content: "Fulbo", date: "2023-05-01" },
@@ -29,21 +29,22 @@ const user = {
 export default function ProfileScreen() {
   return (
       <View style={styles.container}>
-        <ScrollView>
-          <ProfileHeader user={user} />
-          <FlatList<Tweet>
-          data={user.tweets}
-          renderItem={({ item }) => {
-            return (
-                <TweetCard profileImage={user.profilePhoto}
-                           username={user.name}
-                           content={item.content}
-                           date={item.date}
-                />
-          );
-          }}
-          ></FlatList>
-        </ScrollView>
+          <ScrollView>
+            <ProfileHeader user={user} />
+              <FlatList<Tweet>
+              data={user.tweets}
+              renderItem={({ item }) => {
+                return (
+                    <TweetCard profileImage={user.profilePhoto}
+                               username={user.name}
+                               content={item.content}
+                               date={item.date}
+                    />
+              );
+              }}
+              scrollEnabled={false}
+              ></FlatList>
+          </ScrollView>
     </View>
   );
 }

@@ -11,13 +11,18 @@ interface ProfileHeader {
     }
 }
 
+const default_images = {
+    profilePhoto: require('../../assets/images/messi.jpg'),
+    bannerPhoto: require('../../assets/images/messi-banner.jpeg')
+}
+
 const ProfileHeader: React.FC<ProfileHeader> = ({user}) => {
     return (
         <View>
-                <Image source={{ uri: user.bannerPhoto }} style={styles.bannerPhoto} />
+                <Image source={user.bannerPhoto ? {uri : user.bannerPhoto} : default_images.bannerPhoto} style={styles.bannerPhoto} />
                 <View style={styles.profileHeader}>
                     <View style={styles.textContainer}>
-                        <Image source={{uri: user.profilePhoto}} style={styles.profilePhoto}></Image>
+                        <Image source={user.profilePhoto ? {uri : user.profilePhoto} : default_images.profilePhoto} style={styles.profilePhoto}></Image>
                         <Text style={styles.name}>{user.name}</Text>
                         <Text style={styles.username}>{user.username}</Text>
                     </View>
