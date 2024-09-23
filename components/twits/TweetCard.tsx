@@ -1,6 +1,10 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 
+const default_images =  {
+    default_profile_picture: require('../../assets/images/no-profile-picture.png'),
+}
+
 interface TweetCardProps {
     profileImage: string; // URL to the image
     username: string;
@@ -11,7 +15,7 @@ interface TweetCardProps {
 const TweetCard: React.FC<TweetCardProps> = ({ profileImage, username, content, date }) => {
     return (
         <View style={styles.container}>
-            <Image source={{ uri: profileImage }}
+            <Image source={profileImage ? { uri: profileImage } : default_images.default_profile_picture}
                    style={styles.profileImage} />
             <View style={styles.contentContainer}>
                 <Text style={styles.username}>{username} <Text style={styles.date}>{date}</Text></Text>

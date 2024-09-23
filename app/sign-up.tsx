@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, Alert, StyleSheet } from 'react-native';
+import { TextInput, Button } from 'react-native-paper';
 
 interface SignUpForm {
   name: string;
@@ -42,20 +43,23 @@ const SignUp: React.FC = () => {
       <TextInput
         style={styles.input}
         value={form.name}
+        mode = "flat"
         onChangeText={(value) => handleChange('name', value)}
-        placeholder="Name"
+        placeholder="John"
       />
       <Text>Last Name:</Text>
       <TextInput
         style={styles.input}
         value={form.lastName}
+        mode = "flat"
         onChangeText={(value) => handleChange('lastName', value)}
-        placeholder="Last Name"
+        placeholder="Doe"
       />
       <Text>Username:</Text>
       <TextInput
         style={styles.input}
         value={form.username}
+        mode = "flat"
         onChangeText={(value) => handleChange('username', value)}
         placeholder="Username"
       />
@@ -63,6 +67,7 @@ const SignUp: React.FC = () => {
       <TextInput
         style={styles.input}
         value={form.birthDate}
+        mode = "flat"
         onChangeText={(value) => handleChange('birthDate', value)}
         placeholder="YYYY-MM-DD"
       />
@@ -70,6 +75,7 @@ const SignUp: React.FC = () => {
       <TextInput
         style={styles.input}
         value={form.password}
+        mode = "flat"
         onChangeText={(value) => handleChange('password', value)}
         placeholder="Password"
         secureTextEntry
@@ -78,11 +84,18 @@ const SignUp: React.FC = () => {
       <TextInput
         style={styles.input}
         value={form.repeatPassword}
+        mode = "flat"
         onChangeText={(value) => handleChange('repeatPassword', value)}
         placeholder="Repeat Password"
         secureTextEntry
       />
-      <Button title="Sign Up" onPress={handleSubmit} />
+      <Button
+          icon="form-select"
+          mode="contained"
+          buttonColor={'#000'}
+          onPress={handleSubmit}>
+        Sign Up
+    </Button>
     </View>
   );
 };
