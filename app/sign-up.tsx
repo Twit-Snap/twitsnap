@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, Alert, StyleSheet } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAtom } from 'jotai';
+import { authenticatedAtom } from './authAtoms/authAtom';
+import { router } from 'expo-router';
 
 interface SignUpForm {
   email: string;
@@ -13,7 +17,9 @@ interface SignUpForm {
 }
 
 const SignUp: () => void = () => {
-  const [form, setForm] = useState<SignUpForm>({
+    const [_, setIsAuthenticated] = useAtom(authenticatedAtom);
+
+    const [form, setForm] = useState<SignUpForm>({
     name: '',
     lastname: '',
     email: '',
@@ -30,28 +36,36 @@ const SignUp: () => void = () => {
     });
   };
 
-  const handleSubmit = () => {
-    if (form.password !== form.repeatPassword) {
-      Alert.alert('Error', 'Passwords do not match!');
-      return;
-    }
-    fetch(`${process.env.SERVER_URL}auth/register`.toString(), {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            console.log('Success:', data);
-            alert('Success! Registering.');
-        })
-        .catch((error) => {
+    const handleSubmit = async () => {
+        if (form.password !== form.repeatPassword) {
+            alert('Error! Passwords do not match.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${process.env.SERVER_URL}auth/register`.toString(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(form),
+            });
+            const data = await response.json();
+            console.log("Register success: ", data);
+            if (response.ok) {
+                await AsyncStorage.setItem('token', data.token);
+                alert('Success Registering!');
+                setIsAuthenticated({email: data.email, username: data.username, name: data.name});
+                router.replace('/');
+            } else {
+                console.log("Login failed: ", data);
+                alert('Something went wrong!');
+            }
+        } catch (error) {
             console.error('Error:', error);
-            alert('Error! Wrong credentials.');
-        });
-  }
+            alert('Error! Some fields are missing or have incorrect format.');
+        }
+    }
 
   return (
     <View style={styles.container}>
