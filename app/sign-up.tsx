@@ -3,20 +3,22 @@ import { View, Text, Alert, StyleSheet } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 
 interface SignUpForm {
-  name: string;
-  lastName: string;
+  email: string;
   username: string;
-  birthDate: string;
   password: string;
+  name: string;
+  lastname: string;
+  birthdate: string;
   repeatPassword: string;
 }
 
-const SignUp: React.FC = () => {
+const SignUp: () => void = () => {
   const [form, setForm] = useState<SignUpForm>({
     name: '',
-    lastName: '',
+    lastname: '',
+    email: '',
     username: '',
-    birthDate: '',
+    birthdate: '',
     password: '',
     repeatPassword: '',
   });
@@ -33,9 +35,23 @@ const SignUp: React.FC = () => {
       Alert.alert('Error', 'Passwords do not match!');
       return;
     }
-    // Add further validation and form submission logic here
-    console.log('Form submitted', form);
-  };
+    fetch(`${process.env.SERVER_URL}auth/register`.toString(), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Success:', data);
+            alert('Success! Registering.');
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Error! Wrong credentials.');
+        });
+  }
 
   return (
     <View style={styles.container}>
@@ -50,10 +66,18 @@ const SignUp: React.FC = () => {
       <Text>Last Name:</Text>
       <TextInput
         style={styles.input}
-        value={form.lastName}
+        value={form.lastname}
         mode = "flat"
-        onChangeText={(value) => handleChange('lastName', value)}
+        onChangeText={(value) => handleChange('lastname', value)}
         placeholder="Doe"
+      />
+      <Text>Email:</Text>
+      <TextInput
+          style={styles.input}
+          value={form.email}
+          mode = "flat"
+          onChangeText={(value) => handleChange('email', value)}
+          placeholder="Email"
       />
       <Text>Username:</Text>
       <TextInput
@@ -66,9 +90,9 @@ const SignUp: React.FC = () => {
       <Text>Birth Date:</Text>
       <TextInput
         style={styles.input}
-        value={form.birthDate}
+        value={form.birthdate}
         mode = "flat"
-        onChangeText={(value) => handleChange('birthDate', value)}
+        onChangeText={(value) => handleChange('birthdate', value)}
         placeholder="YYYY-MM-DD"
       />
       <Text>Password:</Text>
