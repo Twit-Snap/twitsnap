@@ -3,13 +3,13 @@ import { View, Text, Alert, StyleSheet } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 
 interface signInForm {
-    usernameOrMail: string;
+    emailOrUsername: string;
     password: string;
 }
 
-const SignIn: React.FC = () => {
+const SignIn: () => void = () => {
     const [form, setForm] = useState<signInForm>({
-        usernameOrMail: '',
+        emailOrUsername: '',
         password: '',
     });
 
@@ -21,7 +21,22 @@ const SignIn: React.FC = () => {
     };
 
     const handleSubmit = () => {
-
+        fetch(`${process.env.SERVER_URL}auth/login`.toString(), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(form),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Success:', data);
+                alert("Success! Logging in.");
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert("Error! Wrong credentials.");
+            });
     };
 
     return (
@@ -29,9 +44,9 @@ const SignIn: React.FC = () => {
             <Text style={{marginTop : 10}}>Username or Email:</Text>
             <TextInput
                 style={styles.input}
-                value={form.usernameOrMail}
+                value={form.emailOrUsername}
                 mode = "flat"
-                onChangeText={(value) => handleChange('usernameOrMail', value)}
+                onChangeText={(value) => handleChange('emailOrUsername', value)}
                 placeholder="Username"
             />
             <Text>Password:</Text>
@@ -51,7 +66,7 @@ const SignIn: React.FC = () => {
                 Sign Up
             </Button>
         </View>
-    );
+    )
 };
 
 const styles = StyleSheet.create({
