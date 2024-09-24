@@ -55,7 +55,7 @@ const SignUp: () => void = () => {
                 await AsyncStorage.setItem('token', data.token);
                 console.log("Register success: ", data);
                 alert('Success Registering!');
-                setIsAuthenticated({email: data.email, username: data.username, name: data.name});
+                setIsAuthenticated({id : data.id, email: data.email, username: data.username, name: data.name});
                 router.replace('/');
             } else if (response.status === 400) {
                 console.log("Register failed: ", data);

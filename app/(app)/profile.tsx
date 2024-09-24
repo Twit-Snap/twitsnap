@@ -2,6 +2,8 @@ import React from "react";
 import { View, ScrollView, StyleSheet, FlatList } from "react-native";
 import TweetCard from "@/components/twits/TweetCard";
 import ProfileHeader from "@/components/profile/ProfileHeader";
+import { useAtom } from 'jotai';
+import { authenticatedAtom } from '../authAtoms/authAtom';
 
 type Tweet = {
   id: string;
@@ -9,34 +11,20 @@ type Tweet = {
   date: string;
 };
 
-const user = {
-  name: "Lionel Messi",
-  username: "@leomessi",
-  profilePhoto: '',
-  bannerPhoto: '',
-  bio: "Footballer | World Cup Winner | PSG Player",
-  tweets: [
-    { id: '1', content: "Fulbo", date: "2023-05-01" },
-    { id: '2', content: "Happy to score and contribute to the win. Fuerza Argentina! 🇦🇷", date: "2023-04-28" },
-    { id: '3', content: "Great training session today. Always working to improve. 💪", date: "2023-04-25" },
-    { id: '4', content: "Thank you to all the fans for your constant support. You're amazing! ❤️", date: "2023-04-22" },
-    { id: '5', content: "Excited for the upcoming matches. Let's go! ⚽", date: "2023-04-20" },
-    { id: '6', content: "Happy to be back on the field. Feeling great! 💯", date: "2023-04-18" },
-    { id: '7', content: "Great team performance today. Let's keep it up! 💪", date: "2023-04-15" },
-  ],
-};
 
 export default function ProfileScreen() {
+  const [userData] = useAtom(authenticatedAtom) || { userAuth: null };
+
   return (
       <View style={styles.container}>
           <ScrollView>
-            <ProfileHeader user={user} />
+            {userData && <ProfileHeader userAuth={userData} bio={"Hi! Welcome to my profile. \nI'm a huge Messi fan!"} profilePhoto={""} bannerPhoto={""} />}
               <FlatList<Tweet>
-              data={user.tweets}
+              data={[]}
               renderItem={({ item }) => {
                 return (
-                    <TweetCard profileImage={user.profilePhoto}
-                               username={user.name}
+                    <TweetCard profileImage={""}
+                               username={userData?.username || ""}
                                content={item.content}
                                date={item.date}
                     />

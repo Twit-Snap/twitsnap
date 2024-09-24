@@ -39,7 +39,7 @@ const SignIn: () => void = () => {
             if (response.ok) {
                 await AsyncStorage.setItem('token', data.token);
                 console.log("Login success: ", data);
-                setIsAuthenticated({email: data.email, username: data.username, name: data.name});
+                setIsAuthenticated({id : data.id, email: data.email, username: data.username, name: data.name});
                 router.replace('/');
             } else {
                 console.log("Login failed: ", data);
