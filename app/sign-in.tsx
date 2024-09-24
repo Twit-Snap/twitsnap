@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Alert, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAtom } from 'jotai';
@@ -36,15 +36,16 @@ const SignIn: () => void = () => {
                 body: JSON.stringify(form),
             });
             const data = await response.json();
-            console.log("Login success: ", data);
             if (response.ok) {
                 await AsyncStorage.setItem('token', data.token);
-                alert('Success! Logging in.');
+                console.log("Login success: ", data);
                 setIsAuthenticated({email: data.email, username: data.username, name: data.name});
                 router.replace('/');
             } else {
                 console.log("Login failed: ", data);
-                alert('Error! Wrong credentials.');
+                if (response.status === 401) {
+                    alert('Error! Wrong credentials.');
+                }
             }
         } catch (error) {
             console.error('Error:', error);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Alert, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAtom } from 'jotai';
@@ -51,15 +51,15 @@ const SignUp: () => void = () => {
                 body: JSON.stringify(form),
             });
             const data = await response.json();
-            console.log("Register success: ", data);
             if (response.ok) {
                 await AsyncStorage.setItem('token', data.token);
+                console.log("Register success: ", data);
                 alert('Success Registering!');
                 setIsAuthenticated({email: data.email, username: data.username, name: data.name});
                 router.replace('/');
-            } else {
-                console.log("Login failed: ", data);
-                alert('Something went wrong!');
+            } else if (response.status === 400) {
+                console.log("Register failed: ", data);
+                alert('Something went wrong! Check the fields for registration.');
             }
         } catch (error) {
             console.error('Error:', error);
