@@ -1,14 +1,11 @@
 import { router } from 'expo-router';
-import { useAtom } from 'jotai';
 import {View, Image, StyleSheet, Text} from 'react-native';
 import { Button } from 'react-native-paper';
-import { authenticatedAtom } from './authAtoms/authAtom';
 import { Dimensions } from 'react-native';
 
 const window = Dimensions.get('window');
 
 export default function FrontPage() {
-    const [_, setIsAuthenticated] = useAtom(authenticatedAtom);
 
     return (
         <View style={styles.container}>
@@ -36,7 +33,7 @@ export default function FrontPage() {
                         // call login API
                         router.push('/sign-in');
                     }}>
-                    Sign In
+                    Log In
                 </Button>
             </View>
             <View style={styles.buttonContainer}>

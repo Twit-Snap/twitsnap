@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { FlatList, View, ScrollView, StyleSheet, Image } from "react-native";
 import TweetCard from "../../components/twits/TweetCard";
 import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
+import {useAtom} from "jotai";
+import {authenticatedAtom} from "@/app/authAtoms/authAtom";
 
 const feed_images = {
     logo: require('../../assets/images/logo_light.png'),
@@ -15,8 +17,7 @@ type Tweet = {
   date: string;
 };
 
-// Mock data for tweets
-const tweets: Tweet[] = [
+const initialTweets: Tweet[] = [
   { id: '1', author: 'Sergio Agüero', content: 'Messi is the GOAT! 🐐🇦🇷', date: '2021-08-05' },
   { id: '2', author: 'Ángel Di María', content: 'Proud to play alongside Leo for Argentina! 🇦🇷⚽', date: '2021-08-04' },
   { id: '3', author: 'Gerard Piqué', content: 'Missing those Barça days with Messi. What a player! 🔵🔴', date: '2021-08-03' },
@@ -31,6 +32,9 @@ type TweetItemProps = {
 };
 
 export default function FeedScreen() {
+  const [tweets, setTweets] = useState(initialTweets);
+  const [userData] = useAtom(authenticatedAtom);
+
   return (
     <View style={styles.container}>
         <ScrollView>
@@ -41,7 +45,15 @@ export default function FeedScreen() {
                   resizeMode="contain"
                 />
           </View>
-          <TweetBoxFeed onTweetSend={(tweetContent) => console.log(tweetContent)} />
+          <TweetBoxFeed onTweetSend={(tweetContent) => {
+            const newTweet = {
+              id: (tweets.length + 1).toString(),
+              author: userData?.username || "Anonymous",
+              content: tweetContent,
+              date: new Date().toISOString(),
+            };
+            setTweets([...tweets, newTweet].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+          }}/>
           <FlatList<Tweet>
             data={tweets}
             renderItem={({ item }) => {
