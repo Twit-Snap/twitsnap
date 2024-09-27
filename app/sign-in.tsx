@@ -30,7 +30,7 @@ const SignIn: () => React.JSX.Element = () => {
     const handleSubmit = async () => {
         try {
             const response = await axios.post(
-                `${process.env.SERVER_URL}auth/login`,
+                `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/login`,
                 form,
                 {
                     headers: {'Content-Type': 'application/json'},
