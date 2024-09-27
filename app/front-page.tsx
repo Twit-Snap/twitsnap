@@ -6,7 +6,6 @@ import { Dimensions } from 'react-native';
 const window = Dimensions.get('window');
 
 export default function FrontPage() {
-
     return (
         <View style={styles.container}>
             <Text style={{ fontSize: 35, fontWeight: "300", textAlign: 'center', marginBottom: 10, marginVertical: 10 }}>

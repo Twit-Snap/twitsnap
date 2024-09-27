@@ -5,13 +5,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAtom } from 'jotai';
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { router } from 'expo-router';
+const axios = require('axios').default;
 
 interface signInForm {
     emailOrUsername: string;
     password: string;
 }
 
-const SignIn: () => void = () => {
+const SignIn: () => React.JSX.Element = () => {
     const [_, setIsAuthenticated] = useAtom(authenticatedAtom);
 
     const [form, setForm] = useState<signInForm>({
@@ -28,28 +29,33 @@ const SignIn: () => void = () => {
 
     const handleSubmit = async () => {
         try {
-            const response = await fetch(`${process.env.SERVER_URL}auth/login`.toString(), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(form),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                await AsyncStorage.setItem('token', data.token);
-                console.log("Login success: ", data);
-                setIsAuthenticated({id : data.id, email: data.email, username: data.username, name: data.name});
-                router.replace('/');
-            } else {
-                console.log("Login failed: ", data);
-                if (response.status === 401) {
-                    alert('Error! Wrong credentials.');
+            const response = await axios.post(
+                `${process.env.SERVER_URL}auth/login`,
+                form,
+                {
+                    headers: {'Content-Type': 'application/json'},
                 }
+            );
+
+            if (response.status == 200) {
+                await AsyncStorage.setItem('token', response.data.token);
+                console.log("Login success: ", response.data);
+                setIsAuthenticated({
+                    id: response.data.id,
+                    email: response.data.email,
+                    username: response.data.username,
+                    name: response.data.name
+                });
+                router.replace('/');
             }
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response && error.response.status == 401) {
+                console.log("Login failed: ", error.response.data);
+                alert('Invalid username or password');
+            } else {
             console.error('Error:', error);
-            alert('Error! Wrong credentials.');
+            alert('An error occurred. Please try again later.');
+            }
         }
     }
 

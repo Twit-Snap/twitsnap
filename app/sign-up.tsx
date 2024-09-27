@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAtom } from 'jotai';
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { router } from 'expo-router';
+const axios = require('axios').default;
 
 interface SignUpForm {
   email: string;
@@ -16,7 +17,7 @@ interface SignUpForm {
   repeatPassword: string;
 }
 
-const SignUp: () => void = () => {
+const SignUp: () => React.JSX.Element = () => {
     const [_, setIsAuthenticated] = useAtom(authenticatedAtom);
 
     const [form, setForm] = useState<SignUpForm>({
@@ -43,27 +44,39 @@ const SignUp: () => void = () => {
         }
 
         try {
-            const response = await fetch(`${process.env.SERVER_URL}auth/register`.toString(), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(form),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                await AsyncStorage.setItem('token', data.token);
-                console.log("Register success: ", data);
-                alert('Success Registering!');
-                setIsAuthenticated({id : data.id, email: data.email, username: data.username, name: data.name});
-                router.replace('/');
-            } else if (response.status === 400) {
-                console.log("Register failed: ", data);
-                alert('Something went wrong! Check the fields for registration.');
+            const response = await axios.post(
+                `${process.env.SERVER_URL}auth/register`,
+                form,
+                {
+                    headers: {'Content-Type': 'application/json'}
+                }
+            );
+            if (response.status == 200) {
+                    await AsyncStorage.setItem('token', response.data.token);
+                    console.log("Register success: ", response.data);
+                    alert('Success Registering!');
+                    setIsAuthenticated({
+                        id: response.data.id,
+                        email: response.data.email,
+                        username: response.data.username,
+                        name: response.data.name
+                    });
+                    router.replace('/');
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error! Some fields are missing or have incorrect format.');
+        } catch (error : any) {
+            if (error.response && error.response.status == 400) {
+                if (error.response.data.type == "INVALID_EMAIL") {
+                    console.log("invalid email: ", form.email);
+                    alert('Error! Invalid email.');
+                }
+                else {
+                    console.log("Register failed: ", error.response.data);
+                    alert('Invalid username or password');
+                }
+            } else {
+                console.error('Error:', error);
+                alert('Error! Some fields are missing or have incorrect format.');
+            }
         }
     }
 
