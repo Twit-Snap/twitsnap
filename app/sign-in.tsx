@@ -1,87 +1,110 @@
-import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { TextInput, Button } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAtom } from 'jotai';
-import {View, Image, StyleSheet, Text} from 'react-native';
-import { Button } from 'react-native-paper';
 import { authenticatedAtom } from './authAtoms/authAtom';
-import { Dimensions } from 'react-native';
+import { router } from 'expo-router';
+const axios = require('axios').default;
 
-const window = Dimensions.get('window');
+interface signInForm {
+    emailOrUsername: string;
+    password: string;
+}
 
-
-export default function SignIn() {
+const SignIn: () => React.JSX.Element = () => {
     const [_, setIsAuthenticated] = useAtom(authenticatedAtom);
 
-    return (
-        <View style={styles.container}>
-            <Text style={{ fontSize: 35, fontWeight: "300", textAlign: 'center', marginBottom: 10, marginVertical: 10 }}>
-                Everything you love about Twitter,
-            </Text>
-            <Text style={{ fontSize: 60, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>
-                but better.
-            </Text>
-            <View style={styles.logoContainer}>
-                <Image
-                    source={require('../assets/images/logo_light.png')}
-                    style={styles.logo}
-                    resizeMode="contain"
+    const [form, setForm] = useState<signInForm>({
+        emailOrUsername: '',
+        password: '',
+    });
+
+    const handleChange = (name: string, value: string) => {
+        setForm({
+            ...form,
+            [name]: value,
+        });
+    };
+
+    const handleSubmit = async () => {
+        try {
+            const response = await axios.post(
+                `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/login`,
+                form,
+                {
+                    headers: {'Content-Type': 'application/json'},
+                }
+            );
+
+            if (response.status == 200) {
+                await AsyncStorage.setItem('token', response.data.token);
+                console.log("Login success: ", response.data);
+                setIsAuthenticated({
+                    id: response.data.id,
+                    email: response.data.email,
+                    username: response.data.username,
+                    name: response.data.name
+                });
+                router.replace('/');
+            }
+        } catch (error: any) {
+            if (error.response && error.response.status == 401) {
+                console.log("Login failed: ", error.response.data);
+                alert('Invalid username or password');
+            } else {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again later.');
+            }
+        }
+    }
+
+        return (
+            <View style={styles.container}>
+                <Text style={{marginTop: 10}}>Username or Email:</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.emailOrUsername}
+                    mode="flat"
+                    onChangeText={(value) => handleChange('emailOrUsername', value)}
+                    placeholder="Username"
                 />
-            </View>
-            <View style={styles.buttonContainer}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>Already have an account?</Text>
+                <Text>Password:</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.password}
+                    mode="flat"
+                    onChangeText={(value) => handleChange('password', value)}
+                    placeholder="Password"
+                    secureTextEntry
+                />
                 <Button
-                    icon="account-outline"
+                    icon="form-select"
                     mode="contained"
                     buttonColor={'#000'}
-                    style={styles.buttonContent}
-                    onPress={() => {
-                        // call login API
-                        setIsAuthenticated({ email: 'emailInJWT@gmail.com', username: 'usernameInJWT', name: 'nameInJWT' });
-                        // Navigate after signing in. You may want to tweak this to ensure sign-in is
-                        // successful before navigating.
-                        router.replace('/');
-                    }}>
-                    Sign In
+                    onPress={handleSubmit}>
+                    Sign Up
                 </Button>
             </View>
-            <View style={styles.buttonContainer}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>New to TwitSnap?</Text>
-                <Button
-                    icon="account-plus-outline"
-                    mode="contained"
-                    buttonColor={'#000'}
-                    style={styles.buttonContent}
-                    onPress={() => {
-                        router.push('/sign-up');
-                    }}>
-                    Sign up
-                </Button>
-            </View>
-        </View>
-    );
-}
+        )
+    };
+
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 10,
+        padding: 16,
+        backgroundColor: '#fff',
+
     },
-    logoContainer: {
-        transform: [{ scale: 5.5 }],
-        position: 'absolute',
-        top: (window.height / 2) + 255,
-        left: (window.width / 2) - 95,
-    },
-    logo: {
-        width: 150,
-        height: 50,
-    },
-    buttonContent: {
-        height: 48,
-        width: 350,
-        justifyContent: 'center',
-    },
-    buttonContainer: {
-        alignItems: 'center',
-        marginVertical: 10,
+    input: {
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        marginBottom: 25,
+        paddingHorizontal: 10,
+        marginTop : 10,
     },
 });
+
+export default SignIn;

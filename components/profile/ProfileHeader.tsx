@@ -1,33 +1,35 @@
 import {Image, StyleSheet, Text, View} from "react-native";
 import React from "react";
+import { UserAuth } from "@/app/types/authTypes";
+import {Dimensions} from "react-native";
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 interface ProfileHeader {
-    user: {
-        name: string;
-        username: string;
-        profilePhoto: string;
-        bannerPhoto: string;
-        bio: string;
-    }
+    userAuth: UserAuth;
+    bannerPhoto: string;
+    profilePhoto: string;
+    bio: string;
 }
 
 const default_images = {
     profilePhoto: require('../../assets/images/messi.jpg'),
-    bannerPhoto: require('../../assets/images/messi-banner.jpeg')
+    bannerPhoto: require('../../assets/images/kanagawa.jpg')
 }
 
-const ProfileHeader: React.FC<ProfileHeader> = ({user}) => {
+const ProfileHeader: React.FC<ProfileHeader> = ({userAuth, bannerPhoto, profilePhoto, bio}) => {
     return (
         <View>
-                <Image source={user.bannerPhoto ? {uri : user.bannerPhoto} : default_images.bannerPhoto} style={styles.bannerPhoto} />
-                <View style={styles.profileHeader}>
-                    <View style={styles.textContainer}>
-                        <Image source={user.profilePhoto ? {uri : user.profilePhoto} : default_images.profilePhoto} style={styles.profilePhoto}></Image>
-                        <Text style={styles.name}>{user.name}</Text>
-                        <Text style={styles.username}>{user.username}</Text>
-                    </View>
+            <Image source={bannerPhoto ? {uri : bannerPhoto} : default_images.bannerPhoto} style={styles.bannerPhoto} />
+            <View style={styles.profileHeader}>
+                <View style={styles.textContainer}>
+                    <Image source={profilePhoto ? {uri : profilePhoto} : default_images.profilePhoto} style={styles.profilePhoto}></Image>
+                    {userAuth && <Text style={styles.name}>{userAuth.name}</Text>}
+                    {userAuth && <Text style={styles.username}>@{userAuth.username}</Text>}
                 </View>
-                <Text style={styles.bio}>{user.bio}</Text>
+            </View>
+            <Text style={styles.bio}>{bio}</Text>
         </View>
     )
 }
@@ -39,9 +41,9 @@ profileHeader: {
         marginBottom: 20,
 },
 bannerPhoto: {
-    width: '100%',
-    height: 300,
-    resizeMode: "cover"
+    height: windowHeight / 4,
+    width: windowWidth,
+    resizeMode: 'cover',
     },
     profilePhoto: {
         width: 160,
