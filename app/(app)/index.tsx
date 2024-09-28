@@ -78,6 +78,7 @@ export default function FeedScreen() {
                 return (
                     <TweetCard
                         profileImage={''}
+                        name={item.user.name}
                         username={item.user.username}
                         content={item.content}
                         date={item.createdAt}

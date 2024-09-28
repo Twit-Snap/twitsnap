@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 
 const default_images =  {
     default_profile_picture: require('../../assets/images/no-profile-picture.png'),
@@ -7,23 +8,40 @@ const default_images =  {
 
 interface TweetCardProps {
     profileImage: string; // URL to the image
+    name: string;
     username: string;
     content: string;
     date: string;
 }
 
-const TweetCard: React.FC<TweetCardProps> = ({ profileImage, username, content, date }) => {
+const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, content, date }) => {
+    const formatDate = (dateString: string): string => {
+        const date = parseISO(dateString);
+        const now = new Date();
+        const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+        if (diffInHours > 24) {
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+            });
+        } else {
+            return formatDistanceToNow(date, { addSuffix: true });
+        }
+    };
     return (
         <View style={styles.container}>
             <Image source={profileImage ? { uri: profileImage } : default_images.default_profile_picture}
                    style={styles.profileImage} />
             <View style={styles.contentContainer}>
-                <Text style={styles.username}>{username} <Text style={styles.date}>{date}</Text></Text>
+                <Text style={styles.name}>{name} <Text style={styles.username}>@{username} <Text style={styles.date}>{formatDate(date)}</Text></Text></Text>
+
                 <Text style={styles.content}>{content}</Text>
             </View>
         </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -41,9 +59,14 @@ const styles = StyleSheet.create({
         flex: 1,
         marginLeft: 10,
     },
-    username: {
+    name: {
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    username: {
+        fontWeight: "light",
+        color: '#666',
+        fontSize: 14,
     },
     content: {
         fontSize: 14,
