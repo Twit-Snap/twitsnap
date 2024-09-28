@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { FlatList, View, ScrollView, StyleSheet, Image } from "react-native";
 import TweetCard from "../../components/twits/TweetCard";
 import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
 import {useAtom} from "jotai";
 import {authenticatedAtom} from "@/app/authAtoms/authAtom";
 import {TwitSnap} from "@/app/types/TwitSnap";
+const axios = require('axios').default;
 
 const feed_images = {
     logo: require('../../assets/images/logo_light.png'),
@@ -13,8 +14,50 @@ const feed_images = {
 const TwitsInFeed: TwitSnap[] = [];
 
 export default function FeedScreen() {
-  const [tweets, setTweets] = useState(TwitsInFeed);
   const [userData] = useAtom(authenticatedAtom);
+  const [tweets, setTweets] = useState<TwitSnap[]>(TwitsInFeed);
+
+  useEffect(() => {
+      const loadTweets = async () => {
+          const fetchedTweets = await fetchTweets();
+          setTweets(fetchedTweets);
+      };
+      loadTweets();
+  }, []);
+
+  const fetchTweets = async (): Promise<TwitSnap[]> => {
+    let tweets: TwitSnap[] = [];
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`);
+      tweets = response.data.data;
+      console.log("Tweets fetched: ", tweets);
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again later.');
+    }
+    return tweets;
+  }
+
+  const sendTwit = async (tweetContent: string) => {
+    try {
+      const response = await axios.post(
+          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`,
+          {
+            authorId: userData?.id,
+            authorName: userData?.name,
+            authorUsername: userData?.username,
+            content: tweetContent,
+          },
+          {
+            headers: {'Content-Type': 'application/json'},
+          }
+      );
+      console.log("Twit sent: ", response.data);
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again later.');
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -27,14 +70,7 @@ export default function FeedScreen() {
                 />
           </View>
           <TweetBoxFeed onTweetSend={(tweetContent) => {
-            const newTweet = {
-              id: (tweets.length + 1).toString(),
-              authorUsername: userData?.username || "Anonymous",
-              authorName: userData?.name || "Anonymous",
-              content: tweetContent,
-              date: new Date().toISOString(),
-            };
-            setTweets([newTweet, ...tweets]);
+            sendTwit(tweetContent);
           }}/>
           <FlatList<TwitSnap>
             data={tweets}
@@ -42,9 +78,9 @@ export default function FeedScreen() {
                 return (
                     <TweetCard
                         profileImage={''}
-                        username={item.authorName}
+                        username={item.user.username}
                         content={item.content}
-                        date={item.date}
+                        date={item.createdAt}
                     />
                 );
             }}

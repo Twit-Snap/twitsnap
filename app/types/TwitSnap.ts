@@ -1,7 +1,20 @@
-export type TwitSnap = {
+export interface TwitUser {
+    userId: number;
+    name: string;
+    username: string;
+    //profileImageUrl: string;
+    //verified: boolean;
+}
+
+export interface TwitSnap {
     id: string;
-    authorName: string;
-    authorUsername: string;
+    createdAt: string;
+    user: TwitUser;
     content: string;
-    date: string;
-};
+    //entities: Entities;
+    //inReplyToTweetId: string | null;
+    //inReplyToUserId: string | null;
+    //lang: string;
+    //favoriteCount: number;
+    //retweetCount: number;
+}
