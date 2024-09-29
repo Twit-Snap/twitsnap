@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { FlatList, View, ScrollView, StyleSheet, Image } from "react-native";
-import TweetCard from "../../components/twits/TweetCard";
+import TweetCard from "@/components/twits/TweetCard";
 import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
 import {useAtom} from "jotai";
 import {authenticatedAtom} from "@/app/authAtoms/authAtom";
 
 const feed_images = {
-    logo: require('../../assets/images/logo_light.png'),
+    logo: require('@/assets/images/logo_light.png'),
 }
 
 // Define the Tweet type
