@@ -7,7 +7,7 @@ import {
 	View,
 } from "react-native";
 
-const window = Dimensions.get("screen");
+const window = Dimensions.get("window");
 
 const styles = StyleSheet.create({
 	container: {
