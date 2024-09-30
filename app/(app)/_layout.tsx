@@ -24,7 +24,7 @@ export default function RootLayout() {
 							color={color}
 						/>
 					),
-					header: () => <HomeHeader />,
+					header: () => <></>,
 				}}
 			/>
 			<Tabs.Screen
