@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
 import { formatDistanceToNow, parseISO } from 'date-fns';
+import React from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 const default_images =  {
     default_profile_picture: require('../../assets/images/no-profile-picture.png'),

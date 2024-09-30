@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 
 interface NewTweetInputProps {
-    onTweetSend: (tweetContent: string) => void;
+  onTweetSend: (tweetContent: string) => void;
 }
 
 const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend }) => {
-    const [tweetContent, setTweetContent] = useState<string>('');
+  const [tweetContent, setTweetContent] = useState<string>('');
 
-    const handleSendTweet = () => {
-        if (tweetContent.trim().length > 0) {
-            onTweetSend(tweetContent);
-            setTweetContent(''); // Clear the input after sending the tweet
-        } else {
-            Alert.alert('Error', 'Tweet content cannot be empty');
-        }
-    };
+  const handleSendTweet = () => {
+    if (tweetContent.trim().length > 0) {
+      onTweetSend(tweetContent);
+      setTweetContent(''); // Clear the input after sending the tweet
+    } else {
+      Alert.alert('Error', 'Tweet content cannot be empty');
+    }
+  };
 
     return (
         <View style={styles.container}>
@@ -40,21 +40,21 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e1e1e1',
-    },
-    input: {
-        height: 100,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 10,
-        padding: 10,
-        marginBottom: 10,
-        textAlignVertical: 'top',
-        backgroundColor: '#f9f9f9',
-    },
+  container: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e1e1'
+  },
+  input: {
+    height: 100,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+    textAlignVertical: 'top',
+    backgroundColor: '#f9f9f9'
+  }
 });
 
 export default NewTweetInput;
