@@ -1,39 +1,63 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { FlatList, View, ScrollView, StyleSheet, Image } from "react-native";
 import TweetCard from "@/components/twits/TweetCard";
 import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
 import {useAtom} from "jotai";
 import {authenticatedAtom} from "@/app/authAtoms/authAtom";
+import {TwitSnap} from "@/app/types/TwitSnap";
+const axios = require('axios').default;
 
 const feed_images = {
     logo: require('@/assets/images/logo_light.png'),
 }
 
-// Define the Tweet type
-type Tweet = {
-  id: string;
-  author: string;
-  content: string;
-  date: string;
-};
-
-const initialTweets: Tweet[] = [
-  { id: '1', author: 'Sergio Agüero', content: 'Messi is the GOAT! 🐐🇦🇷', date: '2021-08-05' },
-  { id: '2', author: 'Ángel Di María', content: 'Proud to play alongside Leo for Argentina! 🇦🇷⚽', date: '2021-08-04' },
-  { id: '3', author: 'Gerard Piqué', content: 'Missing those Barça days with Messi. What a player! 🔵🔴', date: '2021-08-03' },
-  { id: '4', author: 'Andrés Iniesta', content: 'The magic we created at Camp Nou was unforgettable. #Messi', date: '2021-08-02' },
-  { id: '5', author: 'Salomón Rondón', content: 'Respect to Messi, one of the greatest to ever play the game! 👏', date: '2021-08-01' },
-];
-
-// Define props type for TweetItem
-type TweetItemProps = {
-  author: string;
-  content: string;
-};
+const TwitsInFeed: TwitSnap[] = [];
 
 export default function FeedScreen() {
-  const [tweets, setTweets] = useState(initialTweets);
   const [userData] = useAtom(authenticatedAtom);
+  const [tweets, setTweets] = useState<TwitSnap[]>(TwitsInFeed);
+
+  useEffect(() => {
+      const loadTweets = async () => {
+          const fetchedTweets = await fetchTweets();
+          setTweets(fetchedTweets);
+      };
+      loadTweets();
+  }, []);
+
+  const fetchTweets = async (): Promise<TwitSnap[]> => {
+    let tweets: TwitSnap[] = [];
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`);
+      tweets = response.data.data;
+      console.log("Tweets fetched: ", tweets);
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again later.');
+    }
+    return tweets;
+  }
+
+  const sendTwit = async (tweetContent: string) => {
+    try {
+      const response = await axios.post(
+          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`,
+          {
+            authorId: userData?.id,
+            authorName: userData?.name,
+            authorUsername: userData?.username,
+            content: tweetContent,
+          },
+          {
+            headers: {'Content-Type': 'application/json'},
+          }
+      );
+      console.log("Twit sent: ", response.data);
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again later.');
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -46,23 +70,18 @@ export default function FeedScreen() {
                 />
           </View>
           <TweetBoxFeed onTweetSend={(tweetContent) => {
-            const newTweet = {
-              id: (tweets.length + 1).toString(),
-              author: userData?.username || "Anonymous",
-              content: tweetContent,
-              date: new Date().toISOString(),
-            };
-            setTweets([...tweets, newTweet].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+            sendTwit(tweetContent);
           }}/>
-          <FlatList<Tweet>
+          <FlatList<TwitSnap>
             data={tweets}
             renderItem={({ item }) => {
                 return (
                     <TweetCard
                         profileImage={''}
-                        username={item.author}
+                        name={item.user.name}
+                        username={item.user.username}
                         content={item.content}
-                        date={item.date}
+                        date={item.createdAt}
                     />
                 );
             }}
