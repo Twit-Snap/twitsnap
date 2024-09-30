@@ -2,8 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { StyleSheet, Text, View } from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
 
 import { authenticatedAtom } from './authAtoms/authAtom';
 
@@ -15,7 +15,7 @@ interface signInForm {
 }
 
 const SignIn: () => React.JSX.Element = () => {
-  const [_, setIsAuthenticated] = useAtom(authenticatedAtom);
+  const [, setIsAuthenticated] = useAtom(authenticatedAtom);
 
   const [form, setForm] = useState<signInForm>({
     emailOrUsername: '',
@@ -39,7 +39,7 @@ const SignIn: () => React.JSX.Element = () => {
         }
       );
 
-      if (response.status == 200) {
+      if (response.status === 200) {
         await AsyncStorage.setItem('token', response.data.token);
         console.log('Login success: ', response.data);
         setIsAuthenticated({
@@ -51,11 +51,11 @@ const SignIn: () => React.JSX.Element = () => {
         router.replace('/');
       }
     } catch (error: any) {
-      if (error.response && error.response.status == 401) {
+      if (error.response && error.response.status === 401) {
         console.log('Login failed: ', error.response.data);
         alert('Invalid username or password');
       } else {
-        console.error('Error:', error);
+        console.error('Error:', JSON.stringify(error, null, 2));
         alert('An error occurred. Please try again later.');
       }
     }

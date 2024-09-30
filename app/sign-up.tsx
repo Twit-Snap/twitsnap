@@ -2,8 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { StyleSheet, Text, View } from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
 
 import { authenticatedAtom } from './authAtoms/authAtom';
 
@@ -20,7 +20,7 @@ interface SignUpForm {
 }
 
 const SignUp: () => React.JSX.Element = () => {
-  const [_, setIsAuthenticated] = useAtom(authenticatedAtom);
+  const [, setIsAuthenticated] = useAtom(authenticatedAtom);
 
   const [form, setForm] = useState<SignUpForm>({
     name: '',
@@ -53,7 +53,7 @@ const SignUp: () => React.JSX.Element = () => {
           headers: { 'Content-Type': 'application/json' }
         }
       );
-      if (response.status == 200) {
+      if (response.status === 200) {
         await AsyncStorage.setItem('token', response.data.token);
         console.log('Register success: ', response.data);
         alert('Success Registering!');
@@ -66,8 +66,8 @@ const SignUp: () => React.JSX.Element = () => {
         router.replace('/');
       }
     } catch (error: any) {
-      if (error.response && error.response.status == 400) {
-        if (error.response.data.type == 'INVALID_EMAIL') {
+      if (error.response && error.response.status === 400) {
+        if (error.response.data.type === 'INVALID_EMAIL') {
           console.log('invalid email: ', form.email);
           alert('Error! Invalid email.');
         } else {

@@ -1,13 +1,12 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
-import { Dimensions } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 
 import { UserAuth } from '@/app/types/authTypes';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-interface ProfileHeader {
+interface IProfileHeader {
   userAuth: UserAuth;
   bannerPhoto: string;
   profilePhoto: string;
@@ -19,7 +18,7 @@ const default_images = {
   bannerPhoto: require('../../assets/images/kanagawa.jpg')
 };
 
-const ProfileHeader: React.FC<ProfileHeader> = ({ userAuth, bannerPhoto, profilePhoto, bio }) => {
+const ProfileHeader: React.FC<IProfileHeader> = ({ userAuth, bannerPhoto, profilePhoto, bio }) => {
   return (
     <View>
       <Image
