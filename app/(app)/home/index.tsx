@@ -4,7 +4,6 @@ import {
 	View,
 	ScrollView,
 	StyleSheet,
-	Image,
 	Dimensions,
 	Animated,
 } from "react-native";
@@ -13,8 +12,9 @@ import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
 import { useAtom } from "jotai";
 import { authenticatedAtom } from "@/app/authAtoms/authAtom";
 import { TwitSnap } from "@/app/types/TwitSnap";
-import { Divider, IconButton } from "react-native-paper";
+import { IconButton } from "react-native-paper";
 import { showTabsAtom } from "@/atoms/showTabsAtom";
+import FeedType, { IFeedTypeProps } from "@/components/feed/feed_type";
 const axios = require("axios").default;
 
 const feed_images = {
@@ -46,6 +46,21 @@ export default function FeedScreen() {
 		}).start(({ finished }) => {
 			setIsExpanded(!isExpanded);
 		});
+	};
+
+	const feed: IFeedTypeProps = {
+		items: [
+			{
+				text: "For you",
+				handler: () => {},
+				initial_state: true,
+			},
+			{
+				text: "Following",
+				handler: () => {},
+				initial_state: false,
+			},
+		],
 	};
 
 	//   useEffect(() => {
@@ -106,6 +121,7 @@ export default function FeedScreen() {
 
 	return (
 		<>
+			<FeedType {...feed} />
 			<View style={styles.container}>
 				<ScrollView>
 					<FlatList<TwitSnap>
