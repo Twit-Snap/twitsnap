@@ -1,37 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Tabs } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
+import { Slot } from 'expo-router';
+import { Provider } from 'jotai';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
+export default function Root() {
+  // Set up the auth context and render our layout inside of it.
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Tabs>
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Feed',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="home-outline" size={size} color={color} />
-            )
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Profile',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person-outline" size={size} color={color} />
-            )
-          }}
-        />
-      </Tabs>
-    </ThemeProvider>
+    <Provider>
+      <Slot />
+    </Provider>
   );
 }
