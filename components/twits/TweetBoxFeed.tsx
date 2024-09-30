@@ -18,25 +18,22 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend }) => {
     }
   };
 
-    return (
-        <View style={styles.container}>
-            <TextInput
-                style={styles.input}
-                mode = "outlined"
-                placeholder="What's happening?"
-                value={tweetContent}
-                onChangeText={setTweetContent}
-                multiline
-                maxLength={280} // Limit to 280 characters like Twitter
-            />
-            <Button
-                mode="contained"
-                buttonColor={'#1494df'}
-                onPress={handleSendTweet}>
-                Send
-            </Button>
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.input}
+        mode="outlined"
+        placeholder="What's happening?"
+        value={tweetContent}
+        onChangeText={setTweetContent}
+        multiline
+        maxLength={280} // Limit to 280 characters like Twitter
+      />
+      <Button mode="contained" buttonColor={'#1494df'} onPress={handleSendTweet}>
+        Send
+      </Button>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({

@@ -1,4 +1,5 @@
-import { atom } from 'jotai'
-import { UserAuth } from '../types/authTypes'
+import { atom } from 'jotai';
 
-export const authenticatedAtom = atom<UserAuth | null>(null)
+import { UserAuth } from '../types/authTypes';
+
+export const authenticatedAtom = atom<UserAuth | null>(null);
