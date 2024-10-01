@@ -192,6 +192,6 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		flexDirection: "column",
-		padding: 10,
+		backgroundColor: "rgb(5 5 5)"
 	},
 });

@@ -1,6 +1,6 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -31,22 +31,26 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
     }
   };
   return (
-    <View style={styles.container}>
-      <Image
-        source={profileImage ? { uri: profileImage } : default_images.default_profile_picture}
-        style={styles.profileImage}
-      />
-      <View style={styles.contentContainer}>
-        <Text style={styles.name}>
-          {name}{' '}
-          <Text style={styles.username}>
-            @{username} <Text style={styles.date}>{formatDate(date)}</Text>
+    <TouchableOpacity style={styles.container} activeOpacity={0.4}>
+      <>
+        <Image
+          source={profileImage ? { uri: profileImage } : default_images.default_profile_picture}
+          style={styles.profileImage}
+        />
+        <View style={styles.contentContainer}>
+          <Text style={styles.name}>
+            {name}{' '}
+            <Text style={styles.username}>
+              @{username}
+              <Text style={styles.dot}>{' - '}</Text>
+              <Text style={styles.date}>{formatDate(date)}</Text>
+            </Text>
           </Text>
-        </Text>
 
-        <Text style={styles.content}>{content}</Text>
-      </View>
-    </View>
+          <Text style={styles.content}>{content}</Text>
+        </View>
+      </>
+    </TouchableOpacity>
   );
 };
 
@@ -55,7 +59,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1'
+    borderBottomColor: 'rgb(50 50 50)',
+    backgroundColor: 'rgb(5 5 5)'
   },
   profileImage: {
     width: 50,
@@ -68,21 +73,25 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: 'bold',
-    fontSize: 16
+    fontSize: 16,
+    color: 'rgb(255 255 255)'
   },
   username: {
     fontWeight: 'light',
-    color: '#666',
+    color: 'rgb(120 120 120)',
     fontSize: 14
   },
   content: {
     fontSize: 14,
-    marginTop: 5,
-    color: '#333'
+    color: 'rgb(220 220 220)',
   },
   date: {
     fontSize: 12,
-    color: '#666'
+    color: 'rgb(120 120 120)'
+  },
+  dot: {
+    fontSize: 16,
+    color: 'rgb(120 120 120)'
   }
 });
 
