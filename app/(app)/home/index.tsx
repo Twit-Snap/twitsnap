@@ -6,6 +6,7 @@ import {
 	StyleSheet,
 	Dimensions,
 	Animated,
+	Keyboard,
 } from "react-native";
 import TweetCard from "@/components/twits/TweetCard";
 import TweetBoxFeed from "@/components/twits/TweetBoxFeed";
@@ -38,7 +39,6 @@ export default function FeedScreen() {
 
 	const handlePress = () => {
 		setShowTabs(!showTabs);
-
 		Animated.timing(animatedValue, {
 			toValue: isExpanded ? window.height : 0, // Adjust the height as needed
 			duration: 300, // Animation duration in milliseconds
@@ -46,6 +46,7 @@ export default function FeedScreen() {
 		}).start(({ finished }) => {
 			setIsExpanded(!isExpanded);
 		});
+		Keyboard.dismiss()
 	};
 
 	const feed: IFeedTypeProps = {
