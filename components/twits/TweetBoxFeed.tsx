@@ -17,6 +17,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
 		if (tweetContent.trim().length > 0) {
 			onTweetSend(tweetContent);
 			setTweetContent(""); // Clear the input after sending the tweet
+            onClose()
 		}
 	};
 
