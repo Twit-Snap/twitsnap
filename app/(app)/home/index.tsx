@@ -15,7 +15,7 @@ import {
   StyleSheet,
   View
 } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import { IconButton, Text } from 'react-native-paper';
 const axios = require('axios').default;
 
 const feed_images = {
@@ -62,25 +62,13 @@ export default function FeedScreen() {
     ]
   };
 
-  //   useEffect(() => {
-  //       const loadTweets = async () => {
-  //           const fetchedTweets = await fetchTweets();
-  //           setTweets(fetchedTweets);
-  //       };
-  //       loadTweets();
-  //   }, []);
-
-  var temp: TwitSnap[] = [];
-  for (let index = 0; index < 20; index++) {
-    temp.push({
-      id: `${index}`,
-      user: { userId: index, name: 'Sergio Agüero', username: '@kun' },
-      content: 'Messi is the GOAT! 🐐🇦🇷',
-      createdAt: '2021-08-05'
-    });
-  }
-
-  useEffect(() => setTweets(temp), []);
+  useEffect(() => {
+    const loadTweets = async () => {
+      const fetchedTweets = await fetchTweets();
+      setTweets(fetchedTweets);
+    };
+    loadTweets();
+  }, []);
 
   const fetchTweets = async (): Promise<TwitSnap[]> => {
     let tweets: TwitSnap[] = [];
@@ -121,22 +109,45 @@ export default function FeedScreen() {
       <FeedType {...feed} />
       <View style={styles.container}>
         <ScrollView>
-          <FlatList<TwitSnap>
-            data={tweets}
-            renderItem={({ item }) => {
-              return (
-                <TweetCard
-                  profileImage={''}
-                  name={item.user.name}
-                  username={item.user.username}
-                  content={item.content}
-                  date={item.createdAt}
-                />
-              );
-            }}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-          />
+          {tweets.length === 0 ? (
+            <Text
+              style={{
+                color: 'rgb(255 255 255)',
+                textAlign: 'center',
+                alignContent: 'center',
+                fontSize: 35
+              }}
+            >
+              Oops! Looks like no one has twited before. Twit something using{'\n'}
+              <IconButton
+                icon="plus"
+                style={{
+                  backgroundColor: 'rgb(3, 165, 252)',
+                  width: 30,
+                  height: 30,
+                  alignSelf: 'center'
+                }}
+                iconColor="rgb(255 255 255)"
+              />
+            </Text>
+          ) : (
+            <FlatList<TwitSnap>
+              data={tweets}
+              renderItem={({ item }) => {
+                return (
+                  <TweetCard
+                    profileImage={''}
+                    name={item.user.name}
+                    username={item.user.username}
+                    content={item.content}
+                    date={item.createdAt}
+                  />
+                );
+              }}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
+          )}
         </ScrollView>
       </View>
       <IconButton
