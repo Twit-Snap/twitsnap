@@ -15,7 +15,7 @@ import {
   StyleSheet,
   View
 } from 'react-native';
-import { IconButton, Text } from 'react-native-paper';
+import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 const axios = require('axios').default;
 
 const feed_images = {
@@ -24,11 +24,9 @@ const feed_images = {
 
 const window = Dimensions.get('screen');
 
-const TwitsInFeed: TwitSnap[] = [];
-
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
-  const [tweets, setTweets] = useState<TwitSnap[]>(TwitsInFeed);
+  const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
 
   const [animatedValue, setAnimatedValue] = useState(new Animated.Value(window.height));
   const [isExpanded, setIsExpanded] = useState(false);
@@ -108,44 +106,58 @@ export default function FeedScreen() {
     <>
       <FeedType {...feed} />
       <View style={styles.container}>
-        <ScrollView>
-          {tweets.length === 0 ? (
-            <Text
-              style={{
-                color: 'rgb(255 255 255)',
-                textAlign: 'center',
-                alignContent: 'center',
-                fontSize: 35
-              }}
-            >
-              Oops! Looks like no one has twited before. Twit something using{'\n'}
-              <IconButton
-                icon="plus"
+        <ScrollView
+          contentContainerStyle={{
+            justifyContent: 'center',
+            flex: 1
+          }}
+        >
+          {tweets ? (
+            tweets.length === 0 ? (
+              <Text
                 style={{
-                  backgroundColor: 'rgb(3, 165, 252)',
-                  width: 30,
-                  height: 30,
-                  alignSelf: 'center'
+                  color: 'rgb(255 255 255)',
+                  textAlign: 'center',
+                  alignContent: 'center',
+                  fontSize: 35
                 }}
-                iconColor="rgb(255 255 255)"
+              >
+                Oops! Looks like no one has twited before. Twit something using{'\n'}
+                <IconButton
+                  icon="plus"
+                  style={{
+                    backgroundColor: 'rgb(3, 165, 252)',
+                    width: 30,
+                    height: 30,
+                    alignSelf: 'center'
+                  }}
+                  iconColor="rgb(255 255 255)"
+                />
+              </Text>
+            ) : (
+              <FlatList<TwitSnap>
+                data={tweets}
+                renderItem={({ item }) => {
+                  return (
+                    <TweetCard
+                      profileImage={''}
+                      name={item.user.name}
+                      username={item.user.username}
+                      content={item.content}
+                      date={item.createdAt}
+                    />
+                  );
+                }}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={false}
               />
-            </Text>
+            )
           ) : (
-            <FlatList<TwitSnap>
-              data={tweets}
-              renderItem={({ item }) => {
-                return (
-                  <TweetCard
-                    profileImage={''}
-                    name={item.user.name}
-                    username={item.user.username}
-                    content={item.content}
-                    date={item.createdAt}
-                  />
-                );
-              }}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
+            <ActivityIndicator
+              animating={true}
+              color={'rgb(3, 165, 252)'}
+              size={60}
+              style={{ alignSelf: 'center' }}
             />
           )}
         </ScrollView>
