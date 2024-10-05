@@ -107,10 +107,9 @@ export default function FeedScreen() {
       <FeedType {...feed} />
       <View style={styles.container}>
         <ScrollView
-          contentContainerStyle={{
-            justifyContent: 'center',
-            flex: 1
-          }}
+        contentContainerStyle={{
+          justifyContent: 'center',
+        }}
         >
           {tweets ? (
             tweets.length === 0 ? (
