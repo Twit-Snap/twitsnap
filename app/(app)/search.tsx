@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { Searchbar, Chip } from 'react-native-paper';
+import { Searchbar } from 'react-native-paper';
+import { router } from 'expo-router';
+import TrendingHashtagChip from '@/components/hashtags/TrendingHashtagChip';
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,30 +16,20 @@ export default function SearchScreen() {
         style={styles.searchbar}
         inputStyle={{ color: 'white' }}
         iconColor="white"
+        onKeyPress={({ nativeEvent }) => {
+            if (nativeEvent.key === 'Enter') {
+              router.push({ pathname: `/searchResults`, params: { hashtag: searchQuery } });
+            }
+        }}
+        onSubmitEditing={() => {
+            router.push({ pathname: `/searchResults`, params: { hashtag: searchQuery } });
+        }}
       />
       <Text style={styles.trendingText}>Trending now</Text>
       <View style={styles.chipsContainer}>
-        <Chip
-          style={[styles.chip, styles.chipLightBlack]}
-          textStyle={{ color: 'white' }}
-          onPress={() => {}}
-        >
-          #Football
-        </Chip>
-        <Chip
-          style={[styles.chip, styles.chipLightBlack]}
-          textStyle={{ color: 'white' }}
-          onPress={() => {}}
-        >
-          #PSG
-        </Chip>
-        <Chip
-          style={[styles.chip, styles.chipLightBlack]}
-          textStyle={{ color: 'white' }}
-          onPress={() => {}}
-        >
-          #WorldCup
-        </Chip>
+        <TrendingHashtagChip trendingHashtag={"#Futbol"}/>
+        <TrendingHashtagChip trendingHashtag={"#Messi"}/>
+        <TrendingHashtagChip trendingHashtag={"#Test"}/>
       </View>
     </View>
   );
@@ -61,10 +53,4 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginVertical: 10
   },
-  chip: {
-    margin: 4
-  },
-  chipLightBlack: {
-    backgroundColor: '#333333'
-  }
 });
