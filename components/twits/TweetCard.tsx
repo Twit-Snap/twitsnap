@@ -1,6 +1,7 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -12,10 +13,9 @@ interface TweetCardProps {
   username: string;
   content: string;
   date: string;
-  onHashtagPress: (hashtag: string) => void;
 }
 
-const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, content, date, onHashtagPress }) => {
+const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, content, date }) => {
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
     const now = new Date();
@@ -40,7 +40,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
             if (word.startsWith('#')) {
               return (
                   <Text key={index}>
-                    <Text onPress={() => onHashtagPress(word)} style={styles.hashtag}>
+                    <Text onPress={() => router.push({ pathname: `/searchResults`, params: { hashtag: word } })} style={styles.hashtag}>
                       {word}
                     </Text>{' '}
                   </Text>

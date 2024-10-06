@@ -57,6 +57,14 @@ export default function RootLayout() {
 					tabBarStyle: { display: showTabs ? "flex" : "none" },
 				}}
 			/>
+			<Tabs.Screen
+				name="searchResults"
+				options={{
+					title: "searchResults",
+					tabBarButton: () => null, // Hide the tab
+					header: () => <></>,
+				}}
+			/>
 		</Tabs>
 	);
 }
