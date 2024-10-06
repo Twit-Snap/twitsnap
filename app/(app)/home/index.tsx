@@ -1,6 +1,8 @@
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
+import { feedRefreshIntervalAtom } from '@/atoms/feedRefreshInterval';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
+import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
@@ -16,13 +18,10 @@ import {
   View
 } from 'react-native';
 import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
+
 const axios = require('axios').default;
-
-const feed_images = {
-  logo: require('@/assets/images/logo_light.png')
-};
-
 const window = Dimensions.get('screen');
+const intervalMinutes = 10 * 60 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -32,6 +31,10 @@ export default function FeedScreen() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [showTabs, setShowTabs] = useAtom(showTabsAtom);
+  const [needRefresh, setNeedRefresh] = useState(false);
+
+  const [fetchInterval, setFetchInterval] = useAtom(feedRefreshIntervalAtom);
+
 
   const handlePress = () => {
     setShowTabs(!showTabs);
@@ -102,14 +105,29 @@ export default function FeedScreen() {
     }
   };
 
+  useEffect(() => {
+    initFeed();
+    // return () => {
+    //   // Anything in here is fired on component unmount.
+    //   if (fetchInterval) {
+    //     clearInterval(fetchInterval);
+    //   }
+    // };
+  }, [fetchInterval]);
+
+  if (!fetchInterval && tweets) {
+    setFetchInterval(setInterval(refreshTweets, intervalMinutes));
+  }
+
   return (
     <>
       <FeedType {...feed} />
+      {needRefresh && <FeedRefresh {...refreshProps} />}
       <View style={styles.container}>
         <ScrollView
-        contentContainerStyle={{
-          justifyContent: 'center',
-        }}
+          contentContainerStyle={{
+            justifyContent: 'center'
+          }}
         >
           {tweets ? (
             tweets.length === 0 ? (
