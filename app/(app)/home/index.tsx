@@ -36,6 +36,24 @@ export default function FeedScreen() {
   const [fetchInterval, setFetchInterval] = useAtom(feedRefreshIntervalAtom);
 
 
+  var refreshProps: IFeedRefreshProps = {
+    profileURLs: [],
+    handler: () => {
+      setNeedRefresh(false);
+
+      setTweets((prev_twits) => {
+        var new_twits: TwitSnap[] = [];
+
+        if (prev_twits && newTwits) {
+          new_twits = [...newTwits, ...prev_twits];
+          newTwits = null;
+        }
+
+        return new_twits;
+      });
+    }
+  };
+
   const handlePress = () => {
     setShowTabs(!showTabs);
     Animated.timing(animatedValue, {
