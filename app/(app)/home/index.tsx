@@ -71,12 +71,17 @@ export default function FeedScreen() {
     loadTweets();
   }, []);
 
-  const fetchTweets = async (): Promise<TwitSnap[]> => {
+  const fetchTweets = async (
+    queryParams: object | undefined = undefined,
+    url: string = ''
+  ): Promise<TwitSnap[]> => {
     let tweets: TwitSnap[] = [];
     try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`);
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${url}`, {
+        params: queryParams
+      });
       tweets = response.data.data;
-      console.log('Tweets fetched: ', tweets);
+      console.log('Fetched: ', tweets.length, ' twits');
     } catch (error: any) {
       console.error('Error:', error);
       alert('An error occurred. Please try again later.');
