@@ -112,12 +112,12 @@ export default function FeedScreen() {
 
   useEffect(() => {
     initFeed();
-    // return () => {
-    //   // Anything in here is fired on component unmount.
-    //   if (fetchInterval) {
-    //     clearInterval(fetchInterval);
-    //   }
-    // };
+    return () => {
+      // Anything in here is fired on component unmount.
+      if (fetchInterval) {
+        clearInterval(fetchInterval);
+      }
+    };
   }, [fetchInterval]);
 
   if (!fetchInterval && tweets) {
