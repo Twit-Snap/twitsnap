@@ -1,11 +1,33 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { View, Image, StyleSheet, Text } from 'react-native';
-import { Dimensions } from 'react-native';
+import { useAtom } from 'jotai';
+import { useEffect } from 'react';
+import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
+import { authenticatedAtom } from './authAtoms/authAtom';
 
 const window = Dimensions.get('window');
 
 export default function FrontPage() {
+  const [auth, setAuth] = useAtom(authenticatedAtom);
+
+  useEffect(() => {
+    const loadAuth = async () => {
+      if (!auth) {
+        const session: string | null = await AsyncStorage.getItem('auth');
+
+        if (!session) {
+          return;
+        }
+
+        setAuth(JSON.parse(session));
+        router.replace('/');
+      }
+    };
+
+    loadAuth();
+  }, [auth, setAuth]);
+
   return (
     <View style={styles.container}>
       <Text

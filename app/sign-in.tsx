@@ -40,14 +40,8 @@ const SignIn: () => React.JSX.Element = () => {
       );
 
       if (response.status === 200) {
-        await AsyncStorage.setItem('token', response.data.token);
+        await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         console.log('Login success: ', response.data);
-        setIsAuthenticated({
-          id: response.data.id,
-          email: response.data.email,
-          username: response.data.username,
-          name: response.data.name
-        });
         router.replace('/');
       }
     } catch (error: any) {

@@ -54,15 +54,9 @@ const SignUp: () => React.JSX.Element = () => {
         }
       );
       if (response.status === 200) {
-        await AsyncStorage.setItem('token', response.data.token);
+        await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         console.log('Register success: ', response.data);
         alert('Success Registering!');
-        setIsAuthenticated({
-          id: response.data.id,
-          email: response.data.email,
-          username: response.data.username,
-          name: response.data.name
-        });
         router.replace('/');
       }
     } catch (error: any) {
