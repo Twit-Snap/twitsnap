@@ -21,7 +21,9 @@ import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 
 const axios = require('axios').default;
 const window = Dimensions.get('screen');
+var newTwits: TwitSnap[] | null = null;
 const intervalMinutes = 10 * 60 * 1000;
+// const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -35,6 +37,7 @@ export default function FeedScreen() {
 
   const [fetchInterval, setFetchInterval] = useAtom(feedRefreshIntervalAtom);
 
+  const [actualFeedType, setActualFeedType] = useState<string>('For you');
 
   var refreshProps: IFeedRefreshProps = {
     profileURLs: [],
@@ -78,6 +81,26 @@ export default function FeedScreen() {
         handler: () => {},
         state: false
       }
+
+  const refreshTweets = async (twits: TwitSnap[] | null): Promise<void> => {
+    console.log(`refresh!`);
+    if (!twits) {
+      return;
+    }
+
+    const params = {
+      createdAt: twits[0] ? twits[0].createdAt : undefined,
+      older: false,
+      limit: 100
+    };
+
+    newTwits = await fetchTweets(params, actualFeedType === 'Following' ? 'by_users' : '');
+    if (newTwits.length > 0) {
+      // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
+      setNeedRefresh(true);
+    }
+  };
+
   const loadMoreTwits = async () => {
     if (!tweets) {
       return;
@@ -157,7 +180,7 @@ export default function FeedScreen() {
   }, [fetchInterval]);
 
   if (!fetchInterval && tweets) {
-    setFetchInterval(setInterval(refreshTweets, intervalMinutes));
+    setFetchInterval(setInterval(() => refreshTweets(tweets), intervalMinutes));
   }
 
   return (
