@@ -29,6 +29,7 @@ export default function RootLayout() {
 					header: () => <></>,
 					tabBarHideOnKeyboard: true,
 					tabBarStyle: { display: showTabs ? "flex" : "none" },
+					headerShown: false,
 				}}
 			/>
 			<Tabs.Screen
@@ -40,6 +41,7 @@ export default function RootLayout() {
 					),
 					tabBarHideOnKeyboard: true,
 					tabBarStyle: { display: showTabs ? "flex" : "none" },
+					headerShown: false,
 				}}
 			/>
 			<Tabs.Screen
@@ -55,6 +57,7 @@ export default function RootLayout() {
 					),
 					tabBarHideOnKeyboard: true,
 					tabBarStyle: { display: showTabs ? "flex" : "none" },
+					headerShown: false,
 				}}
 			/>
 			<Tabs.Screen

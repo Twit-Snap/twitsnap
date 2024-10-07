@@ -21,7 +21,7 @@ export default function SearchResultsScreen() {
         };
 
         if (hashtag) {
-            fetchTweets().then(r => console.log(r));
+            fetchTweets();
         }
     }, [hashtag]);
 
