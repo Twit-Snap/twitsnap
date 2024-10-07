@@ -78,16 +78,34 @@ export default function FeedScreen() {
         handler: () => {},
         state: false
       }
-    ]
-  };
+  const loadMoreTwits = async () => {
+    if (!tweets) {
+      return;
+    }
 
-  useEffect(() => {
-    const loadTweets = async () => {
-      const fetchedTweets = await fetchTweets();
-      setTweets(fetchedTweets);
+    const params = {
+      createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,
+      older: true,
+      limit: 20
     };
-    loadTweets();
-  }, []);
+
+    const olderTwits: TwitSnap[] = await fetchTweets(
+      params,
+      actualFeedType === 'Following' ? 'by_users' : ''
+    );
+
+    if (olderTwits.length === 0) {
+      return;
+    }
+
+    setTweets((prev_twits) => {
+      if (!prev_twits) {
+        return olderTwits;
+      }
+
+      return [...prev_twits, ...olderTwits];
+    });
+  };
 
   const fetchTweets = async (
     queryParams: object | undefined = undefined,
@@ -148,6 +166,16 @@ export default function FeedScreen() {
       {needRefresh && <FeedRefresh {...refreshProps} />}
       <View style={styles.container}>
         <ScrollView
+          scrollEventThrottle={16}
+          onScroll={({ nativeEvent }) => {
+            // User has reached the bottom?
+            if (
+              nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >=
+              nativeEvent.contentSize.height
+            ) {
+              loadMoreTwits();
+            }
+          }}
           contentContainerStyle={{
             justifyContent: 'center'
           }}
