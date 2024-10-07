@@ -6,6 +6,7 @@ import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAtom } from 'jotai';
 import React, { useEffect, useState } from 'react';
 import {
@@ -73,14 +74,96 @@ export default function FeedScreen() {
     items: [
       {
         text: 'For you',
-        handler: () => {},
+        handler: async (twits: TwitSnap[] | null, feedType: string) => {
+          saveTwits(twits, feedType);
+          initFeed();
+          setActualFeedType('For you');
+        },
         state: true
       },
       {
         text: 'Following',
-        handler: () => {},
+        handler: async (twits: TwitSnap[] | null, feedType: string) => {
+          saveTwits(twits, feedType);
+          initFollowsFeed();
+          setActualFeedType('Following');
+        },
         state: false
       }
+    ],
+    twits: tweets,
+    feedType: actualFeedType
+  };
+
+  const loadSavedTwits = async (key: string): Promise<boolean> => {
+    const savedTwits: string | null = await AsyncStorage.getItem(key);
+
+    if (savedTwits) {
+      const parsedTwits = JSON.parse(savedTwits);
+      setTweets(parsedTwits);
+      return true;
+    }
+
+    return false;
+  };
+
+  const saveTwits = async (toSaveTwits: TwitSnap[] | null, feedType: string): Promise<void> => {
+    if (!toSaveTwits || toSaveTwits.length === 0) {
+      return;
+    }
+
+    const slicedTwits = toSaveTwits.slice(0, 100);
+    if (!slicedTwits) {
+      return;
+    }
+
+    const parsedTwits = JSON.stringify(slicedTwits);
+
+    await AsyncStorage.setItem(
+      `twits${feedType
+        .split(' ')
+        .map((str) => `${str[0].toUpperCase()}${str.slice(1)}`) // Capitalize
+        .join('')}`,
+      parsedTwits
+    );
+
+    setTweets(null);
+  };
+
+  const initFeed = async () => {
+    if (tweets) {
+      return;
+    }
+
+    if (await loadSavedTwits('twitsForYou')) {
+      return;
+    }
+
+    const params = {
+      limit: 20
+    };
+
+    const fetchedTweets = await fetchTweets(params);
+    setTweets(fetchedTweets);
+  };
+
+  const initFollowsFeed = async () => {
+    if (tweets) {
+      return;
+    }
+
+    if (await loadSavedTwits('twitsFollowing')) {
+      return;
+    }
+
+    const params = {
+      limit: 20
+    };
+
+    // const fetchedTweets = await fetchTweets(params, 'by_users');
+    // setTweets(fetchedTweets);
+    setTweets([]);
+  };
 
   const refreshTweets = async (twits: TwitSnap[] | null): Promise<void> => {
     console.log(`refresh!`);

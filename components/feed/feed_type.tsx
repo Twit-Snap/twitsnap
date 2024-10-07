@@ -1,3 +1,4 @@
+import { TwitSnap } from '@/app/types/TwitSnap';
 import React, { useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -31,23 +32,25 @@ const styles = StyleSheet.create({
 export interface FeedTypeProp {
   text: string;
   state: boolean;
-  handler: () => undefined;
+  handler: (twits: TwitSnap[] | null, feedType: string) => Promise<void>;
 }
 
 export interface IFeedTypeProps {
   items: FeedTypeProp[];
+  twits: TwitSnap[] | null;
+  feedType: string;
 }
 
 export default function FeedType(props: IFeedTypeProps) {
-  const [items, setItems] = useState<IFeedTypeProps>(props);
+  const [items, setItems] = useState<FeedTypeProp[]>(props.items);
 
   const handlePress = (this_item: FeedTypeProp) => {
-    setItems({
-      items: items.items.map((item) => {
+    setItems(
+      items.map((item) => {
         if (this_item === item) {
           if (!item.state) {
             item.state = true;
-            item.handler();
+            item.handler(props.twits, props.feedType);
           }
           return item;
         }
@@ -55,12 +58,12 @@ export default function FeedType(props: IFeedTypeProps) {
         item.state = false;
         return item;
       })
-    });
+    );
   };
 
   return (
     <View style={styles.feed_type}>
-      {items.items.map((item) => {
+      {items.map((item) => {
         return (
           <TouchableOpacity
             key={item.text}
