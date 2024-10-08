@@ -8,7 +8,7 @@ import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAtom } from 'jotai';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -29,6 +29,7 @@ const intervalMinutes = 10 * 60 * 1000;
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
+  const twitsRef = useRef<TwitSnap[]>([]);
 
   const [animatedValue, setAnimatedValue] = useState(new Animated.Value(window.height));
   const [isExpanded, setIsExpanded] = useState(false);
@@ -50,6 +51,7 @@ export default function FeedScreen() {
 
         if (prev_twits && newTwits) {
           new_twits = [...newTwits, ...prev_twits];
+          twitsRef.current = new_twits;
           newTwits = null;
         }
 
@@ -91,7 +93,7 @@ export default function FeedScreen() {
         state: false
       }
     ],
-    twits: tweets,
+    twits: twitsRef.current,
     feedType: actualFeedType
   };
 
@@ -100,6 +102,7 @@ export default function FeedScreen() {
 
     if (savedTwits) {
       const parsedTwits = JSON.parse(savedTwits);
+      twitsRef.current = parsedTwits;
       setTweets(parsedTwits);
       return true;
     }
@@ -136,6 +139,7 @@ export default function FeedScreen() {
     }
 
     if (await loadSavedTwits('twitsForYou')) {
+      refreshTweets(twitsRef.current, true);
       return;
     }
 
@@ -153,6 +157,7 @@ export default function FeedScreen() {
     }
 
     if (await loadSavedTwits('twitsFollowing')) {
+      refreshTweets(twitsRef.current, true);
       return;
     }
 
@@ -165,11 +170,13 @@ export default function FeedScreen() {
     setTweets([]);
   };
 
-  const refreshTweets = async (twits: TwitSnap[] | null): Promise<void> => {
+  const refreshTweets = async (twits: TwitSnap[], force: boolean = false): Promise<void> => {
     console.log(`refresh!`);
-    if (!twits) {
+    if (!twits && !force) {
       return;
     }
+
+    console.log(twits.length);
 
     const params = {
       createdAt: twits[0] ? twits[0].createdAt : undefined,
@@ -208,8 +215,9 @@ export default function FeedScreen() {
       if (!prev_twits) {
         return olderTwits;
       }
-
-      return [...prev_twits, ...olderTwits];
+      const ret = [...prev_twits, ...olderTwits];
+      twitsRef.current = ret;
+      return ret;
     });
   };
 
@@ -263,7 +271,7 @@ export default function FeedScreen() {
   }, [fetchInterval]);
 
   if (!fetchInterval && tweets) {
-    setFetchInterval(setInterval(() => refreshTweets(tweets), intervalMinutes));
+    setFetchInterval(setInterval(() => refreshTweets(twitsRef.current), intervalMinutes));
   }
 
   return (
