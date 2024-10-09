@@ -11,6 +11,7 @@ import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  AppState,
   Dimensions,
   FlatList,
   Keyboard,
@@ -39,7 +40,7 @@ export default function FeedScreen() {
 
   const [fetchInterval, setFetchInterval] = useAtom(feedRefreshIntervalAtom);
 
-  const [actualFeedType, setActualFeedType] = useState<string>('For you');
+  const actualFeedType = useRef<string>('For you');
 
   var refreshProps: IFeedRefreshProps = {
     profileURLs: [],
@@ -79,7 +80,7 @@ export default function FeedScreen() {
         handler: async (twits: TwitSnap[] | null, feedType: string) => {
           saveTwits(twits, feedType);
           initFeed();
-          setActualFeedType('For you');
+          actualFeedType.current = 'For you';
         },
         state: true
       },
@@ -88,13 +89,13 @@ export default function FeedScreen() {
         handler: async (twits: TwitSnap[] | null, feedType: string) => {
           saveTwits(twits, feedType);
           initFollowsFeed();
-          setActualFeedType('Following');
+          actualFeedType.current = 'Following';
         },
         state: false
       }
     ],
     twits: twitsRef.current,
-    feedType: actualFeedType
+    feedType: actualFeedType.current
   };
 
   const loadSavedTwits = async (key: string): Promise<boolean> => {
@@ -184,7 +185,7 @@ export default function FeedScreen() {
       limit: 100
     };
 
-    newTwits = await fetchTweets(params, actualFeedType === 'Following' ? 'by_users' : '');
+    newTwits = await fetchTweets(params, actualFeedType.current === 'Following' ? 'by_users' : '');
     if (newTwits.length > 0) {
       // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
       setNeedRefresh(true);
@@ -204,7 +205,7 @@ export default function FeedScreen() {
 
     const olderTwits: TwitSnap[] = await fetchTweets(
       params,
-      actualFeedType === 'Following' ? 'by_users' : ''
+      actualFeedType.current === 'Following' ? 'by_users' : ''
     );
 
     if (olderTwits.length === 0) {
@@ -261,12 +262,20 @@ export default function FeedScreen() {
   };
 
   useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState.match(/inactive|background/)) {
+        console.log('App will go into ', nextAppState, ' state and save current tweets');
+        saveTwits(twitsRef.current, actualFeedType.current);
+      }
+    });
     initFeed();
+
     return () => {
       // Anything in here is fired on component unmount.
       if (fetchInterval) {
         clearInterval(fetchInterval);
       }
+      subscription.remove();
     };
   }, [fetchInterval]);
 
