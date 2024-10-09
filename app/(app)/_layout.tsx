@@ -1,43 +1,62 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Redirect, Tabs } from 'expo-router';
-import { useAtom } from 'jotai';
-
-import { authenticatedAtom } from '../authAtoms/authAtom';
+import { Redirect, Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useAtom, useAtomValue } from "jotai";
+import { authenticatedAtom } from "../authAtoms/authAtom";
+import { showTabsAtom } from "@/atoms/showTabsAtom";
 
 export default function RootLayout() {
-  const [isAuthenticated] = useAtom(authenticatedAtom);
+	const [isAuthenticated] = useAtom(authenticatedAtom);
 
-  if (!isAuthenticated) {
-    return <Redirect href="/front-page" />;
-  }
+	if (!isAuthenticated) {
+		return <Redirect href="/front-page" />;
+	}
 
-  return (
-    <Tabs>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Feed',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          )
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Search',
-          tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          )
-        }}
-      />
-    </Tabs>
-  );
+	const showTabs = useAtomValue(showTabsAtom);
+
+	return (
+		<Tabs>
+			<Tabs.Screen
+				name="home"
+				options={{
+					title: "Home",
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons
+							name="home-outline"
+							size={size}
+							color={color}
+						/>
+					),
+					header: () => <></>,
+					tabBarHideOnKeyboard: true,
+					tabBarStyle: { display: showTabs ? "flex" : "none" },
+				}}
+			/>
+			<Tabs.Screen
+				name="search"
+				options={{
+					title: "Search",
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons name="search" size={size} color={color} />
+					),
+					tabBarHideOnKeyboard: true,
+					tabBarStyle: { display: showTabs ? "flex" : "none" },
+				}}
+			/>
+			<Tabs.Screen
+				name="profile"
+				options={{
+					title: "Profile",
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons
+							name="person-outline"
+							size={size}
+							color={color}
+						/>
+					),
+					tabBarHideOnKeyboard: true,
+					tabBarStyle: { display: showTabs ? "flex" : "none" },
+				}}
+			/>
+		</Tabs>
+	);
 }
