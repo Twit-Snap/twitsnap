@@ -1,6 +1,7 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -30,6 +31,27 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
       return formatDistanceToNow(date, { addSuffix: true });
     }
   };
+
+  const renderContent = (text: string) => {
+    const words = text.split(' ');
+    return (
+        <Text>
+          {words.map((word, index) => {
+            if (word.startsWith('#')) {
+              return (
+                  <Text key={index}>
+                    <Text onPress={() => router.push({ pathname: `/searchResults`, params: { hashtag: word } })} style={styles.hashtag}>
+                      {word}
+                    </Text>{' '}
+                  </Text>
+              );
+            }
+            return <Text key={index}>{word} </Text>;
+          })}
+        </Text>
+    );
+  };
+
   return (
     <TouchableOpacity style={styles.container} activeOpacity={0.4}>
       <>
@@ -46,8 +68,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
               <Text style={styles.date}>{formatDate(date)}</Text>
             </Text>
           </Text>
-
-          <Text style={styles.content}>{content}</Text>
+          <Text style={styles.content}>{renderContent(content)}</Text>
         </View>
       </>
     </TouchableOpacity>
@@ -88,6 +109,9 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 12,
     color: 'rgb(120 120 120)'
+  },
+  hashtag: {
+    color: 'rgb(67,67,244)',
   },
   dot: {
     fontSize: 16,
