@@ -17,14 +17,20 @@ export default function SearchScreen() {
         inputStyle={{ color: 'white' }}
         iconColor="white"
         onIconPress={() => {
-                if (searchQuery[0] === '#' && searchQuery.length > 1) {
-                    router.push({pathname: `/searchResults`, params: {hashtag: searchQuery}});
-                }
+              if (searchQuery[0] === '#' && searchQuery.length > 1) {
+                  router.push({pathname: `/searchResults`, params: {hashtag: searchQuery}});
+              }else if (searchQuery.length > 1) {
+                // Handle user search
+                router.push({ pathname: `/profile`, params: { username: searchQuery } });
+              }
             }
         }
         onSubmitEditing={() => {
             if (searchQuery[0] === '#' && searchQuery.length > 1) {
                 router.push({pathname: `/searchResults`, params: {hashtag: searchQuery}});
+            }else if (searchQuery.length > 1) {
+              // Handle user search
+              router.push({ pathname: `/profile`, params: { username: searchQuery } });
             }
         }}
       />
