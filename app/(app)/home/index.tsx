@@ -6,7 +6,6 @@ import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -106,6 +105,8 @@ export default function FeedScreen() {
     };
 
     const fetchedTweets = await fetchTweets(params);
+    twitsRef.current = fetchedTweets;
+    console.log(fetchedTweets)
     setTweets(fetchedTweets);
   };
 
@@ -120,6 +121,7 @@ export default function FeedScreen() {
 
     // const fetchedTweets = await fetchTweets(params, 'by_users');
     // setTweets(fetchedTweets);
+    // twitsRef.current = fetchedTweets;
     setTweets([]);
   };
 
@@ -130,6 +132,7 @@ export default function FeedScreen() {
     }
 
     console.log(twits.length);
+    console.log(twits[0] ? twits[0].content : undefined);
 
     const params = {
       createdAt: twits[0] ? twits[0].createdAt : undefined,
@@ -148,6 +151,8 @@ export default function FeedScreen() {
     if (!tweets) {
       return;
     }
+
+    console.log("por alguna razon entre aca")
 
     const params = {
       createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,
