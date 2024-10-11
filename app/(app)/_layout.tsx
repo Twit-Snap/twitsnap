@@ -14,7 +14,7 @@ export default function RootLayout() {
 	const showTabs = useAtomValue(showTabsAtom);
 
 	return (
-		<Tabs>
+		<Tabs sceneContainerStyle={{backgroundColor: "rgb(5 5 5)"}}>
 			<Tabs.Screen
 				name="home"
 				options={{
