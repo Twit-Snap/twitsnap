@@ -1,12 +1,12 @@
 // ProfileScreen.tsx
 import axios from 'axios';
-import { useLocalSearchParams } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useAtom } from 'jotai';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, FlatList, ActivityIndicator, Text } from 'react-native';
 
-import { TwitSnap } from '@/app/types/TwitSnap';
 import { SearchedUser } from '@/app/types/publicUser';
+import { TwitSnap } from '@/app/types/TwitSnap';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
 
@@ -14,68 +14,110 @@ import { authenticatedAtom } from '../authAtoms/authAtom';
 
 export default function ProfileScreen() {
   const [userData] = useAtom(authenticatedAtom);
-  const { username } = useLocalSearchParams<{ username: string }>();
-
   const [searchUserData, setSearchUserData] = useState<SearchedUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  /* useEffect(() => {
     const fetchUserData = async () => {
       if (!userData || !userData.token) {
         console.error('No token found.');
         return; // You can choose to handle this case appropriately (e.g., redirect to login)
       }
 
-      if (username) {
+      try {
+        const response = await axios.get(
+          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${userData.username}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userData.token}`
+            }
+          }
+        );
+        setSearchUserData(response.data.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUserData();
+    setLoading(false);
+  }, []);*/
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchUserData = async () => {
+        if (!userData || !userData.token) {
+          console.error('No token found.');
+          return; // Handle this appropriately
+        }
+
+        setLoading(true); // Start loading
+
         try {
+          // Fetch the user's data
           const response = await axios.get(
-            `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}`,
+            `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${userData.username}`,
             {
               headers: {
                 Authorization: `Bearer ${userData.token}`
               }
             }
           );
-          setSearchUserData(response.data.data);
+
+          const newUserData: SearchedUser = response.data.data;
+
+          // Only update state if the fetched data is different from current state
+          if (JSON.stringify(newUserData) !== JSON.stringify(searchUserData)) {
+            setSearchUserData(newUserData); // Update the state if data has changed
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
+        } finally {
+          setLoading(false); // End loading
         }
-      }
-      setLoading(false);
-    };
+      };
 
-    fetchUserData();
-  }, [username]);
+      fetchUserData(); // Call the function to fetch data
+    }, [userData]) // Only depend on userData
+  );
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-        {loading ? (
+      {loading ? ( // Show loading indicator if loading
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="white" />
-        ) : searchUserData ? (
-          <ProfileHeader
-            user={searchUserData}
-            bio={"Hi! Welcome to my profile. \nI'm a huge Messi fan!"}
-            profilePhoto={/*searchUserData.profilePhoto || */ ''}
-            bannerPhoto={/*searchUserData.bannerPhoto ||*/ ''}
-          />
-        ) : (
-          <Text style={styles.errorText}>User not found</Text>
-        )}
-        <FlatList<TwitSnap>
-          data={searchUserData?.twits || []}
-          renderItem={({ item }) => (
-            <TweetCard
-              profileImage={''}
-              name={searchUserData?.name || ''}
-              username={searchUserData?.username || ''}
-              content={item.content}
-              date={item.createdAt}
-            />
+        </View>
+      ) : (
+        <ScrollView>
+          {loading ? (
+            <ActivityIndicator size="large" color="white" />
+          ) : searchUserData ? (
+            <>
+              <ProfileHeader
+                user={searchUserData}
+                bio={"Hi! Welcome to my profile. \nI'm a huge Messi fan!"}
+                profilePhoto={/*searchUserData.profilePhoto || */ ''}
+                bannerPhoto={/*searchUserData.bannerPhoto ||*/ ''}
+              />
+              <View style={styles.divider} />
+            </>
+          ) : (
+            <Text style={styles.errorText}>User not found</Text>
           )}
-          scrollEnabled={false}
-        />
-      </ScrollView>
+          <FlatList<TwitSnap>
+            data={searchUserData?.twits || []}
+            renderItem={({ item }) => (
+              <TweetCard
+                profileImage={''}
+                name={searchUserData?.name || ''}
+                username={searchUserData?.username || ''}
+                content={item.content}
+                date={item.createdAt}
+              />
+            )}
+            scrollEnabled={false}
+          />
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -86,10 +128,21 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: 'rgb(5 5 5)'
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgb(5 5 5)'
+  },
   errorText: {
     color: 'white',
     fontSize: 18,
     textAlign: 'center',
     marginTop: 20
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'gray',
+    marginVertical: 20
   }
 });

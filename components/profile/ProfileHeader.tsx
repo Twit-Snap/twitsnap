@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
   },
   bio: {
     fontSize: 16,
+    color: 'white',
     lineHeight: 24,
     marginBottom: 5
   },
