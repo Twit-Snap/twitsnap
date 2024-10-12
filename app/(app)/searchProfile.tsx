@@ -17,6 +17,7 @@ export default function PublicProfileScreen() {
 
   const [searchUserData, setSearchUserData] = useState<SearchedUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   /*useEffect(() => {
     const fetchUserData = async () => {
@@ -51,11 +52,13 @@ export default function PublicProfileScreen() {
       const fetchUserData = async () => {
         if (!userData || !userData.token) {
           console.error('No token found.');
+          setLoading(false);
           return; // Handle this case appropriately
         }
 
         if (username) {
           setLoading(true); // Start loading
+          setError(null);
           try {
             const response = await axios.get(
               `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}`,
@@ -72,8 +75,16 @@ export default function PublicProfileScreen() {
             if (JSON.stringify(newUserData) !== JSON.stringify(searchUserData)) {
               setSearchUserData(newUserData); // Update state if data has changed
             }
-          } catch (error) {
-            console.error('Error fetching user data:', error);
+          } catch (error: any) {
+            if (error.response?.status === 404) {
+              setError('User not found.');
+              setLoading(false);
+              console.error('User not found:', error);
+            } else {
+              setError('An error occurred while fetching user data.');
+              setLoading(false);
+              console.error('Error fetching user data:', error);
+            }
           } finally {
             setLoading(false); // End loading
           }
@@ -94,32 +105,34 @@ export default function PublicProfileScreen() {
   return (
     <View style={styles.container}>
       <ScrollView>
-        {searchUserData ? (
+        {error ? (
+          <Text style={styles.errorText}>{error}</Text> // Show error message if there's an error
+        ) : searchUserData ? (
           <>
             <ProfileHeader
               user={searchUserData}
               bio={"Hi! Welcome to my profile. \nI'm a huge Messi fan!"}
               profilePhoto={/*searchUserData.profilePhoto ||*/ ''}
-              bannerPhoto={/*searchUserData.bannerPhoto || */''}
+              bannerPhoto={/*searchUserData.bannerPhoto || */ ''}
             />
             <View style={styles.divider} />
+            <FlatList<TwitSnap>
+              data={searchUserData.twits || []}
+              renderItem={({ item }) => (
+                <TweetCard
+                  profileImage={/*searchUserData?.profilePhoto ||*/ ''}
+                  name={searchUserData?.name || ''}
+                  username={searchUserData?.username || ''}
+                  content={item.content}
+                  date={item.createdAt}
+                />
+              )}
+              scrollEnabled={false}
+            />
           </>
         ) : (
           <Text style={styles.errorText}>User not found</Text>
         )}
-        <FlatList<TwitSnap>
-          data={searchUserData?.twits || []}
-          renderItem={({ item }) => (
-            <TweetCard
-              profileImage={/*searchUserData?.profilePhoto ||*/ ''}
-              name={searchUserData?.name || ''}
-              username={searchUserData?.username || ''}
-              content={item.content}
-              date={item.createdAt}
-            />
-          )}
-          scrollEnabled={false}
-        />
       </ScrollView>
     </View>
   );
@@ -141,7 +154,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     textAlign: 'center',
-    marginTop: 20
+    marginTop: 40
   },
   divider: {
     height: 1,
