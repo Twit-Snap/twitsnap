@@ -1,29 +1,88 @@
-import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, Text } from 'react-native';
+import { TwitSnap, TwitUser } from '@/app/types/TwitSnap';
 import TweetCard from '@/components/twits/TweetCard';
-import { TwitSnap } from '@/app/types/TwitSnap';
-import {router, useLocalSearchParams} from "expo-router";
-import {Appbar} from "react-native-paper";
+import removeDuplicates from '@/utils/removeDup';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Appbar } from 'react-native-paper';
 const axios = require('axios').default;
+const window = Dimensions.get('window');
+const parseQuery = (query: string): string => {
+  query = query.trim();
+
+  if (query[0] === '#') {
+    return query.substring(1);
+  }
+
+  return query;
+};
 
 export default function SearchResultsScreen() {
-    const { hashtag } = useLocalSearchParams<{ hashtag: string }>();
-    const [tweets, setTweets] = useState<TwitSnap[]>([]);
+  const query = parseQuery(useLocalSearchParams<{ query: string }>().query);
 
-    useEffect(() => {
-        const fetchTweets = async () => {
-            try {
-                const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}hashtags/${hashtag.substring(1)}`);
-                setTweets(response.data.data);
-            } catch (error) {
-                console.error('Error fetching tweets:', error);
-            }
-        };
+  const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
+  const [users, setUsers] = useState<TwitUser[] | null>(null);
 
-        if (hashtag) {
-            fetchTweets();
-        }
-    }, [hashtag]);
+  useEffect(() => {
+    const fetchByHashtag = async (): Promise<TwitSnap[]> => {
+      try {
+        const response = await axios.get(
+          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}hashtags/${query}`
+        );
+
+        console.log(`Fetched ${response.data.data.length} twits with "#${query}"`);
+
+        return response.data.data;
+      } catch (error) {
+        console.log(`No twits with hashtag ${query}, `, error);
+      }
+
+      return [];
+    };
+
+    const fetchByText = async (): Promise<TwitSnap[]> => {
+      try {
+        const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
+          params: { has: query }
+        });
+
+        console.log(
+          `Fetched ${response.data.data.length} twits which has "${query}" in its content`
+        );
+
+        return response.data.data;
+      } catch (error) {
+        console.log(`No twit has in its content: ${query}, `, error);
+      }
+
+      return [];
+    };
+
+    const fetchUsers = async (): Promise<TwitUser[]> => {
+      try {
+        const response = await axios.get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}`, {
+          params: undefined
+        });
+        return response.data.data;
+      } catch (error) {
+        console.log(`No users: ${query}, `, error);
+      }
+
+      return [];
+    };
+
+    const fetchTweets = async () => {
+      const hashtagTwits = await fetchByHashtag();
+      const textTwits = await fetchByText();
+      // const users = await fetchUsers();
+
+      const twits = removeDuplicates([...hashtagTwits, ...textTwits]);
+
+      setTweets([...twits]);
+    };
+
+    fetchTweets();
+  }, [query]);
 
     return (
         <View style={styles.container}>
