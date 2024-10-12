@@ -1,7 +1,7 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
+import { router } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -35,20 +35,25 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
   const renderContent = (text: string) => {
     const words = text.split(' ');
     return (
-        <Text>
-          {words.map((word, index) => {
-            if (word.startsWith('#')) {
-              return (
-                  <Text key={index}>
-                    <Text onPress={() => router.push({ pathname: `/searchResults`, params: { hashtag: word } })} style={styles.hashtag}>
-                      {word}
-                    </Text>{' '}
-                  </Text>
-              );
-            }
-            return <Text key={index}>{word} </Text>;
-          })}
-        </Text>
+      <Text>
+        {words.map((word, index) => {
+          if (word.startsWith('#')) {
+            return (
+              <Text key={index}>
+                <Text
+                  onPress={() =>
+                    router.push({ pathname: `/searchResults`, params: { hashtag: word } })
+                  }
+                  style={styles.hashtag}
+                >
+                  {word}
+                </Text>{' '}
+              </Text>
+            );
+          }
+          return <Text key={index}>{word} </Text>;
+        })}
+      </Text>
     );
   };
 
@@ -104,14 +109,14 @@ const styles = StyleSheet.create({
   },
   content: {
     fontSize: 14,
-    color: 'rgb(220 220 220)',
+    color: 'rgb(220 220 220)'
   },
   date: {
     fontSize: 12,
     color: 'rgb(120 120 120)'
   },
   hashtag: {
-    color: 'rgb(67,67,244)',
+    color: 'rgb(67,67,244)'
   },
   dot: {
     fontSize: 16,

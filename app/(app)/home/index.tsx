@@ -1,11 +1,3 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { TwitSnap } from '@/app/types/TwitSnap';
-import { feedRefreshIntervalAtom } from '@/atoms/feedRefreshInterval';
-import { showTabsAtom } from '@/atoms/showTabsAtom';
-import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
-import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
-import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
-import TweetCard from '@/components/twits/TweetCard';
 import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -20,9 +12,18 @@ import {
 } from 'react-native';
 import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { TwitSnap } from '@/app/types/TwitSnap';
+import { feedRefreshIntervalAtom } from '@/atoms/feedRefreshInterval';
+import { showTabsAtom } from '@/atoms/showTabsAtom';
+import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
+import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
+import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
+import TweetCard from '@/components/twits/TweetCard';
+
 const axios = require('axios').default;
 const window = Dimensions.get('screen');
-var newTwits: TwitSnap[] | null = null;
+let newTwits: TwitSnap[] | null = null;
 // const intervalMinutes = 10 * 60 * 1000;
 const intervalMinutes = 10 * 1000;
 
@@ -41,13 +42,13 @@ export default function FeedScreen() {
 
   const actualFeedType = useRef<string>('For you');
 
-  var refreshProps: IFeedRefreshProps = {
+  const refreshProps: IFeedRefreshProps = {
     profileURLs: [],
     handler: () => {
       setNeedRefresh(false);
 
       setTweets((prev_twits) => {
-        var new_twits: TwitSnap[] = [];
+        let new_twits: TwitSnap[] = [];
 
         if (prev_twits && newTwits) {
           new_twits = [...newTwits, ...prev_twits];
@@ -106,7 +107,7 @@ export default function FeedScreen() {
 
     const fetchedTweets = await fetchTweets(params);
     twitsRef.current = fetchedTweets;
-    console.log(fetchedTweets)
+    console.log(fetchedTweets);
     setTweets(fetchedTweets);
   };
 
@@ -151,8 +152,6 @@ export default function FeedScreen() {
     if (!tweets) {
       return;
     }
-
-    console.log("por alguna razon entre aca")
 
     const params = {
       createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,

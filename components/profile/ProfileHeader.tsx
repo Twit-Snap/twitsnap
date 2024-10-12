@@ -1,9 +1,8 @@
+import { format } from 'date-fns';
 import React from 'react';
 import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 
-import { UserAuth } from '@/app/types/authTypes';
 import { SearchedUser } from '@/app/types/publicUser';
-import { format } from 'date-fns';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -21,8 +20,9 @@ const default_images = {
 };
 
 const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePhoto, bio }) => {
-
-  const formattedBirthdate = user.birthdate ? format(new Date(user.birthdate), 'MMMM dd, yyyy') : null;
+  const formattedBirthdate = user.birthdate
+    ? format(new Date(user.birthdate), 'MMMM dd, yyyy')
+    : null;
   const formattedJoinDate = user.createdAt ? format(new Date(user.createdAt), 'MMMM yyyy') : null;
 
   return (
@@ -41,16 +41,8 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
           {user && <Text style={styles.username}>@{user.username}</Text>}
 
           {/* Birthday and Join Date */}
-          {formattedBirthdate && (
-            <Text style={styles.birthdate}>
-              🎂 Born {formattedBirthdate}
-            </Text>
-          )}
-          {formattedJoinDate && (
-            <Text style={styles.joinDate}>
-              📅 Joined {formattedJoinDate}
-            </Text>
-          )}
+          {formattedBirthdate && <Text style={styles.birthdate}>🎂 Born {formattedBirthdate}</Text>}
+          {formattedJoinDate && <Text style={styles.joinDate}>📅 Joined {formattedJoinDate}</Text>}
         </View>
       </View>
       <Text style={styles.bio}>{bio}</Text>

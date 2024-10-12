@@ -1,6 +1,7 @@
-import { TwitSnap } from '@/app/types/TwitSnap';
 import React, { useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { TwitSnap } from '@/app/types/TwitSnap';
 
 const window = Dimensions.get('window');
 

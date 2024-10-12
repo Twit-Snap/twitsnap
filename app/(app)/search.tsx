@@ -1,7 +1,8 @@
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import {Searchbar} from 'react-native-paper';
-import { router } from 'expo-router';
+import { Searchbar } from 'react-native-paper';
+
 import TrendingHashtagChip from '@/components/hashtags/TrendingHashtagChip';
 
 export default function SearchScreen() {
@@ -18,27 +19,26 @@ export default function SearchScreen() {
         iconColor="white"
         onIconPress={() => {
           if (searchQuery[0] === '#' && searchQuery.length > 1) {
-                  router.push({pathname: `/searchResults`, params: {hashtag: searchQuery}});
-              }else if (searchQuery.length > 1) {
-                // Handle user search
-                router.push({ pathname: `/searchProfile`, params: { username: searchQuery } });
-              }
-            }
-        }
+            router.push({ pathname: `/searchResults`, params: { hashtag: searchQuery } });
+          } else if (searchQuery.length > 1) {
+            // Handle user search
+            router.push({ pathname: `/searchProfile`, params: { username: searchQuery } });
+          }
+        }}
         onSubmitEditing={() => {
-            if (searchQuery[0] === '#' && searchQuery.length > 1) {
-                router.push({pathname: `/searchResults`, params: {hashtag: searchQuery}});
-            }else if (searchQuery.length > 1) {
-              // Handle user search
-              router.push({ pathname: `/searchProfile`, params: { username: searchQuery } });
-            }
+          if (searchQuery[0] === '#' && searchQuery.length > 1) {
+            router.push({ pathname: `/searchResults`, params: { hashtag: searchQuery } });
+          } else if (searchQuery.length > 1) {
+            // Handle user search
+            router.push({ pathname: `/searchProfile`, params: { username: searchQuery } });
+          }
         }}
       />
       <Text style={styles.trendingText}>Trending now</Text>
       <View style={styles.chipsContainer}>
-        <TrendingHashtagChip trendingHashtag={"#Futbol"}/>
-        <TrendingHashtagChip trendingHashtag={"#Messi"}/>
-        <TrendingHashtagChip trendingHashtag={"#Test"}/>
+        <TrendingHashtagChip trendingHashtag={'#Futbol'} />
+        <TrendingHashtagChip trendingHashtag={'#Messi'} />
+        <TrendingHashtagChip trendingHashtag={'#Test'} />
       </View>
     </View>
   );
@@ -64,5 +64,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginVertical: 10
-  },
+  }
 });
