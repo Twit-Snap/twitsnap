@@ -1,63 +1,169 @@
-import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, Text } from 'react-native';
+import { TwitSnap, TwitUser } from '@/app/types/TwitSnap';
 import TweetCard from '@/components/twits/TweetCard';
-import { TwitSnap } from '@/app/types/TwitSnap';
-import {router, useLocalSearchParams} from "expo-router";
-import {Appbar} from "react-native-paper";
+import removeDuplicates from '@/utils/removeDup';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Appbar } from 'react-native-paper';
 const axios = require('axios').default;
+const window = Dimensions.get('window');
+const parseQuery = (query: string): string => {
+  query = query.trim();
+
+  if (query[0] === '#') {
+    return query.substring(1);
+  }
+
+  return query;
+};
 
 export default function SearchResultsScreen() {
-    const { hashtag } = useLocalSearchParams<{ hashtag: string }>();
-    const [tweets, setTweets] = useState<TwitSnap[]>([]);
+  const query = parseQuery(useLocalSearchParams<{ query: string }>().query);
 
-    useEffect(() => {
-        const fetchTweets = async () => {
-            try {
-                const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}hashtags/${hashtag.substring(1)}`);
-                setTweets(response.data.data);
-            } catch (error) {
-                console.error('Error fetching tweets:', error);
-            }
-        };
+  const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
+  const [users, setUsers] = useState<TwitUser[] | null>(null);
 
-        if (hashtag) {
-            fetchTweets();
-        }
-    }, [hashtag]);
+  useEffect(() => {
+    const fetchByHashtag = async (): Promise<TwitSnap[]> => {
+      try {
+        const response = await axios.get(
+          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}hashtags/${query}`
+        );
 
-    return (
-        <View style={styles.container}>
-            <Appbar.Header style={{ backgroundColor: 'rgb(0 0 0)' } }>
-                <Appbar.BackAction onPress={() => router.push("/home")} color="rgb(255 255 255)" />
-            </Appbar.Header>
-            <Text style={styles.header}> Tweets with {hashtag} </Text>
-            <FlatList
-                data={tweets}
-                renderItem={({ item }) => (
-                    <TweetCard
-                        profileImage={''}
-                        name={item.user.name}
-                        username={item.user.username}
-                        content={item.content}
-                        date={item.createdAt}
-                    />
-                )}
-                keyExtractor={(item) => item.id}
-            />
-        </View>
-    );
+        console.log(`Fetched ${response.data.data.length} twits with "#${query}"`);
+
+        return response.data.data;
+      } catch (error) {
+        console.log(`No twits with hashtag ${query}, `, error);
+      }
+
+      return [];
+    };
+
+    const fetchByText = async (): Promise<TwitSnap[]> => {
+      try {
+        const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
+          params: { has: query }
+        });
+
+        console.log(
+          `Fetched ${response.data.data.length} twits which has "${query}" in its content`
+        );
+
+        return response.data.data;
+      } catch (error) {
+        console.log(`No twit has in its content: ${query}, `, error);
+      }
+
+      return [];
+    };
+
+    const fetchUsers = async (): Promise<TwitUser[]> => {
+      try {
+        const response = await axios.get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}`, {
+          params: undefined
+        });
+        return response.data.data;
+      } catch (error) {
+        console.log(`No users: ${query}, `, error);
+      }
+
+      return [];
+    };
+
+    const fetchTweets = async () => {
+      const hashtagTwits = await fetchByHashtag();
+      const textTwits = await fetchByText();
+      // const users = await fetchUsers();
+
+      const twits = removeDuplicates([...hashtagTwits, ...textTwits]);
+
+      setTweets([...twits]);
+    };
+
+    fetchTweets();
+  }, [query]);
+
+  return (
+    <View style={styles.container}>
+      <Appbar.Header style={{ backgroundColor: 'rgb(5 5 5)' }}>
+        <Appbar.BackAction onPress={() => router.push('/home')} color="rgb(255 255 255)" />
+      </Appbar.Header>
+      <Text style={styles.header}> Tweets with {query} </Text>
+      {tweets ? (
+        tweets.length > 0 ? (
+          <FlatList
+            data={tweets}
+            renderItem={({ item }) => (
+              <TweetCard
+                profileImage={''}
+                name={item.user.name}
+                username={item.user.username}
+                content={item.content}
+                date={item.createdAt}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        ) : (
+          <View style={styles.error_container}>
+            <Text
+              numberOfLines={6}
+              ellipsizeMode="tail"
+              style={styles.error_label}
+            >{`No results for "${query}"`}</Text>
+            <Text style={styles.error_label_aux}>Try searching for something else</Text>
+          </View>
+        )
+      ) : (
+        <ActivityIndicator
+          animating={true}
+          color={'rgb(3, 165, 252)'}
+          size={60}
+          style={{ alignSelf: 'center' }}
+        />
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 10,
-        backgroundColor: 'rgb(5 5 5)',
-    },
-    header: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: 'rgb(255 255 255)',
-    },
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: 'rgb(5 5 5)'
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: 'rgb(255 255 255)'
+  },
+  error_label: {
+    color: 'rgb(255 255 255)',
+    fontSize: 30,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    textAlign: 'left',
+    textAlignVertical: 'center',
+    width: '100%'
+  },
+  error_label_aux: {
+    color: 'rgb(120 120 120)',
+    fontSize: 16,
+    alignSelf: 'center',
+    textAlign: 'left',
+    textAlignVertical: 'center',
+    width: '100%',
+    marginTop: 3
+  },
+  error_container: {
+    justifyContent: 'center',
+    alignContent: 'center',
+    flex: 1,
+    height: '100%',
+    maxWidth: window.width,
+    flexDirection: 'column',
+    marginHorizontal: 25
+  }
 });
