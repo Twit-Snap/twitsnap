@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "224360780470",
+    "project_id": "twit-snap",
+    "storage_bucket": "twit-snap.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224360780470:android:a5de3fa25a47ac94814c17",
+        "android_client_info": {
+          "package_name": "com.lescalante14.twitsnap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAi70bL19-ZNS0OMOoxNS0kuoOtvflgrSA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
