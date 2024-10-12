@@ -2,7 +2,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { router } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import Interaction from './interaction';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -15,19 +15,6 @@ interface TweetCardProps {
   content: string;
   date: string;
 }
-
-const parseInteractionCount = (n: number): string => {
-  if (n > 1_000_000_000) {
-    return `${(n / 1_000_000_000.0).toPrecision()}B`;
-  } else if (n > 1_000_000) {
-    return `${(n / 1_000_000.0).toPrecision()}M`;
-  } else if (n > 1_000) {
-    return `${(n / 1000.0).toPrecision()}k`;
-  }
-
-  return n.toString();
-};
-
 
 const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, content, date }) => {
   const formatDate = (dateString: string): string => {
@@ -90,19 +77,29 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
             </Text>
             <Text style={styles.content}>{renderContent(content)}</Text>
           </View>
-          <View style={{ flex: 1, flexDirection: 'row' }}>
-            <TouchableOpacity style={{ flex: 1, flexDirection: 'row' }}>
-              <IconButton style={styles.interaction_icon} icon="comment-outline" size={20} />
-              <Text style={styles.interaction_label}>123</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1, flexDirection: 'row' }}>
-              <IconButton style={styles.interaction_icon} icon="repeat" size={20} />
-              <Text style={styles.interaction_label}>123</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1, flexDirection: 'row' }}>
-              <IconButton style={styles.interaction_icon} icon="heart-outline" size={20} />
-              <Text style={styles.interaction_label}>123</Text>
-            </TouchableOpacity>
+          <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
+            <Interaction
+              icon="comment-outline"
+              initState={false}
+              count={1_023_002_230}
+              handler={(state: boolean) => console.log('asd')}
+            />
+            <Interaction
+              icon="repeat-off"
+              icon_alt="repeat"
+              icon_alt_color="rgb(47, 204, 110  )"
+              initState={false}
+              count={1_023_203}
+              handler={(state: boolean) => console.log('asd')}
+            />
+            <Interaction
+              icon="heart-outline"
+              icon_alt="heart"
+              icon_alt_color="rgb(255, 79, 56)"
+              initState={false}
+              count={1_023}
+              handler={(state: boolean) => console.log('asd')}
+            />
           </View>
         </View>
       </>
@@ -116,7 +113,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'rgb(50 50 50)',
-    backgroundColor: 'rgb(5 5 5)',
+    backgroundColor: 'rgb(5 5 5)'
   },
   profileImage: {
     width: 40,
@@ -153,16 +150,17 @@ const styles = StyleSheet.create({
     color: 'rgb(120 120 120)'
   },
   interaction_icon: {
-    margin: 0,
+    margin: 0
   },
   interaction_label: {
     color: 'rgb(120 120 120)',
     textAlign: 'left',
-    textAlignVertical: 'center',
+    textAlignVertical: 'bottom',
     flex: 1,
     alignContent: 'center',
     justifyContent: 'center',
-    fontSize: 14
+    fontSize: 14,
+    height: 36
   }
 });
 
