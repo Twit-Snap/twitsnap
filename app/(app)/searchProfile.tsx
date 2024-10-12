@@ -16,6 +16,7 @@ export default function PublicProfileScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
 
   const [searchUserData, setSearchUserData] = useState<SearchedUser | null>(null);
+  const [twits, setTwits] = useState<TwitSnap[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,10 +47,88 @@ export default function PublicProfileScreen() {
 
     fetchUserData();
   }, [username]);*/
+  const loadMoreTwits = async () => {
+    if (!searchUserData?.twits) {
+      return;
+    }
+
+    const params = {
+      createdAt: searchUserData.twits[searchUserData.twits.length - 1] ? searchUserData.twits[searchUserData.twits.length - 1].createdAt : undefined,
+      older: true,
+      limit: 20
+    };
+
+    const olderTwits: TwitSnap[] = await fetchTweets(
+      params,
+      actualFeedType.current === 'Following' ? 'by_users' : ''
+    );
+
+    if (olderTwits.length === 0) {
+      return;
+    }
+
+    setTwits((prev_twits) => {
+      if (!prev_twits) {
+        return olderTwits;
+      }
+      const ret = [...prev_twits, ...olderTwits];
+      twitsRef.current = ret;
+      return ret;
+    });
+  };
+
+  const fetchTweets = async (
+    queryParams: object | undefined = undefined,
+    url: string = ''
+  ): Promise<TwitSnap[]> => {
+    let tweets: TwitSnap[] = [];
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${url}`, {
+        params: queryParams
+      });
+      tweets = response.data.data;
+      console.log('Fetched: ', tweets.length, ' twits');
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again later.');
+    }
+    return tweets;
+  };
+
+  async function fetchUserData(token: string) {
+    try {
+      const response = await axios.get(
+        `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      //const newUserData: SearchedUser = response.data.data;
+      // Only update state if the fetched data is different from current state
+      /*if (JSON.stringify(newUserData) !== JSON.stringify(searchUserData)) {
+        setSearchUserData(newUserData); // Update state if data has changed
+      }*/
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        setError('User not found.');
+        setLoading(false);
+        console.error('User not found:', error);
+      } else {
+        setError('An error occurred while fetching user data.');
+        setLoading(false);
+        console.error('Error fetching user data:', error);
+      }
+    } finally {
+      setLoading(false); // End loading
+    }
+  }
 
   useFocusEffect(
     React.useCallback(() => {
-      const fetchUserData = async () => {
+      const fetchUserProfile = async () => {
         if (!userData || !userData.token) {
           console.error('No token found.');
           setLoading(false);
@@ -59,39 +138,12 @@ export default function PublicProfileScreen() {
         if (username) {
           setLoading(true); // Start loading
           setError(null);
-          try {
-            const response = await axios.get(
-              `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${userData.token}`
-                }
-              }
-            );
-
-            const newUserData: SearchedUser = response.data.data;
-
-            // Only update state if the fetched data is different from current state
-            if (JSON.stringify(newUserData) !== JSON.stringify(searchUserData)) {
-              setSearchUserData(newUserData); // Update state if data has changed
-            }
-          } catch (error: any) {
-            if (error.response?.status === 404) {
-              setError('User not found.');
-              setLoading(false);
-              console.error('User not found:', error);
-            } else {
-              setError('An error occurred while fetching user data.');
-              setLoading(false);
-              console.error('Error fetching user data:', error);
-            }
-          } finally {
-            setLoading(false); // End loading
-          }
+          await fetchUserData(userData.token);
+          await fetchTweets();
         }
       };
 
-      fetchUserData(); // Call the function to fetch data
+      fetchUserProfile(); // Call the function to fetch data
     }, [userData, username, searchUserData]) // Dependencies
   );
 
