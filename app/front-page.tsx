@@ -4,6 +4,7 @@ import { useAtom } from 'jotai';
 import { useEffect } from 'react';
 import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 const window = Dimensions.get('window');
@@ -82,6 +83,23 @@ export default function FrontPage() {
           }}
         >
           Sign up
+        </Button>
+      </View>
+      <View style={styles.buttonContainer}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>
+          Or continue with
+        </Text>
+        <Button
+          icon="google"
+          mode="contained"
+          buttonColor={'#DB4437'}
+          style={styles.buttonContent}
+          onPress={() => {
+            // call Google sign-in API
+            console.log('Google sign-in');
+          }}
+        >
+          Continue with Google
         </Button>
       </View>
     </View>
