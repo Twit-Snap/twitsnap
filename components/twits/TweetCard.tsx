@@ -1,7 +1,8 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
+import { router } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
+import { IconButton } from 'react-native-paper';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -35,20 +36,25 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
   const renderContent = (text: string) => {
     const words = text.split(' ');
     return (
-        <Text>
-          {words.map((word, index) => {
-            if (word.startsWith('#')) {
-              return (
-                  <Text key={index}>
-                    <Text onPress={() => router.push({ pathname: `/searchResults`, params: { hashtag: word } })} style={styles.hashtag}>
-                      {word}
-                    </Text>{' '}
-                  </Text>
-              );
-            }
-            return <Text key={index}>{word} </Text>;
-          })}
-        </Text>
+      <Text>
+        {words.map((word, index) => {
+          if (word.startsWith('#')) {
+            return (
+              <Text key={index}>
+                <Text
+                  onPress={() =>
+                    router.push({ pathname: `/searchResults`, params: { hashtag: word } })
+                  }
+                  style={styles.hashtag}
+                >
+                  {word}
+                </Text>{' '}
+              </Text>
+            );
+          }
+          return <Text key={index}>{word} </Text>;
+        })}
+      </Text>
     );
   };
 
@@ -59,16 +65,32 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
           source={profileImage ? { uri: profileImage } : default_images.default_profile_picture}
           style={styles.profileImage}
         />
-        <View style={styles.contentContainer}>
-          <Text style={styles.name}>
-            {name}{' '}
-            <Text style={styles.username}>
-              @{username}
-              <Text style={styles.dot}>{' - '}</Text>
-              <Text style={styles.date}>{formatDate(date)}</Text>
+        <View style={{ flex: 1, flexDirection: 'column' }}>
+          <View style={styles.contentContainer}>
+            <Text style={styles.name}>
+              {name}{' '}
+              <Text style={styles.username}>
+                @{username}
+                <Text style={styles.dot}>{' - '}</Text>
+                <Text style={styles.date}>{formatDate(date)}</Text>
+              </Text>
             </Text>
-          </Text>
-          <Text style={styles.content}>{renderContent(content)}</Text>
+            <Text style={styles.content}>{renderContent(content)}</Text>
+          </View>
+          <View style={{ flex: 1, flexDirection: 'row' }}>
+            <TouchableOpacity style={{ flex: 1, flexDirection: 'row' }}>
+              <IconButton style={styles.interaction_icon} icon="comment-outline" size={20} />
+              <Text style={styles.interaction_label}>123</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ flex: 1, flexDirection: 'row' }}>
+              <IconButton style={styles.interaction_icon} icon="repeat" size={20} />
+              <Text style={styles.interaction_label}>123</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ flex: 1, flexDirection: 'row' }}>
+              <IconButton style={styles.interaction_icon} icon="heart-outline" size={20} />
+              <Text style={styles.interaction_label}>123</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </>
     </TouchableOpacity>
@@ -81,11 +103,11 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'rgb(50 50 50)',
-    backgroundColor: 'rgb(5 5 5)'
+    backgroundColor: 'rgb(5 5 5)',
   },
   profileImage: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     borderRadius: 25
   },
   contentContainer: {
@@ -104,18 +126,30 @@ const styles = StyleSheet.create({
   },
   content: {
     fontSize: 14,
-    color: 'rgb(220 220 220)',
+    color: 'rgb(220 220 220)'
   },
   date: {
     fontSize: 12,
     color: 'rgb(120 120 120)'
   },
   hashtag: {
-    color: 'rgb(67,67,244)',
+    color: 'rgb(67,67,244)'
   },
   dot: {
     fontSize: 16,
     color: 'rgb(120 120 120)'
+  },
+  interaction_icon: {
+    margin: 0,
+  },
+  interaction_label: {
+    color: 'rgb(120 120 120)',
+    textAlign: 'left',
+    textAlignVertical: 'center',
+    flex: 1,
+    alignContent: 'center',
+    justifyContent: 'center',
+    fontSize: 14
   }
 });
 
