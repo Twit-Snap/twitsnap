@@ -16,6 +16,19 @@ interface TweetCardProps {
   date: string;
 }
 
+const parseInteractionCount = (n: number): string => {
+  if (n > 1_000_000_000) {
+    return `${(n / 1_000_000_000.0).toPrecision()}B`;
+  } else if (n > 1_000_000) {
+    return `${(n / 1_000_000.0).toPrecision()}M`;
+  } else if (n > 1_000) {
+    return `${(n / 1000.0).toPrecision()}k`;
+  }
+
+  return n.toString();
+};
+
+
 const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, content, date }) => {
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
