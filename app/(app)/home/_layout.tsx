@@ -7,7 +7,6 @@ const window = Dimensions.get("window");
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		marginTop: 20,
 		flexDirection: "column",
 	},
 	header: {

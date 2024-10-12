@@ -6,7 +6,6 @@ import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -24,8 +23,8 @@ import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 const axios = require('axios').default;
 const window = Dimensions.get('screen');
 var newTwits: TwitSnap[] | null = null;
-const intervalMinutes = 10 * 60 * 1000;
-// const intervalMinutes = 10 * 1000;
+// const intervalMinutes = 10 * 60 * 1000;
+const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -78,7 +77,6 @@ export default function FeedScreen() {
       {
         text: 'For you',
         handler: async (twits: TwitSnap[] | null, feedType: string) => {
-          saveTwits(twits, feedType);
           initFeed();
           actualFeedType.current = 'For you';
         },
@@ -87,7 +85,6 @@ export default function FeedScreen() {
       {
         text: 'Following',
         handler: async (twits: TwitSnap[] | null, feedType: string) => {
-          saveTwits(twits, feedType);
           initFollowsFeed();
           actualFeedType.current = 'Following';
         },
@@ -98,49 +95,8 @@ export default function FeedScreen() {
     feedType: actualFeedType.current
   };
 
-  const loadSavedTwits = async (key: string): Promise<boolean> => {
-    const savedTwits: string | null = await AsyncStorage.getItem(key);
-
-    if (savedTwits) {
-      const parsedTwits = JSON.parse(savedTwits);
-      twitsRef.current = parsedTwits;
-      setTweets(parsedTwits);
-      return true;
-    }
-
-    return false;
-  };
-
-  const saveTwits = async (toSaveTwits: TwitSnap[] | null, feedType: string): Promise<void> => {
-    if (!toSaveTwits || toSaveTwits.length === 0) {
-      return;
-    }
-
-    const slicedTwits = toSaveTwits.slice(0, 100);
-    if (!slicedTwits) {
-      return;
-    }
-
-    const parsedTwits = JSON.stringify(slicedTwits);
-
-    await AsyncStorage.setItem(
-      `twits${feedType
-        .split(' ')
-        .map((str) => `${str[0].toUpperCase()}${str.slice(1)}`) // Capitalize
-        .join('')}`,
-      parsedTwits
-    );
-
-    setTweets(null);
-  };
-
   const initFeed = async () => {
     if (tweets) {
-      return;
-    }
-
-    if (await loadSavedTwits('twitsForYou')) {
-      refreshTweets(twitsRef.current, true);
       return;
     }
 
@@ -149,16 +105,13 @@ export default function FeedScreen() {
     };
 
     const fetchedTweets = await fetchTweets(params);
+    twitsRef.current = fetchedTweets;
+    console.log(fetchedTweets)
     setTweets(fetchedTweets);
   };
 
   const initFollowsFeed = async () => {
     if (tweets) {
-      return;
-    }
-
-    if (await loadSavedTwits('twitsFollowing')) {
-      refreshTweets(twitsRef.current, true);
       return;
     }
 
@@ -168,6 +121,7 @@ export default function FeedScreen() {
 
     // const fetchedTweets = await fetchTweets(params, 'by_users');
     // setTweets(fetchedTweets);
+    // twitsRef.current = fetchedTweets;
     setTweets([]);
   };
 
@@ -178,6 +132,7 @@ export default function FeedScreen() {
     }
 
     console.log(twits.length);
+    console.log(twits[0] ? twits[0].content : undefined);
 
     const params = {
       createdAt: twits[0] ? twits[0].createdAt : undefined,
@@ -196,6 +151,8 @@ export default function FeedScreen() {
     if (!tweets) {
       return;
     }
+
+    console.log("por alguna razon entre aca")
 
     const params = {
       createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,
@@ -265,7 +222,6 @@ export default function FeedScreen() {
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState.match(/inactive|background/)) {
         console.log('App will go into ', nextAppState, ' state and save current tweets');
-        saveTwits(twitsRef.current, actualFeedType.current);
       }
     });
     initFeed();

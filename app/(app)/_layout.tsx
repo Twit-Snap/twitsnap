@@ -16,13 +16,16 @@ export default function RootLayout() {
   const showTabs = useAtomValue(showTabsAtom);
 
   return (
-    <Tabs>
+    <TabssceneContainerStyle={{backgroundColor: "rgb(5 5 5)"}}>
       <Tabs.Screen
         name="home"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+            <Ionicons
+              name="home-outline"
+              size={size}
+              color={color} />
           ),
           header: () => <></>,
           tabBarHideOnKeyboard: true,
