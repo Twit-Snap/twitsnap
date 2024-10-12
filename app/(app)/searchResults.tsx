@@ -84,39 +84,86 @@ export default function SearchResultsScreen() {
     fetchTweets();
   }, [query]);
 
-    return (
-        <View style={styles.container}>
-            <Appbar.Header style={{ backgroundColor: 'rgb(0 0 0)' } }>
-                <Appbar.BackAction onPress={() => router.push("/home")} color="rgb(255 255 255)" />
-            </Appbar.Header>
-            <Text style={styles.header}> Tweets with {hashtag} </Text>
-            <FlatList
-                data={tweets}
-                renderItem={({ item }) => (
-                    <TweetCard
-                        profileImage={''}
-                        name={item.user.name}
-                        username={item.user.username}
-                        content={item.content}
-                        date={item.createdAt}
-                    />
-                )}
-                keyExtractor={(item) => item.id}
-            />
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <Appbar.Header style={{ backgroundColor: 'rgb(5 5 5)' }}>
+        <Appbar.BackAction onPress={() => router.push('/home')} color="rgb(255 255 255)" />
+      </Appbar.Header>
+      <Text style={styles.header}> Tweets with {query} </Text>
+      {tweets ? (
+        tweets.length > 0 ? (
+          <FlatList
+            data={tweets}
+            renderItem={({ item }) => (
+              <TweetCard
+                profileImage={''}
+                name={item.user.name}
+                username={item.user.username}
+                content={item.content}
+                date={item.createdAt}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        ) : (
+          <View style={styles.error_container}>
+            <Text
+              numberOfLines={6}
+              ellipsizeMode="tail"
+              style={styles.error_label}
+            >{`No results for "${query}"`}</Text>
+            <Text style={styles.error_label_aux}>Try searching for something else</Text>
+          </View>
+        )
+      ) : (
+        <ActivityIndicator
+          animating={true}
+          color={'rgb(3, 165, 252)'}
+          size={60}
+          style={{ alignSelf: 'center' }}
+        />
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 10,
-        backgroundColor: 'rgb(5 5 5)',
-    },
-    header: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: 'rgb(255 255 255)',
-    },
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: 'rgb(5 5 5)'
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: 'rgb(255 255 255)'
+  },
+  error_label: {
+    color: 'rgb(255 255 255)',
+    fontSize: 30,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    textAlign: 'left',
+    textAlignVertical: 'center',
+    width: '100%'
+  },
+  error_label_aux: {
+    color: 'rgb(120 120 120)',
+    fontSize: 16,
+    alignSelf: 'center',
+    textAlign: 'left',
+    textAlignVertical: 'center',
+    width: '100%',
+    marginTop: 3
+  },
+  error_container: {
+    justifyContent: 'center',
+    alignContent: 'center',
+    flex: 1,
+    height: '100%',
+    maxWidth: window.width,
+    flexDirection: 'column',
+    marginHorizontal: 25
+  }
 });
