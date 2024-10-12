@@ -106,7 +106,7 @@ export default function FeedScreen() {
 
     const fetchedTweets = await fetchTweets(params);
     twitsRef.current = fetchedTweets;
-    console.log(fetchedTweets)
+    console.log(fetchedTweets);
     setTweets(fetchedTweets);
   };
 
@@ -152,7 +152,7 @@ export default function FeedScreen() {
       return;
     }
 
-    console.log("por alguna razon entre aca")
+    console.log('por alguna razon entre aca');
 
     const params = {
       createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,
@@ -288,6 +288,7 @@ export default function FeedScreen() {
                   return (
                     <TweetCard
                       profileImage={''}
+                      id={item.id}
                       name={item.user.name}
                       username={item.user.username}
                       content={item.content}

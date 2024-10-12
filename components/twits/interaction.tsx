@@ -20,7 +20,10 @@ export interface InteractionProps {
   icon_alt_color?: string;
   initState: boolean;
   count: number;
-  handler: (state: boolean) => void;
+  handler: (
+    state: boolean,
+    setState: React.Dispatch<React.SetStateAction<boolean>>
+  ) => Promise<boolean>;
 }
 
 export default function Interaction({
@@ -36,9 +39,8 @@ export default function Interaction({
   return (
     <TouchableOpacity
       style={{ flex: 1, flexDirection: 'row' }}
-      onPress={() => {
-        handler(state);
-        setState(!state);
+      onPress={async () => {
+        setState(await handler(state, setState));
       }}
     >
       <IconButton

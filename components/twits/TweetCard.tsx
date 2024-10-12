@@ -1,5 +1,8 @@
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import axios from 'axios';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { router } from 'expo-router';
+import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Interaction from './interaction';
@@ -9,6 +12,7 @@ const default_images = {
 };
 
 interface TweetCardProps {
+  id: string;
   profileImage: string; // URL to the image
   name: string;
   username: string;
@@ -16,7 +20,16 @@ interface TweetCardProps {
   date: string;
 }
 
-const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, content, date }) => {
+const TweetCard: React.FC<TweetCardProps> = ({
+  id,
+  profileImage,
+  name,
+  username,
+  content,
+  date
+}) => {
+  const userData = useAtomValue(authenticatedAtom);
+
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
     const now = new Date();
@@ -82,7 +95,10 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
               icon="comment-outline"
               initState={false}
               count={1_023_002_230}
-              handler={(state: boolean) => console.log('asd')}
+              handler={async (state: boolean) => {
+                console.log('asd');
+                return true;
+              }}
             />
             <Interaction
               icon="repeat-off"
@@ -90,7 +106,10 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
               icon_alt_color="rgb(47, 204, 110  )"
               initState={false}
               count={1_023_203}
-              handler={(state: boolean) => console.log('asd')}
+              handler={async (state: boolean) => {
+                console.log('asd');
+                return true;
+              }}
             />
             <Interaction
               icon="heart-outline"
@@ -98,7 +117,42 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
               icon_alt_color="rgb(255, 79, 56)"
               initState={false}
               count={1_023}
-              handler={(state: boolean) => console.log('asd')}
+              handler={async (state: boolean): Promise<boolean> => {
+                return state
+                  ? await axios
+                      .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
+                        data: {
+                          userId: userData?.id,
+                          twitId: id
+                        },
+                        headers: {
+                          'Content-Type': 'application/json'
+                        }
+                      })
+                      .then((response) => !state)
+                      .catch((error) => {
+                        console.error(error);
+                        return state;
+                      })
+                  : await axios
+                      .post(
+                        `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
+                        {
+                          userId: userData?.id,
+                          twitId: id
+                        },
+                        {
+                          headers: {
+                            'Content-Type': 'application/json'
+                          }
+                        }
+                      )
+                      .then((response) => !state)
+                      .catch((error) => {
+                        console.error(error);
+                        return state;
+                      });
+              }}
             />
           </View>
         </View>
