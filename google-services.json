@@ -12,7 +12,20 @@
           "package_name": "com.lescalante14.twitsnap"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "224360780470-ulvd0i89ev1oo30g7huciroif7k6fouq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lescalante14.twitsnap",
+            "certificate_hash": "058da1b5326966fd1ea094fab1a98a27ccb5a6e4"
+          }
+        },
+        {
+          "client_id": "224360780470-maj4ma0cdjlm1o2376lv28m45rvm2e8e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAi70bL19-ZNS0OMOoxNS0kuoOtvflgrSA"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224360780470-maj4ma0cdjlm1o2376lv28m45rvm2e8e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

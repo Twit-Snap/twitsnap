@@ -1,16 +1,26 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+  User
+} from '@react-native-google-signin/google-signin';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
 
 import { authenticatedAtom } from './authAtoms/authAtom';
 
+GoogleSignin.configure();
 const window = Dimensions.get('window');
 
 export default function FrontPage() {
   const [auth, setAuth] = useAtom(authenticatedAtom);
+  const [googleAuth, setGoogleAuth] = useState<{ userInfo: User } | undefined>();
 
   useEffect(() => {
     const loadAuth = async () => {
@@ -28,6 +38,35 @@ export default function FrontPage() {
 
     loadAuth();
   }, [auth, setAuth]);
+
+  // Somewhere in your code
+  const handleGoogleSignIn = useCallback(async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      if (isSuccessResponse(response)) {
+        setGoogleAuth({ userInfo: response.data });
+      } else {
+        // sign in was cancelled by user
+      }
+    } catch (error) {
+      console.error(JSON.stringify(error, null, 2));
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            // operation (eg. sign in) already in progress
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            // Android only, play services not available or outdated
+            break;
+          default:
+          // some other error happened
+        }
+      } else {
+        // an error that's not related to google sign in occurred
+      }
+    }
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -89,18 +128,15 @@ export default function FrontPage() {
         <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>
           Or continue with
         </Text>
-        <Button
-          icon="google"
-          mode="contained"
-          buttonColor={'#DB4437'}
-          style={styles.buttonContent}
+        <GoogleSigninButton
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
           onPress={() => {
-            // call Google sign-in API
-            console.log('Google sign-in');
+            handleGoogleSignIn();
+            // initiate sign in
           }}
-        >
-          Continue with Google
-        </Button>
+          // disabled={isInProgress}
+        />
       </View>
     </View>
   );
