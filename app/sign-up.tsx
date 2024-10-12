@@ -1,11 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { useAtom } from 'jotai';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
-
-import { authenticatedAtom } from './authAtoms/authAtom';
 
 const axios = require('axios').default;
 
@@ -20,8 +17,6 @@ interface SignUpForm {
 }
 
 const SignUp: () => React.JSX.Element = () => {
-  const [, setIsAuthenticated] = useAtom(authenticatedAtom);
-
   const [form, setForm] = useState<SignUpForm>({
     name: '',
     lastname: '',
@@ -65,11 +60,11 @@ const SignUp: () => React.JSX.Element = () => {
           console.log('invalid email: ', form.email);
           alert('Error! Invalid email.');
         } else {
-          console.log('Register failed: ', error.response.data);
+          console.log('Register failed: ', JSON.stringify(error.response.data, null, 2));
           alert('Invalid username or password');
         }
       } else {
-        console.error('Error:', error);
+        console.error('Error:', JSON.stringify(error, null, 2));
         alert('Error! Some fields are missing or have incorrect format.');
       }
     }
