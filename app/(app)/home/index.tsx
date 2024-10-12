@@ -23,8 +23,8 @@ import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 const axios = require('axios').default;
 const window = Dimensions.get('screen');
 var newTwits: TwitSnap[] | null = null;
-// const intervalMinutes = 10 * 60 * 1000;
-const intervalMinutes = 10 * 1000;
+const intervalMinutes = 10 * 60 * 1000;
+//const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -101,6 +101,8 @@ export default function FeedScreen() {
     }
 
     const params = {
+      username: userData?.username,
+      rank: true,
       limit: 20
     };
 
@@ -137,10 +139,12 @@ export default function FeedScreen() {
     const params = {
       createdAt: twits[0] ? twits[0].createdAt : undefined,
       older: false,
+      username: userData?.username,
+      rank: true,
       limit: 100
     };
 
-    newTwits = await fetchTweets(params, actualFeedType.current === 'Following' ? 'by_users' : '');
+    newTwits = await fetchTweets(params);
     if (newTwits.length > 0) {
       // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
       setNeedRefresh(true);
@@ -161,8 +165,7 @@ export default function FeedScreen() {
     };
 
     const olderTwits: TwitSnap[] = await fetchTweets(
-      params,
-      actualFeedType.current === 'Following' ? 'by_users' : ''
+      params
     );
 
     if (olderTwits.length === 0) {
@@ -180,12 +183,11 @@ export default function FeedScreen() {
   };
 
   const fetchTweets = async (
-    queryParams: object | undefined = undefined,
-    url: string = ''
+    queryParams: object | undefined = undefined
   ): Promise<TwitSnap[]> => {
     let tweets: TwitSnap[] = [];
     try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${url}`, {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
         params: queryParams
       });
       tweets = response.data.data;
