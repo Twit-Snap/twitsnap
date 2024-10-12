@@ -1,11 +1,19 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import {Searchbar} from 'react-native-paper';
-import { router } from 'expo-router';
 import TrendingHashtagChip from '@/components/hashtags/TrendingHashtagChip';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Searchbar } from 'react-native-paper';
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSubmit = () => {
+    if (searchQuery.length > 0) {
+      router.push({ pathname: `/searchResults`, params: { query: searchQuery } });
+      setSearchQuery('')
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Searchbar
@@ -15,24 +23,16 @@ export default function SearchScreen() {
         value={searchQuery}
         style={styles.searchbar}
         inputStyle={{ color: 'white' }}
+        maxLength={80}
         iconColor="white"
-        onIconPress={() => {
-                if (searchQuery[0] === '#' && searchQuery.length > 1) {
-                    router.push({pathname: `/searchResults`, params: {hashtag: searchQuery}});
-                }
-            }
-        }
-        onSubmitEditing={() => {
-            if (searchQuery[0] === '#' && searchQuery.length > 1) {
-                router.push({pathname: `/searchResults`, params: {hashtag: searchQuery}});
-            }
-        }}
+        onIconPress={handleSubmit}
+        onSubmitEditing={handleSubmit}
       />
       <Text style={styles.trendingText}>Trending now</Text>
       <View style={styles.chipsContainer}>
-        <TrendingHashtagChip trendingHashtag={"#Futbol"}/>
-        <TrendingHashtagChip trendingHashtag={"#Messi"}/>
-        <TrendingHashtagChip trendingHashtag={"#Test"}/>
+        <TrendingHashtagChip trendingHashtag={'#Futbol'} />
+        <TrendingHashtagChip trendingHashtag={'#Messi'} />
+        <TrendingHashtagChip trendingHashtag={'#Test'} />
       </View>
     </View>
   );
@@ -41,7 +41,7 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 25,
+    marginTop: 35,
     padding: 10,
     backgroundColor: 'rgb(5 5 5)'
   },
@@ -58,5 +58,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginVertical: 10
-  },
+  }
 });
