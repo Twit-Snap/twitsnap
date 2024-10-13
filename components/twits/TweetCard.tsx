@@ -1,33 +1,22 @@
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { TwitSnap } from '@/app/types/TwitSnap';
 import axios from 'axios';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Interaction from './interaction';
+import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
 };
 
 interface TweetCardProps {
-  id: string;
-  profileImage: string; // URL to the image
-  name: string;
-  username: string;
-  content: string;
-  date: string;
+  item: TwitSnap;
 }
 
-const TweetCard: React.FC<TweetCardProps> = ({
-  id,
-  profileImage,
-  name,
-  username,
-  content,
-  date
-}) => {
+const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const userData = useAtomValue(authenticatedAtom);
 
   const formatDate = (dateString: string): string => {
@@ -75,29 +64,31 @@ const TweetCard: React.FC<TweetCardProps> = ({
     <TouchableOpacity style={styles.container} activeOpacity={0.4}>
       <>
         <Image
-          source={profileImage ? { uri: profileImage } : default_images.default_profile_picture}
+          source={
+            item.profileImage ? { uri: item.profileImage } : default_images.default_profile_picture
+          }
           style={styles.profileImage}
         />
         <View style={{ flex: 1, flexDirection: 'column' }}>
           <View style={styles.contentContainer}>
             <Text style={styles.name}>
-              {name}{' '}
+              {item.user.name}{' '}
               <Text style={styles.username}>
-                @{username}
+                @{item.user.username}
                 <Text style={styles.dot}>{' - '}</Text>
-                <Text style={styles.date}>{formatDate(date)}</Text>
+                <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
               </Text>
             </Text>
-            <Text style={styles.content}>{renderContent(content)}</Text>
+            <Text style={styles.content}>{renderContent(item.content)}</Text>
           </View>
           <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
             <Interaction
               icon="comment-outline"
               initState={false}
-              count={1_023_002_230}
-              handler={async (state: boolean) => {
+              initCount={1_023_002_230}
+              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
                 console.log('asd');
-                return true;
+                return { state: true, count: 0 };
               }}
             />
             <Interaction
@@ -105,53 +96,59 @@ const TweetCard: React.FC<TweetCardProps> = ({
               icon_alt="repeat"
               icon_alt_color="rgb(47, 204, 110  )"
               initState={false}
-              count={1_023_203}
-              handler={async (state: boolean) => {
+              initCount={1_023_203}
+              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
                 console.log('asd');
-                return true;
+                return { state: true, count: 0 };
               }}
             />
             <Interaction
               icon="heart-outline"
               icon_alt="heart"
               icon_alt_color="rgb(255, 79, 56)"
-              initState={false}
-              count={1_023}
-              handler={async (state: boolean): Promise<boolean> => {
+              initState={item.userLiked}
+              initCount={item.likesCount}
+              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
                 return state
-                  ? await axios
-                      .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
-                        data: {
-                          userId: userData?.id,
-                          twitId: id
-                        },
-                        headers: {
-                          'Content-Type': 'application/json'
-                        }
-                      })
-                      .then((response) => !state)
-                      .catch((error) => {
-                        console.error(error);
-                        return state;
-                      })
-                  : await axios
-                      .post(
-                        `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
-                        {
-                          userId: userData?.id,
-                          twitId: id
-                        },
-                        {
+                  ? {
+                      state: await axios
+                        .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
+                          data: {
+                            twitId: item.id
+                          },
                           headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${userData?.token}`
                           }
-                        }
-                      )
-                      .then((response) => !state)
-                      .catch((error) => {
-                        console.error(error);
-                        return state;
-                      });
+                        })
+                        .then((response) => !state)
+                        .catch((error) => {
+                          console.error(error);
+                          return state;
+                        }),
+                      count: count - 1
+                    }
+                  : {
+                      state: await axios
+                        .post(
+                          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
+                          {
+                            twitId: item.id
+                          },
+                          {
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${userData?.token}`
+                            }
+                          }
+                        )
+                        .then((response) => !state)
+                        .catch((error) => {
+                          console.error(error);
+                          return state;
+                        }),
+                      count: count + 1
+                    };
               }}
             />
           </View>

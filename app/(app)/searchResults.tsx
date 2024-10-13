@@ -2,9 +2,11 @@ import { TwitSnap, TwitUser } from '@/app/types/TwitSnap';
 import TweetCard from '@/components/twits/TweetCard';
 import removeDuplicates from '@/utils/removeDup';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useAtomValue } from 'jotai';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator, Appbar } from 'react-native-paper';
+import { authenticatedAtom } from '../authAtoms/authAtom';
 const axios = require('axios').default;
 const window = Dimensions.get('window');
 const parseQuery = (query: string): string => {
@@ -19,7 +21,7 @@ const parseQuery = (query: string): string => {
 
 export default function SearchResultsScreen() {
   const query = parseQuery(useLocalSearchParams<{ query: string }>().query);
-
+  const userData = useAtomValue(authenticatedAtom);
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
   const [users, setUsers] = useState<TwitUser[] | null>(null);
 
@@ -27,7 +29,10 @@ export default function SearchResultsScreen() {
     const fetchByHashtag = async (): Promise<TwitSnap[]> => {
       try {
         const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}hashtags/${query}`
+          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}hashtags/${query}`,
+          {
+            headers: { Authorization: `Bearer ${userData?.token}` }
+          }
         );
 
         console.log(`Fetched ${response.data.data.length} twits with "#${query}"`);
@@ -43,6 +48,7 @@ export default function SearchResultsScreen() {
     const fetchByText = async (): Promise<TwitSnap[]> => {
       try {
         const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
+          headers: { Authorization: `Bearer ${userData?.token}` },
           params: { has: query }
         });
 
@@ -61,6 +67,7 @@ export default function SearchResultsScreen() {
     const fetchUsers = async (): Promise<TwitUser[]> => {
       try {
         const response = await axios.get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}`, {
+          headers: { Authorization: `Bearer ${userData?.token}` },
           params: undefined
         });
         return response.data.data;
@@ -94,15 +101,7 @@ export default function SearchResultsScreen() {
         tweets.length > 0 ? (
           <FlatList
             data={tweets}
-            renderItem={({ item }) => (
-              <TweetCard
-                profileImage={''}
-                name={item.user.name}
-                username={item.user.username}
-                content={item.content}
-                date={item.createdAt}
-              />
-            )}
+            renderItem={({ item }) => <TweetCard item={item} />}
             keyExtractor={(item) => item.id}
           />
         ) : (

@@ -14,33 +14,38 @@ const parseInteractionCount = (n: number): string => {
   return n.toString();
 };
 
+export interface handlerReturn {
+  state: boolean;
+  count: number;
+}
+
 export interface InteractionProps {
   icon: string;
   icon_alt?: string;
   icon_alt_color?: string;
   initState: boolean;
-  count: number;
-  handler: (
-    state: boolean,
-    setState: React.Dispatch<React.SetStateAction<boolean>>
-  ) => Promise<boolean>;
+  initCount: number;
+  handler: (state: boolean, count: number) => Promise<handlerReturn>;
 }
 
 export default function Interaction({
   icon,
   initState,
-  count,
+  initCount,
   handler,
   icon_alt,
   icon_alt_color
 }: InteractionProps) {
   const [state, setState] = useState<boolean>(initState);
+  const [count, setCount] = useState<number>(initCount);
 
   return (
     <TouchableOpacity
       style={{ flex: 1, flexDirection: 'row' }}
       onPress={async () => {
-        setState(await handler(state, setState));
+        const ret = await handler(state, count);
+        setState(ret.state);
+        setCount(ret.count);
       }}
     >
       <IconButton

@@ -186,6 +186,7 @@ export default function FeedScreen() {
     let tweets: TwitSnap[] = [];
     try {
       const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${url}`, {
+        headers: { Authorization: `Bearer ${userData?.token}` },
         params: queryParams
       });
       tweets = response.data.data;
@@ -208,7 +209,10 @@ export default function FeedScreen() {
           content: tweetContent
         },
         {
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userData?.token}`
+          }
         }
       );
       console.log('Twit sent: ', response.data);
@@ -285,16 +289,7 @@ export default function FeedScreen() {
               <FlatList<TwitSnap>
                 data={tweets}
                 renderItem={({ item }) => {
-                  return (
-                    <TweetCard
-                      profileImage={''}
-                      id={item.id}
-                      name={item.user.name}
-                      username={item.user.username}
-                      content={item.content}
-                      date={item.createdAt}
-                    />
-                  );
+                  return <TweetCard item={item} />;
                 }}
                 keyExtractor={(item) => item.id}
                 scrollEnabled={false}
