@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import auth from '@react-native-firebase/auth';
 import {
   GoogleSignin,
   GoogleSigninButton,
@@ -15,41 +16,52 @@ import { Button } from 'react-native-paper';
 
 import { authenticatedAtom } from './authAtoms/authAtom';
 
-GoogleSignin.configure();
+GoogleSignin.configure({
+  webClientId: '224360780470-maj4ma0cdjlm1o2376lv28m45rvm2e8e.apps.googleusercontent.com'
+});
 const window = Dimensions.get('window');
 
 export default function FrontPage() {
-  const [auth, setAuth] = useAtom(authenticatedAtom);
+  const [authAtom, setAuthAtom] = useAtom(authenticatedAtom);
   const [googleAuth, setGoogleAuth] = useState<{ userInfo: User } | undefined>();
 
   useEffect(() => {
     const loadAuth = async () => {
-      if (!auth) {
+      if (!authAtom) {
         const session: string | null = await AsyncStorage.getItem('auth');
 
         if (!session) {
           return;
         }
 
-        setAuth(JSON.parse(session));
+        setAuthAtom(JSON.parse(session));
         router.replace('/');
       }
     };
 
     loadAuth();
-  }, [auth, setAuth]);
+  }, [authAtom, setAuthAtom]);
 
   // Somewhere in your code
   const handleGoogleSignIn = useCallback(async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
+
+      console.log('success', JSON.stringify(response, null, 2));
       if (isSuccessResponse(response)) {
         setGoogleAuth({ userInfo: response.data });
+        const idToken = response.data.idToken;
+        const credential = auth.GoogleAuthProvider.credential(idToken);
+        console.log('credential', JSON.stringify(credential, null, 2));
+        // const { accessToken } = await GoogleSignin.getTokens();
+        const userSignin = await auth().signInWithCredential(credential);
+        console.log('userSignin', JSON.stringify(userSignin, null, 2));
       } else {
         // sign in was cancelled by user
       }
     } catch (error) {
+      console.error(error);
       console.error(JSON.stringify(error, null, 2));
       if (isErrorWithCode(error)) {
         switch (error.code) {
@@ -137,6 +149,7 @@ export default function FrontPage() {
           }}
           // disabled={isInProgress}
         />
+        <Text>{googleAuth?.userInfo.user.email}</Text>
       </View>
     </View>
   );

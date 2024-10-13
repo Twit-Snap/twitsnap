@@ -1,0 +1,51 @@
+[
+  {
+    "additionalUserInfo": {
+      "providerId": "google.com",
+      "profile": {
+        "email_verified": true,
+        "picture": "https://lh3.googleusercontent.com/a/ACg8ocLQS08BetQ3WM1oLcqSIhR5ATwOpt7FIEE7vZEszWwEAL5dVr8=s96-c",
+        "name": "Luis Escalante",
+        "sub": "102604259162683047185",
+        "iss": "https://accounts.google.com",
+        "email": "lescalante@fi.uba.ar",
+        "iat": 1728788072,
+        "exp": 1728791672,
+        "azp": "224360780470-ulvd0i89ev1oo30g7huciroif7k6fouq.apps.googleusercontent.com",
+        "aud": "224360780470-maj4ma0cdjlm1o2376lv28m45rvm2e8e.apps.googleusercontent.com",
+        "family_name": "Escalante",
+        "hd": "fi.uba.ar",
+        "given_name": "Luis"
+      },
+      "isNewUser": true
+    },
+    "user": {
+      "multiFactor": {
+        "enrolledFactors": []
+      },
+      "metadata": {
+        "lastSignInTime": 1728789174073,
+        "creationTime": 1728789174073
+      },
+      "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocLQS08BetQ3WM1oLcqSIhR5ATwOpt7FIEE7vZEszWwEAL5dVr8=s96-c",
+      "phoneNumber": null,
+      "tenantId": null,
+      "displayName": "Luis Escalante",
+      "emailVerified": true,
+      "isAnonymous": false,
+      "uid": "lWSvjF5qGpeEMIjq810M21gDV0H3",
+      "email": "lescalante@fi.uba.ar",
+      "providerData": [
+        {
+          "email": "lescalante@fi.uba.ar",
+          "providerId": "google.com",
+          "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocLQS08BetQ3WM1oLcqSIhR5ATwOpt7FIEE7vZEszWwEAL5dVr8=s96-c",
+          "phoneNumber": null,
+          "displayName": "Luis Escalante",
+          "uid": "102604259162683047185"
+        }
+      ],
+      "providerId": "firebase"
+    }
+  }
+]
