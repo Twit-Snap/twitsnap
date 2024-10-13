@@ -58,14 +58,11 @@ export default function PublicProfileScreen() {
   // Cargar tweets, con soporte de paginación
   const fetchTweets = useCallback(
     async (olderTwits = false) => {
-      console.log('Fetching tweets before if...');
       if (!hasMoreTwits || !username) return;
-      console.log('Fetching tweets for:', username);
       const lastTwit = olderTwits ? twits[twits.length - 1] : undefined;
-      console.log('Last tweet to paginate from:', lastTwit);
       const queryParams = lastTwit
-        ? { createdAt: lastTwit.createdAt, older: true, limit: 5 }
-        : { limit: 5 };
+        ? { createdAt: lastTwit.createdAt, older: true, limit: 20 }
+        : { limit: 20 };
 
       try {
         setLoadingMore(true);
@@ -75,8 +72,6 @@ export default function PublicProfileScreen() {
           { params: queryParams }
         );
         const newTwits = response.data.data;
-        console.log('New tweets:', newTwits);
-        console.log('Amount of new tweets:', newTwits.length);
 
         if (newTwits.length === 0) {
           setHasMoreTwits(false);
@@ -99,8 +94,8 @@ export default function PublicProfileScreen() {
           setLoading(false);
           return;
         }
-        setTwits([]); // Reiniciar los tweets cuando cambia el usuario
-        setHasMoreTwits(true); // Permitir la paginación para el nuevo usuario
+        setTwits([]);
+        setHasMoreTwits(true);
 
         setLoading(true);
         await fetchUserData(userData.token);
@@ -119,7 +114,7 @@ export default function PublicProfileScreen() {
         nativeEvent.contentSize.height - 20 &&
       !loadingMore
     ) {
-      await fetchTweets(true); // Cargar más tweets cuando se llega al final
+      await fetchTweets(true);
     }
   };
 
