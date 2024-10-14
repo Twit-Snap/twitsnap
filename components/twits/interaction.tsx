@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   interaction_label: {
     color: 'rgb(120 120 120)',
     textAlign: 'left',
-    textAlignVertical: 'bottom',
+    textAlignVertical: 'center',
     flex: 1,
     alignContent: 'center',
     justifyContent: 'center',
