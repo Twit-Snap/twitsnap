@@ -2,7 +2,6 @@ import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
-  AppState,
   Dimensions,
   FlatList,
   Keyboard,
@@ -185,6 +184,7 @@ export default function FeedScreen() {
     let tweets: TwitSnap[] = [];
     try {
       const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${url}`, {
+        headers: { Authorization: `Bearer ${userData?.token}` },
         params: queryParams
       });
       tweets = response.data.data;
@@ -207,7 +207,10 @@ export default function FeedScreen() {
           content: tweetContent
         },
         {
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userData?.token}`
+          }
         }
       );
       console.log('Twit sent: ', response.data);
@@ -218,11 +221,6 @@ export default function FeedScreen() {
   };
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState.match(/inactive|background/)) {
-        console.log('App will go into ', nextAppState, ' state and save current tweets');
-      }
-    });
     initFeed();
 
     return () => {
@@ -230,7 +228,6 @@ export default function FeedScreen() {
       if (fetchInterval) {
         clearInterval(fetchInterval);
       }
-      subscription.remove();
     };
   }, [fetchInterval]);
 
@@ -284,15 +281,7 @@ export default function FeedScreen() {
               <FlatList<TwitSnap>
                 data={tweets}
                 renderItem={({ item }) => {
-                  return (
-                    <TweetCard
-                      profileImage={''}
-                      name={item.user.name}
-                      username={item.user.username}
-                      content={item.content}
-                      date={item.createdAt}
-                    />
-                  );
+                  return <TweetCard item={item} />;
                 }}
                 keyExtractor={(item) => item.id}
                 scrollEnabled={false}
