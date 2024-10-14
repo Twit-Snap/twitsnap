@@ -10,7 +10,6 @@ import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
-  AppState,
   Dimensions,
   FlatList,
   Keyboard,
@@ -223,11 +222,6 @@ export default function FeedScreen() {
   };
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState.match(/inactive|background/)) {
-        console.log('App will go into ', nextAppState, ' state and save current tweets');
-      }
-    });
     initFeed();
 
     return () => {
@@ -235,7 +229,6 @@ export default function FeedScreen() {
       if (fetchInterval) {
         clearInterval(fetchInterval);
       }
-      subscription.remove();
     };
   }, [fetchInterval]);
 
