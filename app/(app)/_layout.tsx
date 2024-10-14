@@ -60,7 +60,7 @@ export default function RootLayout() {
         }}
       />
       <Tabs.Screen
-        name="searchProfile"
+        name="searchProfile/[username]"
         options={{
           title: 'searchProfile',
           tabBarButton: () => null, // Hide the tab

@@ -17,7 +17,7 @@ import { TwitSnap } from '@/app/types/TwitSnap';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
 
-import { authenticatedAtom } from '../authAtoms/authAtom';
+import { authenticatedAtom } from '../../authAtoms/authAtom';
 
 export default function PublicProfileScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -35,6 +35,7 @@ export default function PublicProfileScreen() {
     async (token: string) => {
       try {
         setError(null);
+        console.log('fetchUserData', username);
         const response = await axios.get(
           `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}`,
           {
@@ -150,12 +151,7 @@ export default function PublicProfileScreen() {
             </>
           )}
           {twits.length > 0 ? (
-            twits.map((twit) => (
-              <TweetCard
-                item={twit}
-                key={twit.id}
-              />
-            ))
+            twits.map((twit) => <TweetCard item={twit} key={twit.id} />)
           ) : (
             <Text style={styles.noTwitsText}>No tweets available</Text>
           )}

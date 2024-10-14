@@ -2,7 +2,7 @@ import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import axios from 'axios';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -63,12 +63,21 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
   return (
     <TouchableOpacity style={styles.container} activeOpacity={0.4}>
       <>
-        <Image
-          source={
-            item.profileImage ? { uri: item.profileImage } : default_images.default_profile_picture
-          }
-          style={styles.profileImage}
-        />
+        <Link
+          href={{
+            pathname: '../searchProfile/[username]',
+            params: { username: item.user.username }
+          }}
+        >
+          <Image
+            source={
+              item.profileImage
+                ? { uri: item.profileImage }
+                : default_images.default_profile_picture
+            }
+            style={styles.profileImage}
+          />
+        </Link>
         <View style={{ flex: 1, flexDirection: 'column' }}>
           <View style={styles.contentContainer}>
             <Text style={styles.name}>

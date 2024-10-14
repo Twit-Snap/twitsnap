@@ -23,7 +23,6 @@ export default function SearchResultsScreen() {
   const query = parseQuery(useLocalSearchParams<{ query: string }>().query);
   const userData = useAtomValue(authenticatedAtom);
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
-  const [users, setUsers] = useState<TwitUser[] | null>(null);
 
   useEffect(() => {
     const fetchByHashtag = async (): Promise<TwitSnap[]> => {
