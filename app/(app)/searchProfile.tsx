@@ -61,16 +61,18 @@ export default function PublicProfileScreen() {
       if (!hasMoreTwits || !username) return;
       const lastTwit = olderTwits ? twits[twits.length - 1] : undefined;
       const queryParams = lastTwit
-        ? { createdAt: lastTwit.createdAt, older: true, limit: 20 }
-        : { limit: 20 };
+        ? { createdAt: lastTwit.createdAt, older: true, limit: 20, username: username }
+        : { limit: 20, username: username };
 
       try {
         setLoadingMore(true);
 
-        const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/by_username/${username}`,
-          { params: queryParams }
-        );
+        const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/`, {
+          params: queryParams,
+          headers: {
+            Authorization: `Bearer ${userData?.token}`
+          }
+        });
         const newTwits = response.data.data;
 
         if (newTwits.length === 0) {
@@ -150,12 +152,8 @@ export default function PublicProfileScreen() {
           {twits.length > 0 ? (
             twits.map((twit) => (
               <TweetCard
+                item={twit}
                 key={twit.id}
-                profileImage={/*twit.user.profileImage*/ ''}
-                name={twit.user.name}
-                username={twit.user.username}
-                content={twit.content}
-                date={twit.createdAt}
               />
             ))
           ) : (
