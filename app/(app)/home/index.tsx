@@ -38,7 +38,7 @@ export default function FeedScreen() {
 
   const [fetchInterval, setFetchInterval] = useAtom(feedRefreshIntervalAtom);
 
-  const actualFeedType = useRef<string>('For you');
+  const isActualFeedTypeFollowing = useRef<boolean>(false);
 
   var refreshProps: IFeedRefreshProps = {
     profileURLs: [],
@@ -77,7 +77,7 @@ export default function FeedScreen() {
         text: 'For you',
         handler: async () => {
           initFeed();
-          actualFeedType.current = 'For you';
+          isActualFeedTypeFollowing.current = false;
         },
         state: true
       },
@@ -85,7 +85,7 @@ export default function FeedScreen() {
         text: 'Following',
         handler: async () => {
           initFeed(true);
-          actualFeedType.current = 'Following';
+          isActualFeedTypeFollowing.current = true;
         },
         state: false
       }
@@ -121,7 +121,7 @@ export default function FeedScreen() {
       createdAt: twits[0] ? twits[0].createdAt : undefined,
       older: false,
       limit: 100,
-      byFollowed: actualFeedType.current === 'Following' ? true : false
+      byFollowed: isActualFeedTypeFollowing.current
     };
 
     newTwits = await fetchTweets(params);
@@ -142,7 +142,7 @@ export default function FeedScreen() {
       createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,
       older: true,
       limit: 20,
-      byFollowed: actualFeedType.current === 'Following' ? true : false
+      byFollowed: isActualFeedTypeFollowing.current
     };
 
     const olderTwits: TwitSnap[] = await fetchTweets(params);
