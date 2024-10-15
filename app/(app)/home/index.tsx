@@ -75,7 +75,7 @@ export default function FeedScreen() {
     items: [
       {
         text: 'For you',
-        handler: async (twits: TwitSnap[] | null, feedType: string) => {
+        handler: async () => {
           initFeed();
           actualFeedType.current = 'For you';
         },
@@ -83,24 +83,23 @@ export default function FeedScreen() {
       },
       {
         text: 'Following',
-        handler: async (twits: TwitSnap[] | null, feedType: string) => {
-          initFollowsFeed();
+        handler: async () => {
+          initFeed(true);
           actualFeedType.current = 'Following';
         },
         state: false
       }
-    ],
-    twits: twitsRef.current,
-    feedType: actualFeedType.current
+    ]
   };
 
-  const initFeed = async () => {
+  const initFeed = async (byFollowed: boolean = false) => {
     if (tweets) {
       return;
     }
 
     const params = {
-      limit: 20
+      limit: 20,
+      byFollowed: byFollowed
     };
 
     const fetchedTweets = await fetchTweets(params);
@@ -109,24 +108,9 @@ export default function FeedScreen() {
     setTweets(fetchedTweets);
   };
 
-  const initFollowsFeed = async () => {
-    if (tweets) {
-      return;
-    }
-
-    const params = {
-      limit: 20
-    };
-
-    // const fetchedTweets = await fetchTweets(params, 'by_users');
-    // setTweets(fetchedTweets);
-    // twitsRef.current = fetchedTweets;
-    setTweets([]);
-  };
-
-  const refreshTweets = async (twits: TwitSnap[], force: boolean = false): Promise<void> => {
+  const refreshTweets = async (twits: TwitSnap[]): Promise<void> => {
     console.log(`refresh!`);
-    if (!twits && !force) {
+    if (!twits) {
       return;
     }
 
@@ -136,10 +120,11 @@ export default function FeedScreen() {
     const params = {
       createdAt: twits[0] ? twits[0].createdAt : undefined,
       older: false,
-      limit: 100
+      limit: 100,
+      byFollowed: actualFeedType.current === 'Following' ? true : false
     };
 
-    newTwits = await fetchTweets(params, actualFeedType.current === 'Following' ? 'by_users' : '');
+    newTwits = await fetchTweets(params);
     if (newTwits.length > 0) {
       // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
       setNeedRefresh(true);
@@ -156,13 +141,11 @@ export default function FeedScreen() {
     const params = {
       createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,
       older: true,
-      limit: 20
+      limit: 20,
+      byFollowed: actualFeedType.current === 'Following' ? true : false
     };
 
-    const olderTwits: TwitSnap[] = await fetchTweets(
-      params,
-      actualFeedType.current === 'Following' ? 'by_users' : ''
-    );
+    const olderTwits: TwitSnap[] = await fetchTweets(params);
 
     if (olderTwits.length === 0) {
       return;
@@ -178,13 +161,10 @@ export default function FeedScreen() {
     });
   };
 
-  const fetchTweets = async (
-    queryParams: object | undefined = undefined,
-    url: string = ''
-  ): Promise<TwitSnap[]> => {
+  const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
     let tweets: TwitSnap[] = [];
     try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${url}`, {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
         headers: { Authorization: `Bearer ${userData?.token}` },
         params: queryParams
       });
