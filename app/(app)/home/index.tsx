@@ -137,11 +137,10 @@ export default function FeedScreen() {
   };
 
   const loadMoreTwits = async () => {
+    console.log('scroll refresh!');
     if (!tweets) {
       return;
     }
-
-    console.log('por alguna razon entre aca');
 
     const params = {
       createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,
@@ -206,13 +205,6 @@ export default function FeedScreen() {
 
   useEffect(() => {
     initFeed();
-
-    return () => {
-      // Anything in here is fired on component unmount.
-      if (fetchInterval) {
-        clearInterval(fetchInterval);
-      }
-    };
   }, [fetchInterval]);
 
   if (!fetchInterval && tweets) {
