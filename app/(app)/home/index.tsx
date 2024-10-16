@@ -71,11 +71,19 @@ export default function FeedScreen() {
     Keyboard.dismiss();
   };
 
+  const resetState = () => {
+    newTwits = null;
+          setTweets(null);
+          newerTwitRef.current = null;
+          setNeedRefresh(false);
+  }
+
   const feed: IFeedTypeProps = {
     items: [
       {
         text: 'For you',
         handler: async () => {
+          resetState()
           initFeed();
           isActualFeedTypeFollowing.current = false;
         },
@@ -84,6 +92,7 @@ export default function FeedScreen() {
       {
         text: 'Following',
         handler: async () => {
+          resetState()
           initFeed(true);
           isActualFeedTypeFollowing.current = true;
         },
