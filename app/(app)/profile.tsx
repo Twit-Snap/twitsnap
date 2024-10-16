@@ -9,7 +9,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Text,
-  NativeSyntheticEvent
+  NativeSyntheticEvent, NativeScrollEvent
 } from 'react-native';
 
 import { SearchedUser } from '@/app/types/publicUser';
