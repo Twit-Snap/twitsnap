@@ -85,6 +85,7 @@ export default function PublicProfileScreen() {
         console.error('Error fetching tweets:', error);
       } finally {
         setLoadingMore(false);
+        setLoading(false);
       }
     },
     [hasMoreTwits, twits, username]
@@ -97,9 +98,9 @@ export default function PublicProfileScreen() {
           setLoading(false);
           return;
         }
+
         setTwits([]);
         setHasMoreTwits(true);
-
         setLoading(true);
         await fetchUserData(userData.token);
         await fetchTweets();
