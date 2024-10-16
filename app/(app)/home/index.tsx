@@ -28,7 +28,7 @@ const intervalMinutes = 10 * 1000;
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
-  const twitsRef = useRef<TwitSnap[]>([]);
+  const newerTwitRef = useRef<TwitSnap | null>(null);
 
   const [animatedValue, setAnimatedValue] = useState(new Animated.Value(window.height));
   const [isExpanded, setIsExpanded] = useState(false);
@@ -50,7 +50,7 @@ export default function FeedScreen() {
 
         if (prev_twits && newTwits) {
           new_twits = [...newTwits, ...prev_twits];
-          twitsRef.current = new_twits;
+          newerTwitRef.current = new_twits[0];
           newTwits = null;
         }
 
@@ -103,22 +103,19 @@ export default function FeedScreen() {
     };
 
     const fetchedTweets = await fetchTweets(params);
-    twitsRef.current = fetchedTweets;
+    newerTwitRef.current = fetchedTweets[0];
     console.log(fetchedTweets);
     setTweets(fetchedTweets);
   };
 
-  const refreshTweets = async (twits: TwitSnap[]): Promise<void> => {
+  const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
     console.log(`refresh!`);
-    if (!twits) {
+    if (!newerTwit) {
       return;
     }
 
-    console.log(twits.length);
-    console.log(twits[0] ? twits[0].content : undefined);
-
     const params = {
-      createdAt: twits[0] ? twits[0].createdAt : undefined,
+      createdAt: newerTwit ? newerTwit.createdAt : undefined,
       older: false,
       limit: 100,
       byFollowed: isActualFeedTypeFollowing.current
@@ -156,7 +153,7 @@ export default function FeedScreen() {
         return olderTwits;
       }
       const ret = [...prev_twits, ...olderTwits];
-      twitsRef.current = ret;
+      newerTwitRef.current = ret[0];
       return ret;
     });
   };
@@ -213,7 +210,7 @@ export default function FeedScreen() {
   }, [fetchInterval]);
 
   if (!fetchInterval && tweets) {
-    setFetchInterval(setInterval(() => refreshTweets(twitsRef.current), intervalMinutes));
+    setFetchInterval(setInterval(() => refreshTweets(newerTwitRef.current), intervalMinutes));
   }
 
   return (
