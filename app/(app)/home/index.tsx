@@ -73,17 +73,17 @@ export default function FeedScreen() {
 
   const resetState = () => {
     newTwits = null;
-          setTweets(null);
-          newerTwitRef.current = null;
-          setNeedRefresh(false);
-  }
+    setTweets(null);
+    newerTwitRef.current = null;
+    setNeedRefresh(false);
+  };
 
   const feed: IFeedTypeProps = {
     items: [
       {
         text: 'For you',
         handler: async () => {
-          resetState()
+          resetState();
           initFeed();
           isActualFeedTypeFollowing.current = false;
         },
@@ -92,7 +92,7 @@ export default function FeedScreen() {
       {
         text: 'Following',
         handler: async () => {
-          resetState()
+          resetState();
           initFeed(true);
           isActualFeedTypeFollowing.current = true;
         },
@@ -113,7 +113,6 @@ export default function FeedScreen() {
 
     const fetchedTweets = await fetchTweets(params);
     newerTwitRef.current = fetchedTweets[0];
-    console.log(fetchedTweets);
     setTweets(fetchedTweets);
   };
 
@@ -161,9 +160,7 @@ export default function FeedScreen() {
       if (!prev_twits) {
         return olderTwits;
       }
-      const ret = [...prev_twits, ...olderTwits];
-      newerTwitRef.current = ret[0];
-      return ret;
+      return [...prev_twits, ...olderTwits];
     });
   };
 
@@ -228,12 +225,12 @@ export default function FeedScreen() {
       {needRefresh && <FeedRefresh {...refreshProps} />}
       <View style={styles.container}>
         <ScrollView
-          scrollEventThrottle={16}
+          scrollEventThrottle={250}
           onScroll={({ nativeEvent }) => {
             // User has reached the bottom?
             if (
               nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >=
-              nativeEvent.contentSize.height
+              nativeEvent.contentSize.height * 0.8
             ) {
               loadMoreTwits();
             }
