@@ -1,16 +1,7 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { TwitSnap } from '@/app/types/TwitSnap';
-import { feedRefreshIntervalAtom } from '@/atoms/feedRefreshInterval';
-import { showTabsAtom } from '@/atoms/showTabsAtom';
-import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
-import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
-import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
-import TweetCard from '@/components/twits/TweetCard';
 import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
-  AppState,
   Dimensions,
   FlatList,
   Keyboard,
@@ -20,18 +11,27 @@ import {
 } from 'react-native';
 import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { TwitSnap } from '@/app/types/TwitSnap';
+import { feedRefreshIntervalAtom } from '@/atoms/feedRefreshInterval';
+import { showTabsAtom } from '@/atoms/showTabsAtom';
+import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
+import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
+import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
+import TweetCard from '@/components/twits/TweetCard';
+
 const axios = require('axios').default;
 const window = Dimensions.get('screen');
-var newTwits: TwitSnap[] | null = null;
-const intervalMinutes = 10 * 60 * 1000;
-//const intervalMinutes = 10 * 1000;
+let newTwits: TwitSnap[] | null = null;
+// const intervalMinutes = 10 * 60 * 1000;
+const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
-  const twitsRef = useRef<TwitSnap[]>([]);
+  const newerTwitRef = useRef<TwitSnap | null>(null);
 
-  const [animatedValue, setAnimatedValue] = useState(new Animated.Value(window.height));
+  const [animatedValue] = useState(new Animated.Value(window.height));
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [showTabs, setShowTabs] = useAtom(showTabsAtom);
@@ -39,19 +39,19 @@ export default function FeedScreen() {
 
   const [fetchInterval, setFetchInterval] = useAtom(feedRefreshIntervalAtom);
 
-  const actualFeedType = useRef<string>('For you');
+  const isActualFeedTypeFollowing = useRef<boolean>(false);
 
-  var refreshProps: IFeedRefreshProps = {
+  const refreshProps: IFeedRefreshProps = {
     profileURLs: [],
     handler: () => {
       setNeedRefresh(false);
 
       setTweets((prev_twits) => {
-        var new_twits: TwitSnap[] = [];
+        let new_twits: TwitSnap[] = [];
 
         if (prev_twits && newTwits) {
           new_twits = [...newTwits, ...prev_twits];
-          twitsRef.current = new_twits;
+          newerTwitRef.current = new_twits[0];
           newTwits = null;
         }
 
@@ -66,36 +66,43 @@ export default function FeedScreen() {
       toValue: isExpanded ? window.height : 0, // Adjust the height as needed
       duration: 300, // Animation duration in milliseconds
       useNativeDriver: true
-    }).start(({ finished }) => {
+    }).start(() => {
       setIsExpanded(!isExpanded);
     });
     Keyboard.dismiss();
+  };
+
+  const resetState = () => {
+    newTwits = null;
+    setTweets(null);
+    newerTwitRef.current = null;
+    setNeedRefresh(false);
   };
 
   const feed: IFeedTypeProps = {
     items: [
       {
         text: 'For you',
-        handler: async (twits: TwitSnap[] | null, feedType: string) => {
+        handler: async () => {
+          resetState();
           initFeed();
-          actualFeedType.current = 'For you';
+          isActualFeedTypeFollowing.current = false;
         },
         state: true
       },
       {
         text: 'Following',
-        handler: async (twits: TwitSnap[] | null, feedType: string) => {
-          initFollowsFeed();
-          actualFeedType.current = 'Following';
+        handler: async () => {
+          resetState();
+          initFeed(true);
+          isActualFeedTypeFollowing.current = true;
         },
         state: false
       }
-    ],
-    twits: twitsRef.current,
-    feedType: actualFeedType.current
+    ]
   };
 
-  const initFeed = async () => {
+  const initFeed = async (byFollowed: boolean = false) => {
     if (tweets) {
       return;
     }
@@ -103,42 +110,25 @@ export default function FeedScreen() {
     const params = {
       username: userData?.username,
       rank: true,
-      limit: 20
+      limit: 20,
+      byFollowed: byFollowed
     };
 
     const fetchedTweets = await fetchTweets(params);
-    twitsRef.current = fetchedTweets;
-    console.log(fetchedTweets)
+    newerTwitRef.current = fetchedTweets[0];
     setTweets(fetchedTweets);
   };
 
-  const initFollowsFeed = async () => {
-    if (tweets) {
-      return;
-    }
-
-    const params = {
-      limit: 20
-    };
-
-    // const fetchedTweets = await fetchTweets(params, 'by_users');
-    // setTweets(fetchedTweets);
-    // twitsRef.current = fetchedTweets;
-    setTweets([]);
-  };
-
-  const refreshTweets = async (twits: TwitSnap[], force: boolean = false): Promise<void> => {
+  const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
     console.log(`refresh!`);
-    if (!twits && !force) {
+    if (!newerTwit) {
       return;
     }
 
-    console.log(twits.length);
-    console.log(twits[0] ? twits[0].content : undefined);
-
     const params = {
-      createdAt: twits[0] ? twits[0].createdAt : undefined,
+      createdAt: newerTwit ? newerTwit.createdAt : undefined,
       older: false,
+      byFollowed: isActualFeedTypeFollowing.current,
       username: userData?.username,
       rank: true,
       limit: 100
@@ -152,21 +142,19 @@ export default function FeedScreen() {
   };
 
   const loadMoreTwits = async () => {
+    console.log('scroll refresh!');
     if (!tweets) {
       return;
     }
 
-    console.log("por alguna razon entre aca")
-
     const params = {
       createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,
       older: true,
-      limit: 20
+      limit: 20,
+      byFollowed: isActualFeedTypeFollowing.current
     };
 
-    const olderTwits: TwitSnap[] = await fetchTweets(
-      params
-    );
+    const olderTwits: TwitSnap[] = await fetchTweets(params);
 
     if (olderTwits.length === 0) {
       return;
@@ -176,18 +164,15 @@ export default function FeedScreen() {
       if (!prev_twits) {
         return olderTwits;
       }
-      const ret = [...prev_twits, ...olderTwits];
-      twitsRef.current = ret;
-      return ret;
+      return [...prev_twits, ...olderTwits];
     });
   };
 
-  const fetchTweets = async (
-    queryParams: object | undefined = undefined
-  ): Promise<TwitSnap[]> => {
+  const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
     let tweets: TwitSnap[] = [];
     try {
       const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
+        headers: { Authorization: `Bearer ${userData?.token}` },
         params: queryParams
       });
       tweets = response.data.data;
@@ -210,7 +195,10 @@ export default function FeedScreen() {
           content: tweetContent
         },
         {
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userData?.token}`
+          }
         }
       );
       console.log('Twit sent: ', response.data);
@@ -221,24 +209,11 @@ export default function FeedScreen() {
   };
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState.match(/inactive|background/)) {
-        console.log('App will go into ', nextAppState, ' state and save current tweets');
-      }
-    });
     initFeed();
-
-    return () => {
-      // Anything in here is fired on component unmount.
-      if (fetchInterval) {
-        clearInterval(fetchInterval);
-      }
-      subscription.remove();
-    };
-  }, [fetchInterval]);
+  }, []);
 
   if (!fetchInterval && tweets) {
-    setFetchInterval(setInterval(() => refreshTweets(twitsRef.current), intervalMinutes));
+    setFetchInterval(setInterval(() => refreshTweets(newerTwitRef.current), intervalMinutes));
   }
 
   return (
@@ -247,12 +222,12 @@ export default function FeedScreen() {
       {needRefresh && <FeedRefresh {...refreshProps} />}
       <View style={styles.container}>
         <ScrollView
-          scrollEventThrottle={16}
+          scrollEventThrottle={250}
           onScroll={({ nativeEvent }) => {
             // User has reached the bottom?
             if (
               nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >=
-              nativeEvent.contentSize.height
+              nativeEvent.contentSize.height * 0.8
             ) {
               loadMoreTwits();
             }
@@ -287,15 +262,7 @@ export default function FeedScreen() {
               <FlatList<TwitSnap>
                 data={tweets}
                 renderItem={({ item }) => {
-                  return (
-                    <TweetCard
-                      profileImage={''}
-                      name={item.user.name}
-                      username={item.user.username}
-                      content={item.content}
-                      date={item.createdAt}
-                    />
-                  );
+                  return <TweetCard item={item} />;
                 }}
                 keyExtractor={(item) => item.id}
                 scrollEnabled={false}

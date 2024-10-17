@@ -3,4 +3,5 @@ export type UserAuth = {
   email: string;
   name: string;
   username: string;
+  token: string;
 };

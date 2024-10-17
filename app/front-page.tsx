@@ -4,6 +4,7 @@ import { useAtom } from 'jotai';
 import { useEffect } from 'react';
 import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 const window = Dimensions.get('window');

@@ -55,6 +55,7 @@ const SignUp: () => React.JSX.Element = () => {
       );
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
+        setIsAuthenticated(response.data);
         console.log('Register success: ', response.data);
         alert('Success Registering!');
         router.replace('/');
