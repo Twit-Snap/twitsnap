@@ -54,7 +54,7 @@ export default function Interaction({
         size={20}
         iconColor={icon_alt ? (state ? icon_alt_color : undefined) : undefined}
       />
-      <Text style={styles.interaction_label}>{parseInteractionCount(count)}</Text>
+      <Text style={styles.interaction_label}>{count ? parseInteractionCount(count) : 0}</Text>
     </TouchableOpacity>
   );
 }

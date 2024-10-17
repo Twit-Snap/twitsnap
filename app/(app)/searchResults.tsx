@@ -28,12 +28,10 @@ export default function SearchResultsScreen() {
   useEffect(() => {
     const fetchByHashtag = async (): Promise<TwitSnap[]> => {
       try {
-        const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}hashtags/${query}`,
-          {
-            headers: { Authorization: `Bearer ${userData?.token}` }
-          }
-        );
+        const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
+          headers: { Authorization: `Bearer ${userData?.token}` },
+          params: { hashtag: query }
+        });
 
         console.log(`Fetched ${response.data.data.length} twits with "#${query}"`);
 
