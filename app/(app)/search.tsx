@@ -1,7 +1,6 @@
-import TrendingHashtagChip from '@/components/hashtags/TrendingHashtagChip';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Searchbar } from 'react-native-paper';
 
 export default function SearchScreen() {
@@ -10,7 +9,7 @@ export default function SearchScreen() {
   const handleSubmit = () => {
     if (searchQuery.length > 0) {
       router.push({ pathname: `/searchResults`, params: { query: searchQuery } });
-      setSearchQuery('')
+      setSearchQuery('');
     }
   };
 
@@ -28,12 +27,12 @@ export default function SearchScreen() {
         onIconPress={handleSubmit}
         onSubmitEditing={handleSubmit}
       />
-      <Text style={styles.trendingText}>Trending now</Text>
+      {/* <Text style={styles.trendingText}>Trending now</Text>
       <View style={styles.chipsContainer}>
         <TrendingHashtagChip trendingHashtag={'#Futbol'} />
         <TrendingHashtagChip trendingHashtag={'#Messi'} />
         <TrendingHashtagChip trendingHashtag={'#Test'} />
-      </View>
+      </View> */}
     </View>
   );
 }

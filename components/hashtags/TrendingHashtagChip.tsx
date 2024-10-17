@@ -3,11 +3,11 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Chip } from 'react-native-paper';
 
-interface TrendingHashtagChip {
+interface ITrendingHashtagChip {
   trendingHashtag: string;
 }
 
-const TrendingHashtagChip: React.FC<TrendingHashtagChip> = ({ trendingHashtag }) => {
+const TrendingHashtagChip: React.FC<ITrendingHashtagChip> = ({ trendingHashtag }) => {
   return (
     <Chip
       style={[styles.chip, styles.chipLightBlack]}

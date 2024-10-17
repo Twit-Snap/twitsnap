@@ -88,7 +88,7 @@ export default function PublicProfileScreen() {
         setLoading(false);
       }
     },
-    [hasMoreTwits, twits, username]
+    [hasMoreTwits, twits, username, userData?.token]
   );
 
   useFocusEffect(

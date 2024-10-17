@@ -4,12 +4,13 @@ import { useFocusEffect } from 'expo-router';
 import { useAtom } from 'jotai';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
-  ActivityIndicator,
   Text,
-  NativeSyntheticEvent, NativeScrollEvent
+  View
 } from 'react-native';
 
 import { SearchedUser } from '@/app/types/publicUser';
@@ -19,9 +20,8 @@ import TweetCard from '@/components/twits/TweetCard';
 
 import { authenticatedAtom } from '../authAtoms/authAtom';
 
-
 export default function ProfileScreen() {
-  const [userData, setUserData] = useAtom(authenticatedAtom);
+  const [userData] = useAtom(authenticatedAtom);
 
   const [searchUserData, setSearchUserData] = useState<SearchedUser | null>(null);
   const [twits, setTwits] = useState<TwitSnap[]>([]);
@@ -108,7 +108,7 @@ export default function ProfileScreen() {
       };
 
       fetchTweetsOnFocus();
-    }, [userData])
+    }, [])
   );
 
   const handleScroll = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -152,12 +152,7 @@ export default function ProfileScreen() {
             </>
           )}
           {twits.length > 0 ? (
-            twits.map((twit) => (
-              <TweetCard
-                item={twit}
-                key={twit.id}
-              />
-            ))
+            twits.map((twit) => <TweetCard item={twit} key={twit.id} />)
           ) : (
             <Text style={styles.noTwitsText}>No tweets available</Text>
           )}
@@ -172,32 +167,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: 'rgb(5 5 5)',
+    backgroundColor: 'rgb(5 5 5)'
   },
   scrollViewContent: {
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgb(5 5 5)',
+    backgroundColor: 'rgb(5 5 5)'
   },
   errorText: {
     color: 'white',
     fontSize: 18,
     textAlign: 'center',
-    marginTop: 40,
+    marginTop: 40
   },
   divider: {
     height: 1,
     backgroundColor: 'gray',
-    marginVertical: 20,
+    marginVertical: 20
   },
   noTwitsText: {
     color: 'white',
     fontSize: 18,
     textAlign: 'center',
     marginTop: 40
-  },
+  }
 });

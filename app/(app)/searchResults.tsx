@@ -1,12 +1,15 @@
-import { TwitSnap, TwitUser } from '@/app/types/TwitSnap';
-import TweetCard from '@/components/twits/TweetCard';
-import removeDuplicates from '@/utils/removeDup';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator, Appbar } from 'react-native-paper';
+
+import { TwitSnap, TwitUser } from '@/app/types/TwitSnap';
+import TweetCard from '@/components/twits/TweetCard';
+import removeDuplicates from '@/utils/removeDup';
+
 import { authenticatedAtom } from '../authAtoms/authAtom';
+
 const axios = require('axios').default;
 const window = Dimensions.get('window');
 const parseQuery = (query: string): string => {
@@ -86,7 +89,7 @@ export default function SearchResultsScreen() {
     };
 
     fetchTweets();
-  }, [query]);
+  }, [query, userData?.token]);
 
   return (
     <View style={styles.container}>

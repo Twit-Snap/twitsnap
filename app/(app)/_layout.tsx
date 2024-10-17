@@ -8,12 +8,12 @@ import { authenticatedAtom } from '../authAtoms/authAtom';
 
 export default function RootLayout() {
   const [isAuthenticated] = useAtom(authenticatedAtom);
+  const showTabs = useAtomValue(showTabsAtom);
 
   if (!isAuthenticated) {
     return <Redirect href="/front-page" />;
   }
 
-  const showTabs = useAtomValue(showTabsAtom);
   return (
     <Tabs sceneContainerStyle={{ backgroundColor: 'rgb(5 5 5)' }}>
       <Tabs.Screen

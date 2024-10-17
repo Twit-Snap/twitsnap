@@ -1,11 +1,13 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { TwitSnap } from '@/app/types/TwitSnap';
 import axios from 'axios';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { Link, useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { TwitSnap } from '@/app/types/TwitSnap';
+
 import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {
@@ -62,7 +64,6 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
     );
   };
 
-
   const handleProfileClick = () => {
     const isOwnProfile = userData?.username === item.user.username;
     const currentRoute = segments.join('/');
@@ -70,7 +71,10 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
     const ownProfileRoute = '/profile';
     const publicProfileRoute = `../searchProfile/[username]`;
 
-    if ((isOwnProfile && currentRoute === ownProfileRoute) || (!isOwnProfile && currentRoute === `/searchProfile/${item.user.username}`)) {
+    if (
+      (isOwnProfile && currentRoute === ownProfileRoute) ||
+      (!isOwnProfile && currentRoute === `/searchProfile/${item.user.username}`)
+    ) {
       return;
     } else {
       if (isOwnProfile) {
@@ -149,7 +153,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
                             Authorization: `Bearer ${userData?.token}`
                           }
                         })
-                        .then((response) => !state)
+                        .then(() => !state)
                         .catch((error) => {
                           console.error(error);
                           return state;
@@ -170,7 +174,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
                             }
                           }
                         )
-                        .then((response) => !state)
+                        .then(() => !state)
                         .catch((error) => {
                           console.error(error);
                           return state;

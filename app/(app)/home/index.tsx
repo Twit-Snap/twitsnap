@@ -31,7 +31,7 @@ export default function FeedScreen() {
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
   const newerTwitRef = useRef<TwitSnap | null>(null);
 
-  const [animatedValue, setAnimatedValue] = useState(new Animated.Value(window.height));
+  const [animatedValue] = useState(new Animated.Value(window.height));
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [showTabs, setShowTabs] = useAtom(showTabsAtom);
@@ -66,7 +66,7 @@ export default function FeedScreen() {
       toValue: isExpanded ? window.height : 0, // Adjust the height as needed
       duration: 300, // Animation duration in milliseconds
       useNativeDriver: true
-    }).start(({ finished }) => {
+    }).start(() => {
       setIsExpanded(!isExpanded);
     });
     Keyboard.dismiss();
@@ -206,7 +206,7 @@ export default function FeedScreen() {
 
   useEffect(() => {
     initFeed();
-  }, [fetchInterval]);
+  }, []);
 
   if (!fetchInterval && tweets) {
     setFetchInterval(setInterval(() => refreshTweets(newerTwitRef.current), intervalMinutes));
