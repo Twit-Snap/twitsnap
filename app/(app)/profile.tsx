@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: 'gray',
-    marginVertical: 20
+    marginTop: 10
   },
   noTwitsText: {
     color: 'white',

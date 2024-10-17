@@ -3,6 +3,7 @@ import React from 'react';
 import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 
 import { SearchedUser } from '@/app/types/publicUser';
+import { Button } from 'react-native-paper';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -26,27 +27,47 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
   const formattedJoinDate = user.createdAt ? format(new Date(user.createdAt), 'MMMM yyyy') : null;
 
   return (
-    <View>
+    <>
       <Image
         source={bannerPhoto ? { uri: bannerPhoto } : default_images.bannerPhoto}
         style={styles.bannerPhoto}
       />
-      <View style={styles.profileHeader}>
-        <View style={styles.textContainer}>
-          <Image
-            source={profilePhoto ? { uri: profilePhoto } : default_images.profilePhoto}
-            style={styles.profilePhoto}
-          ></Image>
-          {user && <Text style={styles.name}>{user.name}</Text>}
-          {user && <Text style={styles.username}>@{user.username}</Text>}
-
-          {/* Birthday and Join Date */}
-          {formattedBirthdate && <Text style={styles.birthdate}>🎂 Born {formattedBirthdate}</Text>}
-          {formattedJoinDate && <Text style={styles.joinDate}>📅 Joined {formattedJoinDate}</Text>}
-        </View>
+      <Image
+        source={profilePhoto ? { uri: profilePhoto } : default_images.profilePhoto}
+        style={styles.profilePhoto}
+      />
+      <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
+        <Button
+          mode="contained"
+          compact={true}
+          // buttonColor={'rgb(5 5 5)'}
+          buttonColor={'rgb(255 255 255)'}
+          onPress={() => {}}
+          style={styles.button}
+          aria-disabled={true}
+          labelStyle={{
+            fontWeight: 'bold',
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            margin: 0,
+            // color: 'rgb(255 255 255)'
+            color: 'rgb(0 0 0)'
+          }}
+          contentStyle={{ height: 35, marginBottom: 2 }}
+        >
+          Follow
+        </Button>
       </View>
-      <Text style={styles.bio}>{bio}</Text>
-    </View>
+      <View style={styles.textContainer}>
+        {user && <Text style={styles.name}>{user.name}</Text>}
+        {user && <Text style={styles.username}>@{user.username}</Text>}
+
+        <Text style={styles.bio}>{bio}</Text>
+        {/* Birthday and Join Date */}
+        {formattedBirthdate && <Text style={styles.birthdate}>🎂 Born {formattedBirthdate}</Text>}
+        {formattedJoinDate && <Text style={styles.joinDate}>📅 Joined {formattedJoinDate}</Text>}
+      </View>
+    </>
   );
 };
 
@@ -54,27 +75,28 @@ const styles = StyleSheet.create({
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20
+    marginBottom: 80
   },
   bannerPhoto: {
-    height: windowHeight / 4,
+    minHeight: windowHeight / 6,
+    maxHeight: windowHeight / 6,
     width: windowWidth,
     resizeMode: 'cover'
   },
   profilePhoto: {
-    width: 160,
-    height: 160,
+    width: 80,
+    height: 80,
     borderRadius: 200,
     borderWidth: 3,
     borderColor: 'black',
-    top: -85,
-    left: 20
+    top: 100,
+    left: 10,
+    position: 'absolute'
   },
   name: {
     fontSize: 18,
     color: 'white',
     fontWeight: 'bold',
-    marginTop: -70,
     marginLeft: 5
   },
   username: {
@@ -86,21 +108,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
     lineHeight: 24,
-    marginBottom: 5
+    marginVertical: 5
   },
   textContainer: {
     flex: 1,
-    justifyContent: 'center'
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    flexDirection: 'column'
   },
   birthdate: {
     fontSize: 14,
-    color: '#939090',
-    marginTop: 23
+    color: '#939090'
   },
   joinDate: {
     fontSize: 14,
-    color: '#939090',
-    marginTop: 10
+    color: '#939090'
+  },
+  button: {
+    paddingHorizontal: 30,
+    marginRight: 11,
+    paddingTop: 0,
+    borderColor: "rgb(80 80 80)",
+    borderWidth: 1,
+    marginTop: 10,
   }
 });
 
