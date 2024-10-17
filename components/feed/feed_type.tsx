@@ -33,13 +33,11 @@ const styles = StyleSheet.create({
 export interface FeedTypeProp {
   text: string;
   state: boolean;
-  handler: (twits: TwitSnap[] | null, feedType: string) => Promise<void>;
+  handler: () => Promise<void>;
 }
 
 export interface IFeedTypeProps {
   items: FeedTypeProp[];
-  twits: TwitSnap[] | null;
-  feedType: string;
 }
 
 export default function FeedType(props: IFeedTypeProps) {
@@ -51,7 +49,7 @@ export default function FeedType(props: IFeedTypeProps) {
         if (this_item === item) {
           if (!item.state) {
             item.state = true;
-            item.handler(props.twits, props.feedType);
+            item.handler();
           }
           return item;
         }

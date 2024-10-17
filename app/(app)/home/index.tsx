@@ -29,7 +29,7 @@ const intervalMinutes = 10 * 1000;
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
-  const twitsRef = useRef<TwitSnap[]>([]);
+  const newerTwitRef = useRef<TwitSnap | null>(null);
 
   const [animatedValue, setAnimatedValue] = useState(new Animated.Value(window.height));
   const [isExpanded, setIsExpanded] = useState(false);
@@ -39,7 +39,7 @@ export default function FeedScreen() {
 
   const [fetchInterval, setFetchInterval] = useAtom(feedRefreshIntervalAtom);
 
-  const actualFeedType = useRef<string>('For you');
+  const isActualFeedTypeFollowing = useRef<boolean>(false);
 
   const refreshProps: IFeedRefreshProps = {
     profileURLs: [],
@@ -51,7 +51,7 @@ export default function FeedScreen() {
 
         if (prev_twits && newTwits) {
           new_twits = [...newTwits, ...prev_twits];
-          twitsRef.current = new_twits;
+          newerTwitRef.current = new_twits[0];
           newTwits = null;
         }
 
@@ -72,75 +72,65 @@ export default function FeedScreen() {
     Keyboard.dismiss();
   };
 
+  const resetState = () => {
+    newTwits = null;
+    setTweets(null);
+    newerTwitRef.current = null;
+    setNeedRefresh(false);
+  };
+
   const feed: IFeedTypeProps = {
     items: [
       {
         text: 'For you',
-        handler: async (twits: TwitSnap[] | null, feedType: string) => {
+        handler: async () => {
+          resetState();
           initFeed();
-          actualFeedType.current = 'For you';
+          isActualFeedTypeFollowing.current = false;
         },
         state: true
       },
       {
         text: 'Following',
-        handler: async (twits: TwitSnap[] | null, feedType: string) => {
-          initFollowsFeed();
-          actualFeedType.current = 'Following';
+        handler: async () => {
+          resetState();
+          initFeed(true);
+          isActualFeedTypeFollowing.current = true;
         },
         state: false
       }
-    ],
-    twits: twitsRef.current,
-    feedType: actualFeedType.current
+    ]
   };
 
-  const initFeed = async () => {
+  const initFeed = async (byFollowed: boolean = false) => {
     if (tweets) {
       return;
     }
 
     const params = {
-      limit: 20
+      limit: 20,
+      byFollowed: byFollowed
     };
 
     const fetchedTweets = await fetchTweets(params);
-    twitsRef.current = fetchedTweets;
-    console.log(fetchedTweets);
+    newerTwitRef.current = fetchedTweets[0];
     setTweets(fetchedTweets);
   };
 
-  const initFollowsFeed = async () => {
-    if (tweets) {
-      return;
-    }
-
-    const params = {
-      limit: 20
-    };
-
-    // const fetchedTweets = await fetchTweets(params, 'by_users');
-    // setTweets(fetchedTweets);
-    // twitsRef.current = fetchedTweets;
-    setTweets([]);
-  };
-
-  const refreshTweets = async (twits: TwitSnap[], force: boolean = false): Promise<void> => {
+  const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
     console.log(`refresh!`);
-    if (!twits && !force) {
+    if (!newerTwit) {
       return;
     }
 
-    console.log(twits.length);
-    console.log(twits[0] ? twits[0].content : undefined);
-
     const params = {
-      createdAt: twits[0] ? twits[0].createdAt : undefined,
+      createdAt: newerTwit ? newerTwit.createdAt : undefined,
       older: false,
-      limit: 100
+      limit: 100,
+      byFollowed: isActualFeedTypeFollowing.current
     };
 
-    newTwits = await fetchTweets(params, actualFeedType.current === 'Following' ? 'by_users' : '');
+    newTwits = await fetchTweets(params);
     if (newTwits.length > 0) {
       // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
       setNeedRefresh(true);
@@ -148,6 +138,7 @@ export default function FeedScreen() {
   };
 
   const loadMoreTwits = async () => {
+    console.log('scroll refresh!');
     if (!tweets) {
       return;
     }
@@ -155,13 +146,11 @@ export default function FeedScreen() {
     const params = {
       createdAt: tweets[tweets.length - 1] ? tweets[tweets.length - 1].createdAt : undefined,
       older: true,
-      limit: 20
+      limit: 20,
+      byFollowed: isActualFeedTypeFollowing.current
     };
 
-    const olderTwits: TwitSnap[] = await fetchTweets(
-      params,
-      actualFeedType.current === 'Following' ? 'by_users' : ''
-    );
+    const olderTwits: TwitSnap[] = await fetchTweets(params);
 
     if (olderTwits.length === 0) {
       return;
@@ -171,19 +160,14 @@ export default function FeedScreen() {
       if (!prev_twits) {
         return olderTwits;
       }
-      const ret = [...prev_twits, ...olderTwits];
-      twitsRef.current = ret;
-      return ret;
+      return [...prev_twits, ...olderTwits];
     });
   };
 
-  const fetchTweets = async (
-    queryParams: object | undefined = undefined,
-    url: string = ''
-  ): Promise<TwitSnap[]> => {
+  const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
     let tweets: TwitSnap[] = [];
     try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${url}`, {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
         headers: { Authorization: `Bearer ${userData?.token}` },
         params: queryParams
       });
@@ -222,17 +206,10 @@ export default function FeedScreen() {
 
   useEffect(() => {
     initFeed();
-
-    return () => {
-      // Anything in here is fired on component unmount.
-      if (fetchInterval) {
-        clearInterval(fetchInterval);
-      }
-    };
   }, [fetchInterval]);
 
   if (!fetchInterval && tweets) {
-    setFetchInterval(setInterval(() => refreshTweets(twitsRef.current), intervalMinutes));
+    setFetchInterval(setInterval(() => refreshTweets(newerTwitRef.current), intervalMinutes));
   }
 
   return (
@@ -241,12 +218,12 @@ export default function FeedScreen() {
       {needRefresh && <FeedRefresh {...refreshProps} />}
       <View style={styles.container}>
         <ScrollView
-          scrollEventThrottle={16}
+          scrollEventThrottle={250}
           onScroll={({ nativeEvent }) => {
             // User has reached the bottom?
             if (
               nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >=
-              nativeEvent.contentSize.height
+              nativeEvent.contentSize.height * 0.8
             ) {
               loadMoreTwits();
             }
