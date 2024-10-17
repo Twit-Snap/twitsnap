@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, FlatList, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator, Appbar } from 'react-native-paper';
 
 import { TwitSnap, TwitUser } from '@/app/types/TwitSnap';
@@ -129,8 +129,9 @@ export default function SearchResultsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: 'rgb(5 5 5)'
+    backgroundColor: 'rgb(5 5 5)',
+    marginTop: StatusBar.currentHeight ? -StatusBar.currentHeight : 0,
+    paddingHorizontal: 2
   },
   header: {
     fontSize: 20,

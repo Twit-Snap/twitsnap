@@ -166,7 +166,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: 'rgb(5 5 5)'
   },
   scrollViewContent: {

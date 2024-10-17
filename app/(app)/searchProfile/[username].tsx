@@ -1,15 +1,15 @@
 import axios from 'axios';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useAtom } from 'jotai';
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
-  ActivityIndicator,
   Text,
-  NativeScrollEvent,
-  NativeSyntheticEvent
+  View
 } from 'react-native';
 
 import { SearchedUser } from '@/app/types/publicUser';
@@ -166,7 +166,6 @@ export default function PublicProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: 'rgb(5 5 5)'
   },
   scrollViewContent: {

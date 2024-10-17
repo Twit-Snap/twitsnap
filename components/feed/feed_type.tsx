@@ -19,7 +19,8 @@ const styles = StyleSheet.create({
   feed_type_button: {
     height: window.height / 20,
     color: 'rgb(255, 255, 255)',
-    textAlign: 'center'
+    textAlign: 'center',
+    textAlignVertical: 'center'
   },
   feed_type_selected: {
     height: 1,

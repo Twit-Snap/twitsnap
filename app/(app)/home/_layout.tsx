@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column'
   },
   header: {
-    height: window.height / 10,
+    height: 50,
     width: window.width
   }
 });

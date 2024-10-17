@@ -4,6 +4,7 @@ import { useAtom, useAtomValue } from 'jotai';
 
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 
+import { StatusBar } from 'react-native';
 import { authenticatedAtom } from '../authAtoms/authAtom';
 
 export default function RootLayout() {
@@ -15,58 +16,59 @@ export default function RootLayout() {
   }
 
   return (
-    <Tabs sceneContainerStyle={{ backgroundColor: 'rgb(5 5 5)' }}>
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
-          header: () => <></>,
-          tabBarHideOnKeyboard: true,
-          tabBarStyle: { display: showTabs ? 'flex' : 'none' },
-          headerShown: false
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Search',
-          tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
-          tabBarHideOnKeyboard: true,
-          tabBarStyle: { display: showTabs ? 'flex' : 'none' },
-          headerShown: false
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
-          tabBarHideOnKeyboard: true,
-          tabBarStyle: { display: showTabs ? 'flex' : 'none' },
-          headerShown: false
-        }}
-      />
-      <Tabs.Screen
-        name="searchResults"
-        options={{
-          title: 'searchResults',
-          tabBarButton: () => null, // Hide the tab
-          header: () => <></>
-        }}
-      />
-      <Tabs.Screen
-        name="searchProfile/[username]"
-        options={{
-          title: 'searchProfile',
-          tabBarButton: () => null, // Hide the tab
-          header: () => <></>
-        }}
-      />
-    </Tabs>
+    <>
+      <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
+      <Tabs
+        sceneContainerStyle={{ backgroundColor: 'rgb(5 5 5)', paddingTop: StatusBar.currentHeight }}
+      >
+        <Tabs.Screen
+          name="home"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="home-outline" size={size} color={color} />
+            ),
+            header: () => <></>,
+            tabBarHideOnKeyboard: true,
+            tabBarStyle: { display: showTabs ? 'flex' : 'none' },
+            headerShown: false
+          }}
+        />
+        <Tabs.Screen
+          name="search"
+          options={{
+            title: 'Search',
+            tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
+            tabBarHideOnKeyboard: true,
+            tabBarStyle: { display: showTabs ? 'flex' : 'none' },
+            headerShown: false
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            tabBarButton: () => null, // Hide the tab
+            header: () => null,
+            headerShown: false
+          }}
+        />
+        <Tabs.Screen
+          name="searchResults"
+          options={{
+            tabBarButton: () => null, // Hide the tab
+            header: () => null,
+            headerShown: false
+          }}
+        />
+        <Tabs.Screen
+          name="searchProfile/[username]"
+          options={{
+            tabBarButton: () => null, // Hide the tab
+            header: () => null,
+            headerShown: false
+          }}
+        />
+      </Tabs>
+    </>
   );
 }
