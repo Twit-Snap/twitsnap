@@ -2,7 +2,7 @@ import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import axios from 'axios';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { router } from 'expo-router';
+import { Link, useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -18,6 +18,8 @@ interface TweetCardProps {
 
 const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const userData = useAtomValue(authenticatedAtom);
+  const router = useRouter(); // Obtener el objeto de router
+  const segments = useSegments(); // Obtener la ruta actual
 
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
@@ -60,15 +62,41 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
     );
   };
 
+
+  const handleProfileClick = () => {
+    const isOwnProfile = userData?.username === item.user.username;
+    const currentRoute = segments.join('/');
+
+    const ownProfileRoute = '/profile';
+    const publicProfileRoute = `../searchProfile/[username]`;
+
+    if ((isOwnProfile && currentRoute === ownProfileRoute) || (!isOwnProfile && currentRoute === `/searchProfile/${item.user.username}`)) {
+      return;
+    } else {
+      if (isOwnProfile) {
+        router.push(ownProfileRoute);
+      } else {
+        router.push({
+          pathname: publicProfileRoute,
+          params: { username: item.user.username }
+        });
+      }
+    }
+  };
+
   return (
     <TouchableOpacity style={styles.container} activeOpacity={0.4}>
       <>
-        <Image
-          source={
-            item.profileImage ? { uri: item.profileImage } : default_images.default_profile_picture
-          }
-          style={styles.profileImage}
-        />
+        <TouchableOpacity onPress={handleProfileClick}>
+          <Image
+            source={
+              item.profileImage
+                ? { uri: item.profileImage }
+                : default_images.default_profile_picture
+            }
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
         <View style={{ flex: 1, flexDirection: 'column' }}>
           <View style={styles.contentContainer}>
             <Text style={styles.name}>
