@@ -1,13 +1,14 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, FlatList, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { ActivityIndicator, Appbar } from 'react-native-paper';
+import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
 
 import { TwitSnap, TwitUser } from '@/app/types/TwitSnap';
 import TweetCard from '@/components/twits/TweetCard';
 import removeDuplicates from '@/utils/removeDup';
 
+import ListHeader from '@/components/common/listHeader';
 import { authenticatedAtom } from '../authAtoms/authAtom';
 
 const axios = require('axios').default;
@@ -95,11 +96,7 @@ export default function SearchResultsScreen() {
   }, [query, userData?.token]);
 
   return (
-    <View style={styles.container}>
-      <Appbar.Header style={{ backgroundColor: 'rgb(5 5 5)' }}>
-        <Appbar.BackAction onPress={() => router.push('/home')} color="rgb(255 255 255)" />
-      </Appbar.Header>
-      <Text style={styles.header}> Tweets with {query} </Text>
+    <ListHeader headerText={`Tweets with ${query}`}>
       {tweets ? (
         tweets.length > 0 ? (
           <FlatList
@@ -125,23 +122,11 @@ export default function SearchResultsScreen() {
           style={{ alignSelf: 'center' }}
         />
       )}
-    </View>
+    </ListHeader>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'rgb(5 5 5)',
-    marginTop: StatusBar.currentHeight ? -StatusBar.currentHeight : 0,
-    paddingHorizontal: 2
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: 'rgb(255 255 255)'
-  },
   error_label: {
     color: 'rgb(255 255 255)',
     fontSize: 30,
