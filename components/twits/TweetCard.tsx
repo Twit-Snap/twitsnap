@@ -70,7 +70,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
         <TouchableOpacity
           onPress={() =>
             router.push({
-              pathname: '../searchProfile/[username]',
+              pathname: '../profile/[username]',
               params: { username: item.user.username }
             })
           }

@@ -44,7 +44,7 @@ export default function HomeHeader() {
         <TouchableOpacity
           onPress={() =>
             router.push({
-              pathname: `/(app)/searchProfile/[username]`,
+              pathname: `/(app)/profile/[username]`,
               params: { username: userData?.username }
             })
           }

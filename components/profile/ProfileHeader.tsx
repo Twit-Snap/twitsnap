@@ -84,10 +84,12 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
       </View>
       <View style={{ flex: 1, flexDirection: 'row' }}>
         <TouchableOpacity
-          onPress={() => router.push({
-            pathname: `../searchProfile/[username]/showFollows`,
-            params: { username: user.username, byFollowers: 'false' }
-          })}
+          onPress={() =>
+            router.push({
+              pathname: `../profile/[username]/showFollows`,
+              params: { username: user.username, byFollowers: 'false' }
+            })
+          }
         >
           <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 10 }}>
             <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
@@ -97,10 +99,12 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-        onPress={() => router.push({
-          pathname: `../searchProfile/[username]/showFollows`,
-            params: { username: user.username, byFollowers: 'true' }
-          })}
+          onPress={() =>
+            router.push({
+              pathname: `../profile/[username]/showFollows`,
+              params: { username: user.username, byFollowers: 'true' }
+            })
+          }
         >
           <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 20 }}>
             <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>

@@ -49,14 +49,6 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="profile"
-          options={{
-            tabBarButton: () => null, // Hide the tab
-            header: () => null,
-            headerShown: false
-          }}
-        />
-        <Tabs.Screen
           name="searchResults"
           options={{
             tabBarButton: () => null, // Hide the tab
@@ -65,7 +57,7 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="searchProfile/[username]"
+          name="profile/[username]"
           options={{
             tabBarButton: () => null, // Hide the tab
             header: () => null,
@@ -73,7 +65,7 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="searchProfile/[username]/showFollows"
+          name="profile/[username]/showFollows"
           options={{
             tabBarButton: () => null, // Hide the tab
             header: () => null,
