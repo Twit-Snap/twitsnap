@@ -10,3 +10,11 @@ export interface SearchedUser {
   followingCount?: number;
   followersCount?: number;
 }
+
+export interface IReducedUser {
+  id: number;
+  name: string;
+  username: string;
+  description: string;
+  profileImage: string;
+}
