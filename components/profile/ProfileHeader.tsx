@@ -3,7 +3,8 @@ import React from 'react';
 import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 
 import { SearchedUser } from '@/app/types/publicUser';
-import { Button } from 'react-native-paper';
+import { router } from 'expo-router';
+import { Button, IconButton } from 'react-native-paper';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -46,10 +47,8 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
       />
       <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
         <Button
-          mode="contained"
           compact={true}
-          // buttonColor={'rgb(5 5 5)'}
-          buttonColor={'rgb(255 255 255)'}
+          buttonColor={user.following ? 'rgb(5 5 5)' : 'rgb(255 255 255)'}
           onPress={() => {}}
           style={styles.button}
           aria-disabled={true}
@@ -58,12 +57,11 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
             textAlign: 'center',
             textAlignVertical: 'center',
             margin: 0,
-            // color: 'rgb(255 255 255)'
-            color: 'rgb(0 0 0)'
+            color: user.following ? 'rgb(255 255 255)' : 'rgb(0 0 0)'
           }}
           contentStyle={{ height: 35, marginBottom: 2 }}
         >
-          Follow
+          {user.following ? 'Following' : 'Follow'}
         </Button>
       </View>
       <View style={styles.textContainer}>
@@ -74,6 +72,21 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
         {/* Birthday and Join Date */}
         {formattedBirthdate && <Text style={styles.birthdate}>🎂 Born {formattedBirthdate}</Text>}
         {formattedJoinDate && <Text style={styles.joinDate}>📅 Joined {formattedJoinDate}</Text>}
+      </View>
+      <View style={{ flex: 1, flexDirection: 'row' }}>
+        <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 10 }}>
+          <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
+            {user.followingCount}
+          </Text>
+          {'  Following'}
+        </Text>
+
+        <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 20 }}>
+          <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
+            {user.followersCount}
+          </Text>
+          {'  Followers'}
+        </Text>
       </View>
     </>
   );
@@ -102,15 +115,13 @@ const styles = StyleSheet.create({
     position: 'absolute'
   },
   name: {
-    fontSize: 18,
+    fontSize: 24,
     color: 'white',
-    fontWeight: 'bold',
-    marginLeft: 5
+    fontWeight: 'bold'
   },
   username: {
     fontSize: 16,
-    color: 'grey',
-    marginLeft: 5
+    color: 'grey'
   },
   bio: {
     fontSize: 16,
@@ -122,7 +133,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 10,
-    flexDirection: 'column'
+    flexDirection: 'column',
+    top: -5
   },
   birthdate: {
     fontSize: 14,
@@ -136,9 +148,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     marginRight: 11,
     paddingTop: 0,
-    borderColor: "rgb(80 80 80)",
+    borderColor: 'rgb(80 80 80)',
     borderWidth: 1,
-    marginTop: 10,
+    marginTop: 10
   }
 });
 

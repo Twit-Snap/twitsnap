@@ -6,4 +6,7 @@ export interface SearchedUser {
   birthdate: string;
   createdAt: string;
   twits: TwitSnap[];
+  following?: boolean;
+  followingCount?: number;
+  followersCount?: number;
 }
