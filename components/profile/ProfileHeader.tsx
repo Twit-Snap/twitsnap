@@ -1,9 +1,12 @@
 import { format } from 'date-fns';
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { SearchedUser } from '@/app/types/publicUser';
+import axios from 'axios';
 import { router } from 'expo-router';
+import { useAtomValue } from 'jotai';
 import { Button, IconButton } from 'react-native-paper';
 
 const windowWidth = Dimensions.get('window').width;
@@ -16,6 +19,13 @@ interface IProfileHeader {
   bio: string;
 }
 
+type SpecialButtonProps = {
+  color: string;
+  text: string;
+  textColor: string;
+  handler: () => void;
+};
+
 const default_images = {
   profilePhoto: require('../../assets/images/messi.jpg'),
   bannerPhoto: require('../../assets/images/kanagawa.jpg')
@@ -26,6 +36,92 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
     ? format(new Date(user.birthdate), 'MMMM dd, yyyy')
     : null;
   const formattedJoinDate = user.createdAt ? format(new Date(user.createdAt), 'MMMM yyyy') : null;
+
+  const authUser = useAtomValue(authenticatedAtom);
+  // const [following, setFollowing] = useState<boolean | undefined>(user.following);
+  const following = useRef<boolean>(user.following ? true : false);
+  const followersCount = useRef<number>(user.followersCount ? user.followersCount : 0);
+  const [followersCountRendered, refreshCount] = useState<number>(followersCount.current);
+
+  const defineButtonProps = (following: boolean | undefined): SpecialButtonProps => {
+    if (user.username === authUser?.username) {
+      return {
+        color: 'rgb(5 5 5)',
+        text: 'Edit profile',
+        textColor: 'rgb(255 255 255)',
+        handler: () => {
+          //EDIT PROFILE ROUTER PUSH
+        }
+      };
+    }
+
+    if (following) {
+      return {
+        color: 'rgb(5 5 5)',
+        text: 'Following',
+        textColor: 'rgb(255 255 255)',
+        handler: async () => {
+          await axios
+            .delete(
+              `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${authUser?.username}/followers`,
+              {
+                data: {
+                  followedUsername: user.username
+                },
+                headers: {
+                  Authorization: `Bearer ${authUser?.token}`
+                }
+              }
+            )
+            .then(() => {
+              setFollowingState();
+              followersCount.current--;
+              refreshCount(followersCount.current)
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        }
+      };
+    }
+
+    return {
+      color: 'rgb(255 255 255)',
+      text: 'Follow',
+      textColor: 'rgb(0 0 0)',
+      handler: async () => {
+        await axios
+          .post(
+            `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${authUser?.username}/followers`,
+            {
+              followedUsername: user.username
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${authUser?.token}`
+              }
+            }
+          )
+          .then(() => {
+            setFollowingState();
+            followersCount.current++;
+            refreshCount(followersCount.current)
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+    };
+  };
+
+  const [specialButtonProps, setSpecialButtonProps] = useState<SpecialButtonProps>(
+    defineButtonProps(user.following)
+  );
+
+  const setFollowingState = () => {
+    following.current = !following.current;
+    setSpecialButtonProps(defineButtonProps(following.current));
+  };
 
   return (
     <>
@@ -48,8 +144,8 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
       <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
         <Button
           compact={true}
-          buttonColor={user.following ? 'rgb(5 5 5)' : 'rgb(255 255 255)'}
-          onPress={() => {}}
+          buttonColor={specialButtonProps.color}
+          onPress={specialButtonProps.handler}
           style={styles.button}
           aria-disabled={true}
           labelStyle={{
@@ -57,11 +153,11 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
             textAlign: 'center',
             textAlignVertical: 'center',
             margin: 0,
-            color: user.following ? 'rgb(255 255 255)' : 'rgb(0 0 0)'
+            color: specialButtonProps.textColor
           }}
-          contentStyle={{ height: 35, marginBottom: 2 }}
+          contentStyle={{ height: 35, marginBottom: 2, paddingHorizontal: 30, width: 150 }}
         >
-          {user.following ? 'Following' : 'Follow'}
+          {specialButtonProps.text}
         </Button>
       </View>
       <View style={styles.textContainer}>
@@ -83,7 +179,7 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
 
         <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 20 }}>
           <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
-            {user.followersCount}
+            {followersCountRendered}
           </Text>
           {'  Followers'}
         </Text>
@@ -145,7 +241,6 @@ const styles = StyleSheet.create({
     color: '#939090'
   },
   button: {
-    paddingHorizontal: 30,
     marginRight: 11,
     paddingTop: 0,
     borderColor: 'rgb(80 80 80)',
