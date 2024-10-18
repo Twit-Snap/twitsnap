@@ -19,8 +19,8 @@ import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
+import axios from 'axios';
 
-const axios = require('axios').default;
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
 // const intervalMinutes = 10 * 60 * 1000;
@@ -165,19 +165,26 @@ export default function FeedScreen() {
   };
 
   const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
-    let tweets: TwitSnap[] = [];
-    try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
+    var twits: TwitSnap[] = [];
+
+    await axios
+      .get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
         headers: { Authorization: `Bearer ${userData?.token}` },
         params: queryParams
+      })
+      .then((response) => {
+        console.log('Fetched: ', response.data.data.length, ' twits');
+        twits = response.data.data;
+      })
+      .catch((error) => {
+        console.error('Error response: ', error.response);
+        console.error('Error requeest: ', error.request);
+        console.error('error message: ', error.message);
+        console.error('error config: ', error.config);
+        alert('An error occurred. Please try again later.');
       });
-      tweets = response.data.data;
-      console.log('Fetched: ', tweets.length, ' twits');
-    } catch (error: any) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again later.');
-    }
-    return tweets;
+
+    return twits;
   };
 
   const sendTwit = async (tweetContent: string) => {
