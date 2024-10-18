@@ -24,8 +24,7 @@ export default function PublicProfileScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
 
   const [searchUserData, setSearchUserData] = useState<SearchedUser | null>(null);
-  const [twits, setTwits] = useState<TwitSnap[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [twits, setTwits] = useState<TwitSnap[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreTwits, setHasMoreTwits] = useState(true);
@@ -61,7 +60,8 @@ export default function PublicProfileScreen() {
   const fetchTweets = useCallback(
     async (olderTwits = false) => {
       if (!hasMoreTwits || !username) return;
-      const lastTwit = olderTwits ? twits[twits.length - 1] : undefined;
+
+      const lastTwit = twits ? (olderTwits ? twits[twits.length - 1] : undefined) : undefined;
       const queryParams = lastTwit
         ? { createdAt: lastTwit.createdAt, older: true, limit: 20, username: username }
         : { limit: 20, username: username };
@@ -81,13 +81,16 @@ export default function PublicProfileScreen() {
         if (newTwits.length === 0) {
           setHasMoreTwits(false);
         } else {
-          setTwits((prevTwits) => [...prevTwits, ...newTwits]);
+          setTwits((prevTwits) => {
+            if (!prevTwits) return newTwits;
+
+            return [...prevTwits, ...newTwits];
+          });
         }
       } catch (error) {
         console.error('Error fetching tweets:', error);
       } finally {
         setLoadingMore(false);
-        setLoading(false);
       }
     },
     [hasMoreTwits, twits, username, userData?.token]
@@ -97,19 +100,21 @@ export default function PublicProfileScreen() {
     useCallback(() => {
       const fetchData = async () => {
         if (!userData || !userData.token) {
-          setLoading(false);
           return;
         }
 
-        setTwits([]);
+        setTwits(null);
         setHasMoreTwits(true);
-        setLoading(true);
         await fetchUserData(userData.token);
         await fetchTweets();
-        setLoading(false);
       };
 
       fetchData();
+
+      return () => {
+        setSearchUserData(null);
+        setTwits(null);
+      };
     }, [fetchUserData, userData])
   );
 
@@ -124,7 +129,7 @@ export default function PublicProfileScreen() {
     }
   };
 
-  if (loading) {
+  if (!searchUserData) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="white" />
@@ -153,10 +158,14 @@ export default function PublicProfileScreen() {
               <View style={styles.divider} />
             </>
           )}
-          {twits.length > 0 ? (
-            twits.map((twit) => <TweetCard item={twit} key={twit.id} />)
+          {twits ? (
+            twits.length > 0 ? (
+              twits.map((twit) => <TweetCard item={twit} key={twit.id} />)
+            ) : (
+              <Text style={styles.noTwitsText}>No tweets available</Text>
+            )
           ) : (
-            <Text style={styles.noTwitsText}>No tweets available</Text>
+            <></>
           )}
           {loadingMore && <ActivityIndicator size="large" color="white" />}
         </ScrollView>
