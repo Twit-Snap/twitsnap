@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import React, { useRef, useState } from 'react';
-import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { SearchedUser } from '@/app/types/publicUser';
@@ -83,19 +83,32 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
         {formattedJoinDate && <Text style={styles.joinDate}>📅 Joined {formattedJoinDate}</Text>}
       </View>
       <View style={{ flex: 1, flexDirection: 'row' }}>
-        <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 10 }}>
-          <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
-            {user.followingCount}
+        <TouchableOpacity
+          onPress={() => router.push({
+            pathname: `../searchProfile/[username]/showFollows`,
+            params: { username: user.username, byFollowers: 'false' }
+          })}
+        >
+          <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 10 }}>
+            <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
+              {user.followingCount}
+            </Text>
+            {'  Following'}
           </Text>
-          {'  Following'}
-        </Text>
-
-        <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 20 }}>
-          <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
-            {followersCountRendered}
+        </TouchableOpacity>
+        <TouchableOpacity
+        onPress={() => router.push({
+          pathname: `../searchProfile/[username]/showFollows`,
+            params: { username: user.username, byFollowers: 'true' }
+          })}
+        >
+          <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 20 }}>
+            <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
+              {followersCountRendered}
+            </Text>
+            {'  Followers'}
           </Text>
-          {'  Followers'}
-        </Text>
+        </TouchableOpacity>
       </View>
     </>
   );

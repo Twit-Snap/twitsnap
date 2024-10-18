@@ -19,7 +19,11 @@ export default function RootLayout() {
     <>
       <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
       <Tabs
-        sceneContainerStyle={{ backgroundColor: 'rgb(5 5 5)', paddingTop: StatusBar.currentHeight }}
+        sceneContainerStyle={{
+          backgroundColor: 'rgb(5 5 5)',
+          paddingTop: StatusBar.currentHeight
+        }}
+        backBehavior="history"
       >
         <Tabs.Screen
           name="home"
@@ -62,6 +66,14 @@ export default function RootLayout() {
         />
         <Tabs.Screen
           name="searchProfile/[username]"
+          options={{
+            tabBarButton: () => null, // Hide the tab
+            header: () => null,
+            headerShown: false
+          }}
+        />
+        <Tabs.Screen
+          name="searchProfile/[username]/showFollows"
           options={{
             tabBarButton: () => null, // Hide the tab
             header: () => null,
