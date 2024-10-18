@@ -32,7 +32,8 @@ export default function SearchResultsScreen() {
       try {
         const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
           headers: { Authorization: `Bearer ${userData?.token}` },
-          params: { hashtag: query }
+          params: { hashtag: query },
+          timeout: 10000,
         });
 
         console.log(`Fetched ${response.data.data.length} twits with "#${query}"`);
@@ -49,7 +50,8 @@ export default function SearchResultsScreen() {
       try {
         const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
           headers: { Authorization: `Bearer ${userData?.token}` },
-          params: { has: query }
+          params: { has: query },
+          timeout: 10000,
         });
 
         console.log(
@@ -68,7 +70,8 @@ export default function SearchResultsScreen() {
       try {
         const response = await axios.get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}`, {
           headers: { Authorization: `Bearer ${userData?.token}` },
-          params: undefined
+          params: undefined,
+          timeout: 10000,
         });
         return response.data.data;
       } catch (error) {

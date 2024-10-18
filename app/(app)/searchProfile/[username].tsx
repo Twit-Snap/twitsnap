@@ -41,7 +41,8 @@ export default function PublicProfileScreen() {
           {
             headers: {
               Authorization: `Bearer ${token}`
-            }
+            },
+            timeout: 10000
           }
         );
         setSearchUserData(response.data.data);
@@ -72,7 +73,8 @@ export default function PublicProfileScreen() {
           params: queryParams,
           headers: {
             Authorization: `Bearer ${userData?.token}`
-          }
+          },
+          timeout: 10000
         });
         const newTwits = response.data.data;
 

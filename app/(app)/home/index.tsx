@@ -194,7 +194,8 @@ export default function FeedScreen() {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${userData?.token}`
-          }
+          },
+          timeout: 10000
         }
       );
       console.log('Twit sent: ', response.data);
