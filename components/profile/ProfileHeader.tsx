@@ -4,10 +4,11 @@ import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { SearchedUser } from '@/app/types/publicUser';
-import axios from 'axios';
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
-import { Button, IconButton } from 'react-native-paper';
+import { IconButton } from 'react-native-paper';
+import EditButton from './editButton';
+import FollowButton from './followButton';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -38,89 +39,13 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
   const formattedJoinDate = user.createdAt ? format(new Date(user.createdAt), 'MMMM yyyy') : null;
 
   const authUser = useAtomValue(authenticatedAtom);
-  // const [following, setFollowing] = useState<boolean | undefined>(user.following);
-  const following = useRef<boolean>(user.following ? true : false);
+
   const followersCount = useRef<number>(user.followersCount ? user.followersCount : 0);
   const [followersCountRendered, refreshCount] = useState<number>(followersCount.current);
 
-  const defineButtonProps = (following: boolean | undefined): SpecialButtonProps => {
-    if (user.username === authUser?.username) {
-      return {
-        color: 'rgb(5 5 5)',
-        text: 'Edit profile',
-        textColor: 'rgb(255 255 255)',
-        handler: () => {
-          //EDIT PROFILE ROUTER PUSH
-        }
-      };
-    }
-
-    if (following) {
-      return {
-        color: 'rgb(5 5 5)',
-        text: 'Following',
-        textColor: 'rgb(255 255 255)',
-        handler: async () => {
-          await axios
-            .delete(
-              `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${authUser?.username}/followers`,
-              {
-                data: {
-                  followedUsername: user.username
-                },
-                headers: {
-                  Authorization: `Bearer ${authUser?.token}`
-                }
-              }
-            )
-            .then(() => {
-              setFollowingState();
-              followersCount.current--;
-              refreshCount(followersCount.current)
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        }
-      };
-    }
-
-    return {
-      color: 'rgb(255 255 255)',
-      text: 'Follow',
-      textColor: 'rgb(0 0 0)',
-      handler: async () => {
-        await axios
-          .post(
-            `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${authUser?.username}/followers`,
-            {
-              followedUsername: user.username
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${authUser?.token}`
-              }
-            }
-          )
-          .then(() => {
-            setFollowingState();
-            followersCount.current++;
-            refreshCount(followersCount.current)
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-      }
-    };
-  };
-
-  const [specialButtonProps, setSpecialButtonProps] = useState<SpecialButtonProps>(
-    defineButtonProps(user.following)
-  );
-
-  const setFollowingState = () => {
-    following.current = !following.current;
-    setSpecialButtonProps(defineButtonProps(following.current));
+  const setFollowingCount = (nowFollowing: boolean) => {
+    nowFollowing ? followersCount.current++ : followersCount.current--;
+    refreshCount(followersCount.current);
   };
 
   return (
@@ -142,23 +67,11 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
         style={styles.profilePhoto}
       />
       <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
-        <Button
-          compact={true}
-          buttonColor={specialButtonProps.color}
-          onPress={specialButtonProps.handler}
-          style={styles.button}
-          aria-disabled={true}
-          labelStyle={{
-            fontWeight: 'bold',
-            textAlign: 'center',
-            textAlignVertical: 'center',
-            margin: 0,
-            color: specialButtonProps.textColor
-          }}
-          contentStyle={{ height: 35, marginBottom: 2, paddingHorizontal: 30, width: 150 }}
-        >
-          {specialButtonProps.text}
-        </Button>
+        {user.username === authUser?.username ? (
+          <EditButton />
+        ) : (
+          <FollowButton extraCallback={setFollowingCount} user={user} />
+        )}
       </View>
       <View style={styles.textContainer}>
         {user && <Text style={styles.name}>{user.name}</Text>}
