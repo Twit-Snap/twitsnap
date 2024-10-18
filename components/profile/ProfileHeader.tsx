@@ -28,6 +28,14 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
 
   return (
     <>
+      <IconButton
+        icon="arrow-left"
+        size={20}
+        style={{ position: 'absolute', top: 5, left: 5, zIndex: 50 }}
+        iconColor="rgb(255 255 255)"
+        containerColor="rgba(0 0 0 / 0.5)"
+        onPress={router.back}
+      />
       <Image
         source={bannerPhoto ? { uri: bannerPhoto } : default_images.bannerPhoto}
         style={styles.bannerPhoto}
