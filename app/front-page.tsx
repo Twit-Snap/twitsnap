@@ -42,7 +42,6 @@ export default function FrontPage() {
     loadAuth();
   }, [authAtom, setAuthAtom]);
 
-  // Somewhere in your code
   const handleGoogleSignIn = useCallback(async () => {
     try {
       await GoogleSignin.hasPlayServices();
@@ -59,6 +58,7 @@ export default function FrontPage() {
         console.log('userSignin', JSON.stringify(userSignin, null, 2));
       } else {
         // sign in was cancelled by user
+        console.log('signin cancelled');
       }
     } catch (error) {
       console.error(error);
@@ -66,16 +66,16 @@ export default function FrontPage() {
       if (isErrorWithCode(error)) {
         switch (error.code) {
           case statusCodes.IN_PROGRESS:
-            // operation (eg. sign in) already in progress
+            console.log('Signin already progress');
             break;
           case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            // Android only, play services not available or outdated
+            console.error('Play services not available');
             break;
           default:
-          // some other error happened
+            console.error('Unhandled error code', error);
         }
       } else {
-        // an error that's not related to google sign in occurred
+        console.error('Unknown error', error);
       }
     }
   }, []);
