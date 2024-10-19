@@ -1,21 +1,28 @@
+import axios from 'axios';
 import { formatDistanceToNow, parseISO } from 'date-fns';
+import { useRouter, useSegments } from 'expo-router';
+import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { TwitSnap } from '@/app/types/TwitSnap';
+
+import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
 };
 
 interface TweetCardProps {
-  profileImage: string; // URL to the image
-  name: string;
-  username: string;
-  content: string;
-  date: string;
+  item: TwitSnap;
 }
 
-const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, content, date }) => {
+const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
+  const userData = useAtomValue(authenticatedAtom);
+  const router = useRouter(); // Obtener el objeto de router
+  const segments = useSegments(); // Obtener la ruta actual
+
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
     const now = new Date();
@@ -35,40 +42,148 @@ const TweetCard: React.FC<TweetCardProps> = ({ profileImage, name, username, con
   const renderContent = (text: string) => {
     const words = text.split(' ');
     return (
-        <Text>
-          {words.map((word, index) => {
-            if (word.startsWith('#')) {
-              return (
-                  <Text key={index}>
-                    <Text onPress={() => router.push({ pathname: `/searchResults`, params: { hashtag: word } })} style={styles.hashtag}>
-                      {word}
-                    </Text>{' '}
-                  </Text>
-              );
-            }
-            return <Text key={index}>{word} </Text>;
-          })}
-        </Text>
+      <Text>
+        {words.map((word, index) => {
+          if (word.startsWith('#')) {
+            return (
+              <Text key={index}>
+                <Text
+                  onPress={() =>
+                    router.push({ pathname: `/searchResults`, params: { hashtag: word } })
+                  }
+                  style={styles.hashtag}
+                >
+                  {word}
+                </Text>{' '}
+              </Text>
+            );
+          }
+          return <Text key={index}>{word} </Text>;
+        })}
+      </Text>
     );
+  };
+
+  const handleProfileClick = () => {
+    const isOwnProfile = userData?.username === item.user.username;
+    const currentRoute = segments.join('/');
+
+    const ownProfileRoute = '/profile';
+    const publicProfileRoute = `../searchProfile/[username]`;
+
+    if (
+      (isOwnProfile && currentRoute === ownProfileRoute) ||
+      (!isOwnProfile && currentRoute === `/searchProfile/${item.user.username}`)
+    ) {
+      return;
+    } else {
+      if (isOwnProfile) {
+        router.push(ownProfileRoute);
+      } else {
+        router.push({
+          pathname: publicProfileRoute,
+          params: { username: item.user.username }
+        });
+      }
+    }
   };
 
   return (
     <TouchableOpacity style={styles.container} activeOpacity={0.4}>
       <>
-        <Image
-          source={profileImage ? { uri: profileImage } : default_images.default_profile_picture}
-          style={styles.profileImage}
-        />
-        <View style={styles.contentContainer}>
-          <Text style={styles.name}>
-            {name}{' '}
-            <Text style={styles.username}>
-              @{username}
-              <Text style={styles.dot}>{' - '}</Text>
-              <Text style={styles.date}>{formatDate(date)}</Text>
+        <TouchableOpacity onPress={handleProfileClick}>
+          <Image
+            source={
+              item.profileImage
+                ? { uri: item.profileImage }
+                : default_images.default_profile_picture
+            }
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
+        <View style={{ flex: 1, flexDirection: 'column' }}>
+          <View style={styles.contentContainer}>
+            <Text style={styles.name}>
+              {item.user.name}{' '}
+              <Text style={styles.username}>
+                @{item.user.username}
+                <Text style={styles.dot}>{' - '}</Text>
+                <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
+              </Text>
             </Text>
-          </Text>
-          <Text style={styles.content}>{renderContent(content)}</Text>
+            <Text style={styles.content}>{renderContent(item.content)}</Text>
+          </View>
+          <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
+            <Interaction
+              icon="comment-outline"
+              initState={false}
+              initCount={1_023_002_230}
+              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
+                console.log('asd');
+                return { state: true, count: 0 };
+              }}
+            />
+            <Interaction
+              icon="repeat-off"
+              icon_alt="repeat"
+              icon_alt_color="rgb(47, 204, 110  )"
+              initState={false}
+              initCount={1_023_203}
+              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
+                console.log('asd');
+                return { state: true, count: 0 };
+              }}
+            />
+            <Interaction
+              icon="heart-outline"
+              icon_alt="heart"
+              icon_alt_color="rgb(255, 79, 56)"
+              initState={item.userLiked}
+              initCount={item.likesCount}
+              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
+                return state
+                  ? {
+                      state: await axios
+                        .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
+                          data: {
+                            twitId: item.id
+                          },
+                          headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${userData?.token}`
+                          }
+                        })
+                        .then(() => !state)
+                        .catch((error) => {
+                          console.error(error);
+                          return state;
+                        }),
+                      count: count - 1
+                    }
+                  : {
+                      state: await axios
+                        .post(
+                          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
+                          {
+                            twitId: item.id
+                          },
+                          {
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${userData?.token}`
+                            }
+                          }
+                        )
+                        .then(() => !state)
+                        .catch((error) => {
+                          console.error(error);
+                          return state;
+                        }),
+                      count: count + 1
+                    };
+              }}
+            />
+          </View>
         </View>
       </>
     </TouchableOpacity>
@@ -84,8 +199,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(5 5 5)'
   },
   profileImage: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     borderRadius: 25
   },
   contentContainer: {
@@ -104,18 +219,31 @@ const styles = StyleSheet.create({
   },
   content: {
     fontSize: 14,
-    color: 'rgb(220 220 220)',
+    color: 'rgb(220 220 220)'
   },
   date: {
     fontSize: 12,
     color: 'rgb(120 120 120)'
   },
   hashtag: {
-    color: 'rgb(67,67,244)',
+    color: 'rgb(67,67,244)'
   },
   dot: {
     fontSize: 16,
     color: 'rgb(120 120 120)'
+  },
+  interaction_icon: {
+    margin: 0
+  },
+  interaction_label: {
+    color: 'rgb(120 120 120)',
+    textAlign: 'left',
+    textAlignVertical: 'bottom',
+    flex: 1,
+    alignContent: 'center',
+    justifyContent: 'center',
+    fontSize: 14,
+    height: 36
   }
 });
 

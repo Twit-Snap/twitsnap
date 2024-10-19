@@ -1,4 +1,3 @@
-import { TwitSnap } from '@/app/types/TwitSnap';
 import React, { useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -20,7 +19,8 @@ const styles = StyleSheet.create({
   feed_type_button: {
     height: window.height / 20,
     color: 'rgb(255, 255, 255)',
-    textAlign: 'center'
+    textAlign: 'center',
+    textAlignVertical: 'center'
   },
   feed_type_selected: {
     height: 1,
@@ -32,13 +32,11 @@ const styles = StyleSheet.create({
 export interface FeedTypeProp {
   text: string;
   state: boolean;
-  handler: (twits: TwitSnap[] | null, feedType: string) => Promise<void>;
+  handler: () => Promise<void>;
 }
 
 export interface IFeedTypeProps {
   items: FeedTypeProp[];
-  twits: TwitSnap[] | null;
-  feedType: string;
 }
 
 export default function FeedType(props: IFeedTypeProps) {
@@ -50,7 +48,7 @@ export default function FeedType(props: IFeedTypeProps) {
         if (this_item === item) {
           if (!item.state) {
             item.state = true;
-            item.handler(props.twits, props.feedType);
+            item.handler();
           }
           return item;
         }

@@ -1,8 +1,7 @@
-// ProfileScreen.tsx
 import axios from 'axios';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useAtom } from 'jotai';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   NativeScrollEvent,
@@ -18,10 +17,11 @@ import { TwitSnap } from '@/app/types/TwitSnap';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
 
-import { authenticatedAtom } from '../authAtoms/authAtom';
+import { authenticatedAtom } from '../../authAtoms/authAtom';
 
-export default function ProfileScreen() {
+export default function PublicProfileScreen() {
   const [userData] = useAtom(authenticatedAtom);
+  const { username } = useLocalSearchParams<{ username: string }>();
 
   const [searchUserData, setSearchUserData] = useState<SearchedUser | null>(null);
   const [twits, setTwits] = useState<TwitSnap[]>([]);
@@ -30,20 +30,17 @@ export default function ProfileScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreTwits, setHasMoreTwits] = useState(true);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!userData || !userData.token) {
-        setLoading(false);
-        return;
-      }
-
+  // Cargar la información del usuario una sola vez
+  const fetchUserData = useCallback(
+    async (token: string) => {
       try {
         setError(null);
+        console.log('fetchUserData', username);
         const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${userData.username}`,
+          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}`,
           {
             headers: {
-              Authorization: `Bearer ${userData.token}`
+              Authorization: `Bearer ${token}`
             }
           }
         );
@@ -54,23 +51,19 @@ export default function ProfileScreen() {
         } else {
           setError('An error occurred while fetching user data.');
         }
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchUserData();
-  }, [userData]);
+    },
+    [username]
+  );
 
   // Cargar tweets, con soporte de paginación
   const fetchTweets = useCallback(
     async (olderTwits = false) => {
-      if (!hasMoreTwits || !userData?.username) return;
-
+      if (!hasMoreTwits || !username) return;
       const lastTwit = olderTwits ? twits[twits.length - 1] : undefined;
       const queryParams = lastTwit
-        ? { createdAt: lastTwit.createdAt, older: true, limit: 20, username: userData.username }
-        : { limit: 20, username: userData.username };
+        ? { createdAt: lastTwit.createdAt, older: true, limit: 20, username: username }
+        : { limit: 20, username: username };
 
       try {
         setLoadingMore(true);
@@ -78,7 +71,7 @@ export default function ProfileScreen() {
         const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/`, {
           params: queryParams,
           headers: {
-            Authorization: `Bearer ${userData.token}`
+            Authorization: `Bearer ${userData?.token}`
           }
         });
         const newTwits = response.data.data;
@@ -92,23 +85,30 @@ export default function ProfileScreen() {
         console.error('Error fetching tweets:', error);
       } finally {
         setLoadingMore(false);
+        setLoading(false);
       }
     },
-    [hasMoreTwits, twits, userData]
+    [hasMoreTwits, twits, username, userData?.token]
   );
 
   useFocusEffect(
     useCallback(() => {
-      const fetchTweetsOnFocus = async () => {
+      const fetchData = async () => {
+        if (!userData || !userData.token) {
+          setLoading(false);
+          return;
+        }
+
         setTwits([]);
         setHasMoreTwits(true);
         setLoading(true);
+        await fetchUserData(userData.token);
         await fetchTweets();
         setLoading(false);
       };
 
-      fetchTweetsOnFocus();
-    }, [])
+      fetchData();
+    }, [fetchUserData, userData])
   );
 
   const handleScroll = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
