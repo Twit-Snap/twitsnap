@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgb(50 50 50)',
+    borderBottomColor: 'rgb(25 25 25)',
     backgroundColor: 'rgb(5 5 5)'
   },
   profileImage: {
