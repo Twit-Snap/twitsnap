@@ -51,7 +51,7 @@ export default function FeedScreen() {
         let new_twits: TwitSnap[] = [];
 
         if (prev_twits && newTwits) {
-          new_twits = [...newTwits, ...prev_twits];
+          new_twits = removeDuplicates([...newTwits, ...prev_twits]);
           newerTwitRef.current = new_twits[0];
           newTwits = null;
         }
@@ -136,10 +136,7 @@ export default function FeedScreen() {
     };
 
     newTwits = await fetchTweets(params);
-    //Filter twits received if they are already in the list
-    if (tweets) {
-      newTwits = removeDuplicates([...tweets, ...newTwits]);
-    }
+
     if (newTwits.length > 0) {
       // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
       setNeedRefresh(true);
@@ -165,16 +162,11 @@ export default function FeedScreen() {
       return;
     }
 
-    //Filter twits received if they are already in the list
-    if (tweets) {
-      olderTwits = removeDuplicates([...tweets, ...olderTwits]);
-    }
-
     setTweets((prev_twits) => {
       if (!prev_twits) {
         return olderTwits;
       }
-      return [...prev_twits, ...olderTwits];
+      return removeDuplicates([...prev_twits, ...olderTwits]);
     });
   };
 
@@ -191,6 +183,7 @@ export default function FeedScreen() {
       console.error('Error:', error);
       alert('An error occurred. Please try again later.');
     }
+
     return tweets;
   };
 
