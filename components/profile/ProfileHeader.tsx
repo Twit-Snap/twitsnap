@@ -20,13 +20,6 @@ interface IProfileHeader {
   bio: string;
 }
 
-type SpecialButtonProps = {
-  color: string;
-  text: string;
-  textColor: string;
-  handler: () => void;
-};
-
 const default_images = {
   profilePhoto: require('../../assets/images/messi.jpg'),
   bannerPhoto: require('../../assets/images/kanagawa.jpg')
@@ -40,12 +33,18 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
 
   const authUser = useAtomValue(authenticatedAtom);
 
+  const canViewFollowList = (following: boolean): boolean => {
+    return user.username === authUser?.username ? true : user.followed && following ? true : false;
+  };
+
+  const [canViewList, setCanViewList] = useState<boolean>(canViewFollowList(user.following));
   const followersCount = useRef<number>(user.followersCount ? user.followersCount : 0);
   const [followersCountRendered, refreshCount] = useState<number>(followersCount.current);
 
   const setFollowingCount = (nowFollowing: boolean) => {
     nowFollowing ? followersCount.current++ : followersCount.current--;
     refreshCount(followersCount.current);
+    setCanViewList(canViewFollowList(nowFollowing));
   };
 
   return (
@@ -84,11 +83,15 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
       </View>
       <View style={{ flex: 1, flexDirection: 'row' }}>
         <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: `../profile/[username]/showFollows`,
-              params: { username: user.username, byFollowers: 'false' }
-            })
+          activeOpacity={canViewList ? 0.4 : 1}
+          onPress={
+            canViewList
+              ? () =>
+                  router.push({
+                    pathname: `../profile/[username]/showFollows`,
+                    params: { username: user.username, byFollowers: 'false' }
+                  })
+              : () => {}
           }
         >
           <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 10 }}>
@@ -99,11 +102,15 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: `../profile/[username]/showFollows`,
-              params: { username: user.username, byFollowers: 'true' }
-            })
+          activeOpacity={canViewList ? 0.4 : 1}
+          onPress={
+            canViewList
+              ? () =>
+                  router.push({
+                    pathname: `../profile/[username]/showFollows`,
+                    params: { username: user.username, byFollowers: 'true' }
+                  })
+              : () => {}
           }
         >
           <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 20 }}>
