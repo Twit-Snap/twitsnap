@@ -132,7 +132,7 @@ export default function PublicProfileScreen() {
   if (!searchUserData) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="white" />
+        <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} />
       </View>
     );
   }
@@ -167,7 +167,7 @@ export default function PublicProfileScreen() {
           ) : (
             <></>
           )}
-          {loadingMore && <ActivityIndicator size="large" color="white" />}
+          {loadingMore && <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} />}
         </ScrollView>
       )}
     </View>
