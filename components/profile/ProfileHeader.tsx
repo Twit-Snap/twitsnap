@@ -166,8 +166,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 10,
-    flexDirection: 'column',
-    top: -5
+    flexDirection: 'column'
   },
   birthdate: {
     fontSize: 14,

@@ -1,6 +1,6 @@
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { IReducedUser } from '@/app/types/publicUser';
-import ListHeader from '@/components/common/listHeader';
+import ListHeader from '@/components/profile/listHeader';
 import UserCard from '@/components/profile/userCard';
 import axios from 'axios';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
