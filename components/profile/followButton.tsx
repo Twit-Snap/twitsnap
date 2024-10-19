@@ -100,10 +100,12 @@ export default function FollowButton({ extraCallback, user }: IFollowButtonProps
         fontWeight: 'bold',
         textAlign: 'center',
         textAlignVertical: 'center',
+        fontSize: 14,
+        lineHeight: 13,
         margin: 0,
         color: specialButtonProps.textColor
       }}
-      contentStyle={{ height: 35, marginBottom: 2, paddingHorizontal: 30, width: 150 }}
+      contentStyle={{ height: 30, paddingHorizontal: 30, width: 150 }}
     >
       {specialButtonProps.text}
     </Button>
@@ -114,8 +116,11 @@ const styles = StyleSheet.create({
   button: {
     marginRight: 11,
     paddingTop: 0,
+    height: 30,
     borderColor: 'rgb(80 80 80)',
     borderWidth: 1,
-    marginTop: 10
+    marginTop: 8,
+    alignSelf: 'center',
+    justifyContent: 'center'
   }
 });
