@@ -35,10 +35,18 @@ export default function Follows() {
             timeout: 10000
           })
           .then((response) => {
-            console.log(response.data);
             setUsers(response.data);
           })
-          .catch((error) => console.error(error));
+          .catch((error) => {
+            if (error.status === 400) {
+              if (error.response.data.type === 'NOT MUTUAL FOLLOW') {
+                alert('You should not be here ;)');
+                setUsers([]);
+              }
+            }
+
+            console.error(error);
+          });
       };
 
       fetchUsers();
