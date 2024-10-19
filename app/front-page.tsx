@@ -8,6 +8,7 @@ import {
   statusCodes,
   User
 } from '@react-native-google-signin/google-signin';
+import axios from 'axios';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
@@ -27,8 +28,10 @@ export default function FrontPage() {
 
   useEffect(() => {
     const loadAuth = async () => {
+      console.log('effect', authAtom);
       if (!authAtom) {
         const session: string | null = await AsyncStorage.getItem('auth');
+        console.log('if effect', session);
 
         if (!session) {
           return;
@@ -42,25 +45,87 @@ export default function FrontPage() {
     loadAuth();
   }, [authAtom, setAuthAtom]);
 
-  const handleSuccessGoogleSignIn = useCallback(
-    async (userCreds: FirebaseAuthTypes.UserCredential) => {
-      const { user, additionalUserInfo } = userCreds;
-      const { email, displayName, photoURL, uid, providerId } = user;
-      const { isNewUser } = additionalUserInfo || {};
+  const handleDirectGoogleLogin = useCallback(
+    async (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
+      const { uid } = userCreds.user;
+      const { providerId } = userCreds.additionalUserInfo!;
       const authData = {
-        email,
-        displayName,
-        photoURL,
+        uid,
+        token,
+        providerId
+      };
+      try {
+        const response = await axios.post(
+          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/sso`,
+          authData,
+          {
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+        if (response.status === 200) {
+          await AsyncStorage.setItem('auth', JSON.stringify(response.data));
+          setAuthAtom(response.data);
+          console.log('Login success: ', response.data);
+          router.replace('/');
+        }
+      } catch (error: any) {
+        if (error.response && error.response.status === 401) {
+          console.log('Login failed: ', error.response.data);
+          alert('Invalid username or password');
+        } else {
+          console.error('Error:', JSON.stringify(error, null, 2));
+          alert('An error occurred. Please try again later.');
+        }
+      }
+    },
+    [setAuthAtom]
+  );
+
+  const handleGoogleSignUp = useCallback(
+    async (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
+      const { uid } = userCreds.user;
+      const { providerId } = userCreds.additionalUserInfo!;
+      const authData = {
         uid,
         providerId,
-        isNewUser
+        token
       };
-      // setAuthAtom(authData);
-      // await AsyncStorage.setItem('auth', JSON.stringify(authData));
-      // router.replace('/');
-      console.log('authData', JSON.stringify(authData, null, 2));
+      try {
+        const response = await axios.post(
+          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/sso/signup`,
+          authData,
+          {
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+        if (response.status === 200) {
+          await AsyncStorage.setItem('auth', JSON.stringify(response.data));
+          setAuthAtom(response.data);
+          console.log('Login success: ', response.data);
+          router.replace('/');
+        }
+      } catch (error: any) {
+        if (error.response && error.response.status === 401) {
+          console.log('Login failed: ', error.response.data);
+          alert('Invalid username or password');
+        } else {
+          console.error('Error:', JSON.stringify(error, null, 2));
+          alert('An error occurred. Please try again later.');
+        }
+      }
     },
-    []
+    [setAuthAtom]
+  );
+
+  const handleSuccessGoogleSignIn = useCallback(
+    async (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
+      if (userCreds.additionalUserInfo?.isNewUser) {
+        handleGoogleSignUp(userCreds, token);
+        return;
+      }
+      handleDirectGoogleLogin(userCreds, token);
+    },
+    [handleDirectGoogleLogin, handleGoogleSignUp]
   );
 
   const handleGoogleSignIn = useCallback(async () => {
@@ -72,11 +137,12 @@ export default function FrontPage() {
       if (isSuccessResponse(response)) {
         setGoogleAuth({ userInfo: response.data });
         const idToken = response.data.idToken;
+        console.log('idToken', idToken);
         const credential = auth.GoogleAuthProvider.credential(idToken);
         console.log('credential', JSON.stringify(credential, null, 2));
         // const { accessToken } = await GoogleSignin.getTokens();
         const userSignin = await auth().signInWithCredential(credential);
-        handleSuccessGoogleSignIn(userSignin);
+        handleSuccessGoogleSignIn(userSignin, idToken!);
         console.log('userSignin', JSON.stringify(userSignin, null, 2));
       } else {
         // sign in was cancelled by user
@@ -100,7 +166,7 @@ export default function FrontPage() {
         console.error('Unknown error', error);
       }
     }
-  }, []);
+  }, [handleSuccessGoogleSignIn]);
 
   return (
     <View style={styles.container}>
