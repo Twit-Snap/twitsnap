@@ -19,6 +19,7 @@ import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
+import removeDuplicates from '@/utils/removeDup';
 
 const axios = require('axios').default;
 const window = Dimensions.get('screen');
@@ -135,6 +136,10 @@ export default function FeedScreen() {
     };
 
     newTwits = await fetchTweets(params);
+    //Filter twits received if they are already in the list
+    if (tweets) {
+      newTwits = removeDuplicates([...tweets, ...newTwits]);
+    }
     if (newTwits.length > 0) {
       // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
       setNeedRefresh(true);
@@ -154,10 +159,15 @@ export default function FeedScreen() {
       byFollowed: isActualFeedTypeFollowing.current
     };
 
-    const olderTwits: TwitSnap[] = await fetchTweets(params);
+    let olderTwits: TwitSnap[] = await fetchTweets(params);
 
     if (olderTwits.length === 0) {
       return;
+    }
+
+    //Filter twits received if they are already in the list
+    if (tweets) {
+      olderTwits = removeDuplicates([...tweets, ...olderTwits]);
     }
 
     setTweets((prev_twits) => {
