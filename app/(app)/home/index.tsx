@@ -292,7 +292,7 @@ export default function FeedScreen() {
           height: 55,
           borderRadius: 200,
           position: 'absolute',
-          top: window.height * 0.83,
+          top: window.height * 0.78,
           right: 15
         }}
         iconColor="rgb(255 255 255)"

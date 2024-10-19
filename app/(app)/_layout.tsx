@@ -5,6 +5,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 
 import { StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authenticatedAtom } from '../authAtoms/authAtom';
 
 export default function RootLayout() {
@@ -18,61 +19,62 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
-      <Tabs
-        sceneContainerStyle={{
-          backgroundColor: 'rgb(5 5 5)',
-          paddingTop: StatusBar.currentHeight
-        }}
-        backBehavior="history"
-      >
-        <Tabs.Screen
-          name="home"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="home-outline" size={size} color={color} />
-            ),
-            header: () => <></>,
-            tabBarHideOnKeyboard: true,
-            tabBarStyle: { display: showTabs ? 'flex' : 'none' },
-            headerShown: false
+      <SafeAreaView style={{ flex: 1 }}>
+        <Tabs
+          sceneContainerStyle={{
+            backgroundColor: 'rgb(5 5 5)'
           }}
-        />
-        <Tabs.Screen
-          name="search"
-          options={{
-            title: 'Search',
-            tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
-            tabBarHideOnKeyboard: true,
-            tabBarStyle: { display: showTabs ? 'flex' : 'none' },
-            headerShown: false
-          }}
-        />
-        <Tabs.Screen
-          name="searchResults"
-          options={{
-            tabBarButton: () => null, // Hide the tab
-            header: () => null,
-            headerShown: false
-          }}
-        />
-        <Tabs.Screen
-          name="profile/[username]"
-          options={{
-            tabBarButton: () => null, // Hide the tab
-            header: () => null,
-            headerShown: false
-          }}
-        />
-        <Tabs.Screen
-          name="profile/[username]/showFollows"
-          options={{
-            tabBarButton: () => null, // Hide the tab
-            header: () => null,
-            headerShown: false
-          }}
-        />
-      </Tabs>
+          backBehavior="history"
+        >
+          <Tabs.Screen
+            name="home"
+            options={{
+              title: 'Home',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="home-outline" size={size} color={color} />
+              ),
+              header: () => <></>,
+              tabBarHideOnKeyboard: true,
+              tabBarStyle: { display: showTabs ? 'flex' : 'none' },
+              headerShown: false
+            }}
+          />
+          <Tabs.Screen
+            name="search"
+            options={{
+              title: 'Search',
+              tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
+              tabBarHideOnKeyboard: true,
+              tabBarStyle: { display: showTabs ? 'flex' : 'none' },
+              headerShown: false
+            }}
+          />
+          <Tabs.Screen
+            name="searchResults"
+            options={{
+              tabBarButton: () => null, // Hide the tab
+              header: () => null,
+              headerShown: false
+            }}
+          />
+          <Tabs.Screen
+            name="profile/[username]"
+            options={{
+              tabBarButton: () => null, // Hide the tab
+              header: () => null,
+              headerShown: false
+            }}
+          />
+          <Tabs.Screen
+            name="profile/[username]/showFollows"
+            options={{
+              tabBarButton: () => null, // Hide the tab
+              header: () => null,
+              headerShown: false
+            }}
+          />
+        </Tabs>
+      </SafeAreaView>
     </>
   );
 }
