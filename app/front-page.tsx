@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import auth from '@react-native-firebase/auth';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import {
   GoogleSignin,
   GoogleSigninButton,
@@ -42,6 +42,27 @@ export default function FrontPage() {
     loadAuth();
   }, [authAtom, setAuthAtom]);
 
+  const handleSuccessGoogleSignIn = useCallback(
+    async (userCreds: FirebaseAuthTypes.UserCredential) => {
+      const { user, additionalUserInfo } = userCreds;
+      const { email, displayName, photoURL, uid, providerId } = user;
+      const { isNewUser } = additionalUserInfo || {};
+      const authData = {
+        email,
+        displayName,
+        photoURL,
+        uid,
+        providerId,
+        isNewUser
+      };
+      // setAuthAtom(authData);
+      // await AsyncStorage.setItem('auth', JSON.stringify(authData));
+      // router.replace('/');
+      console.log('authData', JSON.stringify(authData, null, 2));
+    },
+    []
+  );
+
   const handleGoogleSignIn = useCallback(async () => {
     try {
       await GoogleSignin.hasPlayServices();
@@ -55,6 +76,7 @@ export default function FrontPage() {
         console.log('credential', JSON.stringify(credential, null, 2));
         // const { accessToken } = await GoogleSignin.getTokens();
         const userSignin = await auth().signInWithCredential(credential);
+        handleSuccessGoogleSignIn(userSignin);
         console.log('userSignin', JSON.stringify(userSignin, null, 2));
       } else {
         // sign in was cancelled by user
