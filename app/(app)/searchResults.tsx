@@ -1,14 +1,13 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
-import { ActivityIndicator } from 'react-native-paper';
+import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, IconButton } from 'react-native-paper';
 
 import { TwitSnap, TwitUser } from '@/app/types/TwitSnap';
 import TweetCard from '@/components/twits/TweetCard';
 import removeDuplicates from '@/utils/removeDup';
 
-import ListHeader from '@/components/common/listHeader';
 import { authenticatedAtom } from '../authAtoms/authAtom';
 
 const axios = require('axios').default;
@@ -34,7 +33,7 @@ export default function SearchResultsScreen() {
         const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
           headers: { Authorization: `Bearer ${userData?.token}` },
           params: { hashtag: query },
-          timeout: 10000,
+          timeout: 10000
         });
 
         console.log(`Fetched ${response.data.data.length} twits with "#${query}"`);
@@ -52,7 +51,7 @@ export default function SearchResultsScreen() {
         const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
           headers: { Authorization: `Bearer ${userData?.token}` },
           params: { has: query },
-          timeout: 10000,
+          timeout: 10000
         });
 
         console.log(
@@ -72,7 +71,7 @@ export default function SearchResultsScreen() {
         const response = await axios.get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}`, {
           headers: { Authorization: `Bearer ${userData?.token}` },
           params: undefined,
-          timeout: 10000,
+          timeout: 10000
         });
         return response.data.data;
       } catch (error) {
@@ -96,7 +95,13 @@ export default function SearchResultsScreen() {
   }, [query, userData?.token]);
 
   return (
-    <ListHeader headerText={`Tweets with ${query}`}>
+    <View style={styles.container}>
+      <View style={{ flex: 1, flexDirection: 'row', maxHeight: 57 }}>
+        <TouchableOpacity onPress={router.back}>
+          <IconButton icon="arrow-left" iconColor="rgb(255 255 255)" size={30} />
+        </TouchableOpacity>
+        <></>
+      </View>
       {tweets ? (
         tweets.length > 0 ? (
           <FlatList
@@ -122,11 +127,16 @@ export default function SearchResultsScreen() {
           style={{ alignSelf: 'center' }}
         />
       )}
-    </ListHeader>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'rgb(5 5 5)',
+    paddingHorizontal: 2
+  },
   error_label: {
     color: 'rgb(255 255 255)',
     fontSize: 30,
