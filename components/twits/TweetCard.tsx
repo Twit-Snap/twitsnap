@@ -64,34 +64,17 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
     );
   };
 
-  const handleProfileClick = () => {
-    const isOwnProfile = userData?.username === item.user.username;
-    const currentRoute = segments.join('/');
-
-    const ownProfileRoute = '/profile';
-    const publicProfileRoute = `../searchProfile/[username]`;
-
-    if (
-      (isOwnProfile && currentRoute === ownProfileRoute) ||
-      (!isOwnProfile && currentRoute === `/searchProfile/${item.user.username}`)
-    ) {
-      return;
-    } else {
-      if (isOwnProfile) {
-        router.push(ownProfileRoute);
-      } else {
-        router.push({
-          pathname: publicProfileRoute,
-          params: { username: item.user.username }
-        });
-      }
-    }
-  };
-
   return (
     <TouchableOpacity style={styles.container} activeOpacity={0.4}>
       <>
-        <TouchableOpacity onPress={handleProfileClick}>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: '../profile/[username]',
+              params: { username: item.user.username }
+            })
+          }
+        >
           <Image
             source={
               item.profileImage

@@ -1,4 +1,6 @@
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { router } from 'expo-router';
+import { useAtomValue } from 'jotai';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const window = Dimensions.get('window');
@@ -30,10 +32,23 @@ const styles = StyleSheet.create({
 });
 
 export default function HomeHeader() {
+  const userData = useAtomValue(authenticatedAtom);
+
+  if (!userData) {
+    return <></>;
+  }
+
   return (
     <>
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => router.replace('/profile')}>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: `/(app)/profile/[username]`,
+              params: { username: userData?.username }
+            })
+          }
+        >
           <Image
             style={StyleSheet.compose(styles.logo, styles.profile_logo)}
             source={require('@/assets/images/messi.jpg')}

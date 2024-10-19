@@ -50,7 +50,8 @@ const SignUp: () => React.JSX.Element = () => {
         `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/register`,
         form,
         {
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000,
         }
       );
       if (response.status === 200) {
