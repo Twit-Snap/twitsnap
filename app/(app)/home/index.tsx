@@ -195,7 +195,7 @@ export default function FeedScreen() {
           authorId: userData?.id,
           authorName: userData?.name,
           authorUsername: userData?.username,
-          content: tweetContent
+          content: tweetContent.trim()
         },
         {
           headers: {
