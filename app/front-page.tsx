@@ -30,7 +30,7 @@ export default function FrontPage() {
     const loadAuth = async () => {
       console.log('effect', authAtom);
       if (!authAtom) {
-        const session: string | null = await AsyncStorage.getItem('auth');
+        const session: string | null = null; //await AsyncStorage.getItem('auth');
         console.log('if effect', session);
 
         if (!session) {
@@ -90,7 +90,9 @@ export default function FrontPage() {
       const authData = {
         uid,
         providerId,
-        token
+        token,
+        username: userCreds.user.email?.split('@')[0],
+        birthdate: '2001-01-01'
       };
       try {
         const response = await axios.post(
@@ -112,6 +114,7 @@ export default function FrontPage() {
           alert('Invalid username or password');
         } else {
           console.error('Error:', JSON.stringify(error, null, 2));
+          console.error('Error data:', JSON.stringify(error.response?.data, null, 2));
           alert('An error occurred. Please try again later.');
         }
       }
@@ -133,6 +136,7 @@ export default function FrontPage() {
   const handleGoogleSignIn = useCallback(async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
       const response = await GoogleSignin.signIn();
 
       console.log('success', JSON.stringify(response, null, 2));
@@ -142,7 +146,6 @@ export default function FrontPage() {
         console.log('idToken', idToken);
         const credential = auth.GoogleAuthProvider.credential(idToken);
         console.log('credential', JSON.stringify(credential, null, 2));
-        // const { accessToken } = await GoogleSignin.getTokens();
         const userCredential = await auth().signInWithCredential(credential);
 
         // Get the Firebase ID token
