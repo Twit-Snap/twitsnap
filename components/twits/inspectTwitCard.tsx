@@ -1,10 +1,9 @@
 import axios from 'axios';
-import { formatDistanceToNow, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
 
@@ -18,62 +17,49 @@ interface TweetCardProps {
   item: TwitSnap;
 }
 
-const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
+const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const userData = useAtomValue(authenticatedAtom);
   const router = useRouter(); // Obtener el objeto de router
   const segments = useSegments(); // Obtener la ruta actual
 
   const formatDate = (dateString: string): string => {
-    const date = parseISO(dateString);
-    const now = new Date();
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-
-    if (diffInHours > 24) {
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-    } else {
-      return formatDistanceToNow(date, { addSuffix: true });
-    }
+      const date = parseISO(dateString);
+      const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const formattedDate = date.toISOString().split('T')[0];
+      return `${time} | ${formattedDate}`;
   };
 
-  const renderContent = (text: string) => {
-    const words = text.split(' ');
+    const renderContent = (text: string) => {
+      const words = text.split(' ');
+      return (
+        <Text>
+          {words.map((word, index) => {
+            if (word.startsWith('#')) {
+              return (
+                <Text key={index}>
+                  <Text
+                    onPress={() =>
+                      router.push({
+                        pathname: `/searchResults`,
+                        params: { query: word }
+                      })
+                    }
+                    style={styles.hashtag}
+                  >
+                    {word}
+                  </Text>{' '}
+                </Text>
+              );
+            }
+            return <Text key={index}>{word} </Text>;
+          })}
+        </Text>
+      );
+    };
+
     return (
-      <Text>
-        {words.map((word, index) => {
-          if (word.startsWith('#')) {
-            return (
-              <Text key={index}>
-                <Text
-                  onPress={() =>
-                    router.push({ pathname: `/searchResults`,
-                      params: { query: word } })
-                  }
-                  style={styles.hashtag}
-                >
-                  {word}
-                </Text>{' '}
-              </Text>
-            );
-          }
-          return <Text key={index}>{word} </Text>;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <TouchableOpacity style={styles.container} activeOpacity={0.4}
-      onPress={() =>
-      router.push({
-        pathname: '../twitView',
-        params: { id: item.id }
-      })
-    }>
       <>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity
           onPress={() =>
             router.push({
@@ -91,19 +77,16 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
             style={styles.profileImage}
           />
         </TouchableOpacity>
-        <View style={{ flex: 1, flexDirection: 'column' }}>
+      <View style={{ marginLeft: 10 }}>
+        <Text style={styles.name}>{item.user.name}</Text>
+        <Text style={styles.username}>@{item.user.username}</Text>
+      </View>
+    </View>
+        <View style={{ flexDirection: 'column' }}>
           <View style={styles.contentContainer}>
-            <Text style={styles.name}>
-              {item.user.name}{' '}
-              <Text style={styles.username}>
-                @{item.user.username}
-                <Text style={styles.dot}>{' - '}</Text>
-                <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
-              </Text>
-            </Text>
             <Text style={styles.content}>{renderContent(item.content)}</Text>
           </View>
-          <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
+          <View style={{ flexDirection: 'row' }}>
             <Interaction
               icon="comment-outline"
               initState={false}
@@ -133,51 +116,51 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
               handler={async (state: boolean, count: number): Promise<handlerReturn> => {
                 return state
                   ? {
-                      state: await axios
-                        .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
-                          data: {
-                            twitId: item.id
-                          },
+                    state: await axios
+                      .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
+                        data: {
+                          twitId: item.id
+                        },
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${userData?.token}`
+                        }
+                      })
+                      .then(() => !state)
+                      .catch((error) => {
+                        console.error(error);
+                        return state;
+                      }),
+                    count: count - 1
+                  }
+                  : {
+                    state: await axios
+                      .post(
+                        `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
+                        {
+                          twitId: item.id
+                        },
+                        {
                           headers: {
                             'Content-Type': 'application/json',
                             Authorization: `Bearer ${userData?.token}`
                           }
-                        })
-                        .then(() => !state)
-                        .catch((error) => {
-                          console.error(error);
-                          return state;
-                        }),
-                      count: count - 1
-                    }
-                  : {
-                      state: await axios
-                        .post(
-                          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
-                          {
-                            twitId: item.id
-                          },
-                          {
-                            headers: {
-                              'Content-Type': 'application/json',
-                              Authorization: `Bearer ${userData?.token}`
-                            }
-                          }
-                        )
-                        .then(() => !state)
-                        .catch((error) => {
-                          console.error(error);
-                          return state;
-                        }),
-                      count: count + 1
-                    };
+                        }
+                      )
+                      .then(() => !state)
+                      .catch((error) => {
+                        console.error(error);
+                        return state;
+                      }),
+                    count: count + 1
+                  };
               }}
             />
           </View>
+          <Text style={[styles.date]}>{formatDate(item.createdAt)}</Text>
         </View>
       </>
-    </TouchableOpacity>
-  );
+    )
 };
 
 const styles = StyleSheet.create({
@@ -189,12 +172,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(5 5 5)'
   },
   profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 25
+      width: 50,
+      height: 50,
+    borderRadius: 25,
+    marginLeft: 10
   },
   contentContainer: {
-    flex: 1,
     marginLeft: 10
   },
   name: {
@@ -208,12 +191,15 @@ const styles = StyleSheet.create({
     fontSize: 14
   },
   content: {
-    fontSize: 14,
-    color: 'rgb(220 220 220)'
+    fontSize: 18,
+    paddingVertical: 5,
+    color: 'rgb(220 220 220)',
   },
   date: {
-    fontSize: 12,
-    color: 'rgb(120 120 120)'
+    fontSize: 14,
+    color: 'rgb(120 120 120)',
+    marginLeft: 10,
+    marginTop: 5,
   },
   hashtag: {
     color: 'rgb(67,67,244)'
@@ -237,4 +223,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default TweetCard;
+export default InspectTweetCard;
