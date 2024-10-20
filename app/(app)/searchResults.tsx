@@ -116,8 +116,7 @@ export default function SearchResultsScreen() {
     <View style={styles.container}>
       <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
       {tweets && users ? (
-        // true || users.length > 0 ? (
-        true ? (
+        users.length > 0 ? (
           <View
             style={{
               paddingHorizontal: 10,
