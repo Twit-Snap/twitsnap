@@ -8,7 +8,7 @@ import {
   statusCodes,
   User
 } from '@react-native-google-signin/google-signin';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
@@ -60,18 +60,22 @@ export default function FrontPage() {
             headers: { 'Content-Type': 'application/json' }
           }
         );
+        console.log('response', response);
         if (response.status === 200) {
           await AsyncStorage.setItem('auth', JSON.stringify(response.data));
           setAuthAtom(response.data);
           console.log('Login success: ', response.data);
           router.replace('/');
+          console.log('Login success: after');
         }
-      } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-          console.log('Login failed: ', error.response.data);
+      } catch (error) {
+        const errorAux = error as AxiosError;
+        if (errorAux.response && errorAux.response.status === 401) {
+          console.log('Login failed: ', errorAux.response.data);
           alert('Invalid username or password');
         } else {
-          console.error('Error:', JSON.stringify(error, null, 2));
+          console.error('Error:', JSON.stringify(errorAux, null, 2));
+          console.error('Error data:', JSON.stringify(errorAux.response?.data, null, 2));
           alert('An error occurred. Please try again later.');
         }
       }
