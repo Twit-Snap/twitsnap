@@ -39,7 +39,7 @@ export default function SearchResultsScreen() {
         try {
           const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
             headers: { Authorization: `Bearer ${userData?.token}` },
-            params: { hashtag: query },
+            params: { has: query },
             timeout: 10000
           });
 
@@ -117,7 +117,7 @@ export default function SearchResultsScreen() {
       <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
       {tweets && users ? (
         // true || users.length > 0 ? (
-        true ? (
+        (
           <View
             style={{
               paddingHorizontal: 10,
@@ -137,8 +137,6 @@ export default function SearchResultsScreen() {
               keyExtractor={(item) => item.id.toString()}
             />
           </View>
-        ) : (
-          <></>
         )
       ) : (
         <></>
