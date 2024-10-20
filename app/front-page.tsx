@@ -48,15 +48,13 @@ export default function FrontPage() {
   const handleDirectGoogleLogin = useCallback(
     async (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
       const { uid } = userCreds.user;
-      const { providerId } = userCreds.additionalUserInfo!;
       const authData = {
         uid,
-        token,
-        providerId
+        token
       };
       try {
         const response = await axios.post(
-          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/sso`,
+          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/sso/login`,
           authData,
           {
             headers: { 'Content-Type': 'application/json' }
@@ -92,7 +90,7 @@ export default function FrontPage() {
       };
       try {
         const response = await axios.post(
-          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/sso/signup`,
+          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/sso/register`,
           authData,
           {
             headers: { 'Content-Type': 'application/json' }
@@ -141,9 +139,14 @@ export default function FrontPage() {
         const credential = auth.GoogleAuthProvider.credential(idToken);
         console.log('credential', JSON.stringify(credential, null, 2));
         // const { accessToken } = await GoogleSignin.getTokens();
-        const userSignin = await auth().signInWithCredential(credential);
-        handleSuccessGoogleSignIn(userSignin, idToken!);
-        console.log('userSignin', JSON.stringify(userSignin, null, 2));
+        const userCredential = await auth().signInWithCredential(credential);
+
+        // Get the Firebase ID token
+        const firebaseIdToken = await userCredential.user.getIdToken();
+        console.log('firebaseIdToken', firebaseIdToken);
+
+        handleSuccessGoogleSignIn(userCredential, firebaseIdToken!);
+        console.log('userSignin', JSON.stringify(userCredential, null, 2));
       } else {
         // sign in was cancelled by user
         console.log('signin cancelled');
