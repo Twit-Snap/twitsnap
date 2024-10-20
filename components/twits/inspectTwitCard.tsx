@@ -2,12 +2,16 @@ import axios from 'axios';
 import { parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
-import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Animated, Dimensions, Image, Keyboard, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
 
 import Interaction, { handlerReturn } from './interaction';
+import { IconButton } from 'react-native-paper';
+import { useAtom } from 'jotai/index';
+import { showTabsAtom } from '@/atoms/showTabsAtom';
+import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -17,10 +21,19 @@ interface TweetCardProps {
   item: TwitSnap;
 }
 
+const window = Dimensions.get('screen');
+
 const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const userData = useAtomValue(authenticatedAtom);
   const router = useRouter(); // Obtener el objeto de router
   const segments = useSegments(); // Obtener la ruta actual
+
+  const [animatedValue] = useState(new Animated.Value(window.height));
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isExpandedRef = useRef(false);
+
+  const [showTabs, setShowTabs] = useAtom(showTabsAtom);
 
   const formatDate = (dateString: string): string => {
       const date = parseISO(dateString);
@@ -57,6 +70,18 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
       );
     };
 
+  const handlePress = () => {
+    setShowTabs(!showTabs);
+    Animated.timing(animatedValue, {
+      toValue: isExpanded ? window.height : 0, // Adjust the height as needed
+      duration: 300, // Animation duration in milliseconds
+      useNativeDriver: true
+    }).start(() => {
+      setIsExpanded(!isExpanded);
+    });
+    Keyboard.dismiss();
+  };
+
     return (
       <>
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -90,9 +115,11 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             <Interaction
               icon="comment-outline"
               initState={false}
-              initCount={1_023_002_230}
+              initCount={1_023_203}
               handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                console.log('asd');
+                isExpandedRef.current = !isExpandedRef.current;
+                setIsExpanded(isExpandedRef.current);
+                handlePress();
                 return { state: true, count: 0 };
               }}
             />
@@ -159,6 +186,33 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
           </View>
           <Text style={[styles.date]}>{formatDate(item.createdAt)}</Text>
         </View>
+        <Animated.View
+          style={[
+            {
+              backgroundColor: 'rgb(5 5 5)',
+              zIndex: 50,
+              position: 'absolute',
+              bottom: 0,
+              top: 0,
+              paddingTop: 35,
+              width: window.width
+            },
+            {
+              transform: [{ translateY: animatedValue }],
+              bottom: 0
+            }
+          ]}
+        >
+          <View style={{ height: window.height }}>
+            <TweetBoxFeed
+              onTweetSend={(tweetContent) => {
+                console.log("tweetContent: ", tweetContent);
+              }}
+              onClose={handlePress}
+              placeholder={`Replying to @${item.user.username}`}
+            />
+          </View>
+        </Animated.View>
       </>
     )
 };
