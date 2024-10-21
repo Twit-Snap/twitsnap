@@ -49,8 +49,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
               <Text key={index}>
                 <Text
                   onPress={() =>
-                    router.push({ pathname: `/searchResults`,
-                      params: { query: word } })
+                    router.push({ pathname: `/searchResults`, params: { query: word } })
                   }
                   style={styles.hashtag}
                 >
@@ -66,13 +65,16 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
   };
 
   return (
-    <TouchableOpacity style={styles.container} activeOpacity={0.4}
+    <TouchableOpacity
+      style={styles.container}
+      activeOpacity={0.4}
       onPress={() =>
-      router.push({
-        pathname: '../twitView',
-        params: { id: item.id }
-      })
-    }>
+        router.push({
+          pathname: '../twitView',
+          params: { id: item.id }
+        })
+      }
+    >
       <>
         <TouchableOpacity
           onPress={() =>
@@ -84,11 +86,11 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
         >
           <Image
             source={
-              item.profileImage
-                ? { uri: item.profileImage }
+              item.profilePicture
+                ? { uri: item.profilePicture }
                 : default_images.default_profile_picture
             }
-            style={styles.profileImage}
+            style={styles.profilePicture}
           />
         </TouchableOpacity>
         <View style={{ flex: 1, flexDirection: 'column' }}>
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgb(25 25 25)',
     backgroundColor: 'rgb(5 5 5)'
   },
-  profileImage: {
+  profilePicture: {
     width: 40,
     height: 40,
     borderRadius: 25

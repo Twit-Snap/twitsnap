@@ -24,7 +24,7 @@ import axios from 'axios';
 
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
- const intervalMinutes = 10 * 60 * 1000;
+const intervalMinutes = 10 * 60 * 1000;
 //const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
@@ -138,7 +138,7 @@ export default function FeedScreen() {
     newTwits = await fetchTweets(params);
 
     if (newTwits.length > 0) {
-      // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
+      // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profilePictureURL)],
       setNeedRefresh(true);
     }
   };

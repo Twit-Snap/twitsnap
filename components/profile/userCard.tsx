@@ -46,9 +46,11 @@ export default function UserCard({ item }: { item: IReducedUser }) {
       <>
         <Image
           source={
-            item.profileImage ? { uri: item.profileImage } : default_images.default_profile_picture
+            item.profilePicture
+              ? { uri: item.profilePicture }
+              : default_images.default_profile_picture
           }
-          style={styles.profileImage}
+          style={styles.profilePicture}
         />
         <View style={{ flex: 1, flexDirection: 'column' }}>
           <View style={styles.contentContainer}>
@@ -71,7 +73,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgb(50 50 50)',
     backgroundColor: 'rgb(5 5 5)'
   },
-  profileImage: {
+  profilePicture: {
     width: 40,
     height: 40,
     borderRadius: 25

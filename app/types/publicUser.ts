@@ -4,10 +4,14 @@ export interface SearchedUser {
   id: number;
   username: string;
   name: string;
+  lastname: string;
+  email: string;
+  providerId: string;
+  ssoUid: string;
   description: string;
   birthdate: string;
   createdAt: string;
-  profileImage: string;
+  profilePicture: string;
   backgroundImage: string;
   twits: TwitSnap[];
   following: boolean;
@@ -21,5 +25,5 @@ export interface IReducedUser {
   name: string;
   username: string;
   description: string;
-  profileImage: string;
+  profilePicture: string;
 }

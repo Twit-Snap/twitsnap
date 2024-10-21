@@ -1,6 +1,13 @@
+import { useAtom } from 'jotai';
 import React, { useState } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { Button, IconButton, TextInput } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+
+const default_images = {
+  default_profile_picture: require('../../assets/images/no-profile-picture.png')
+};
 
 interface NewTweetInputProps {
   onTweetSend: (tweetContent: string) => void;
@@ -10,6 +17,7 @@ interface NewTweetInputProps {
 
 const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, placeholder }) => {
   const [tweetContent, setTweetContent] = useState<string>('');
+  const [userData] = useAtom(authenticatedAtom);
 
   const handleSendTweet = () => {
     if (tweetContent.trim().length > 0) {
@@ -48,7 +56,14 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, pla
         </Button>
       </View>
       <View style={styles.container}>
-        <Image style={styles.profile_logo} source={require('@/assets/images/messi.jpg')} />
+        <Image
+          style={styles.profile_logo}
+          source={
+            userData?.profilePicture
+              ? { uri: userData?.profilePicture }
+              : default_images.default_profile_picture
+          }
+        />
         <TextInput
           style={styles.input}
           cursorColor="rgb(255 255 255)"

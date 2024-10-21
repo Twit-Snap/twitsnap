@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import { useAtom, useAtomValue } from 'jotai';
+import { StatusBar } from 'react-native';
 
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 
-import { StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authenticatedAtom } from '../authAtoms/authAtom';
 

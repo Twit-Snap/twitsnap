@@ -31,7 +31,7 @@ export default function LargeUserCard({ item }: { item: SearchedUser }) {
         style={styles.backgroundImage}
       />
       <Image
-        source={item.profileImage ? { uri: item.profileImage } : default_images.profilePhoto}
+        source={item.profilePicture ? { uri: item.profilePicture } : default_images.profilePhoto}
         style={styles.profilePhoto}
       />
       <View

@@ -152,7 +152,7 @@ export default function PublicProfileScreen() {
               <ProfileHeader
                 user={searchUserData}
                 bio={"Hi! Welcome to my profile. \nI'm a huge Messi fan!"}
-                profilePhoto={/*searchUserData.profilePhoto ||*/ ''}
+                profilePhoto={searchUserData.profilePicture || ''}
                 bannerPhoto={/*searchUserData.bannerPhoto ||*/ ''}
               />
               <View style={styles.divider} />
