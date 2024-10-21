@@ -73,6 +73,10 @@ const SignUp: () => React.JSX.Element = () => {
       } else {
         console.error('Error:', error);
         alert('Error! Some fields are missing or have incorrect format.');
+        console.error('Error response: ', error.response);
+        console.error('Error request: ', error.request);
+        console.error('error message: ', error.message);
+        console.error('error config: ', error.config);
       }
     }
   };
