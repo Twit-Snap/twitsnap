@@ -136,6 +136,8 @@ export default function SearchResultsScreen() {
               keyExtractor={(item) => item.id.toString()}
             />
           </View>
+        ) : (
+          <></>
         )
       ) : (
         <></>
