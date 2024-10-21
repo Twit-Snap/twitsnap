@@ -1,8 +1,7 @@
-import { router } from 'expo-router';
-import { useAtom } from 'jotai';
-import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { router } from 'expo-router';
+import { useAtomValue } from 'jotai';
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -37,12 +36,23 @@ const styles = StyleSheet.create({
 });
 
 export default function HomeHeader() {
-  const [userData] = useAtom(authenticatedAtom);
+  const userData = useAtomValue(authenticatedAtom);
+
+  if (!userData) {
+    return <></>;
+  }
 
   return (
     <>
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => router.replace('/profile')}>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: `/(app)/profile/[username]`,
+              params: { username: userData?.username }
+            })
+          }
+        >
           <Image
             style={StyleSheet.compose(styles.logo, styles.profile_logo)}
             source={

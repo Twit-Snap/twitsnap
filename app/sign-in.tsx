@@ -35,7 +35,8 @@ const SignIn: () => React.JSX.Element = () => {
         `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/login`,
         form,
         {
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000,
         }
       );
 

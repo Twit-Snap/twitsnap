@@ -12,9 +12,10 @@ const default_images = {
 interface NewTweetInputProps {
   onTweetSend: (tweetContent: string) => void;
   onClose: () => void;
+  placeholder?: string;
 }
 
-const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose }) => {
+const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, placeholder }) => {
   const [tweetContent, setTweetContent] = useState<string>('');
   const [userData] = useAtom(authenticatedAtom);
 
@@ -73,7 +74,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose }) =
           }}
           contentStyle={{ padding: 10 }}
           mode="outlined"
-          placeholder="What's happening?"
+          placeholder={placeholder || "What's happening?"}
           value={tweetContent}
           onChangeText={setTweetContent}
           multiline

@@ -19,12 +19,13 @@ import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
+import removeDuplicates from '@/utils/removeDup';
+import axios from 'axios';
 
-const axios = require('axios').default;
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
-// const intervalMinutes = 10 * 60 * 1000;
-const intervalMinutes = 10 * 1000;
+const intervalMinutes = 10 * 60 * 1000;
+//const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -50,7 +51,7 @@ export default function FeedScreen() {
         let new_twits: TwitSnap[] = [];
 
         if (prev_twits && newTwits) {
-          new_twits = [...newTwits, ...prev_twits];
+          new_twits = removeDuplicates([...newTwits, ...prev_twits]);
           newerTwitRef.current = new_twits[0];
           newTwits = null;
         }
@@ -108,6 +109,8 @@ export default function FeedScreen() {
     }
 
     const params = {
+      username: userData?.username,
+      rank: true,
       limit: 20,
       byFollowed: byFollowed
     };
@@ -126,13 +129,16 @@ export default function FeedScreen() {
     const params = {
       createdAt: newerTwit ? newerTwit.createdAt : undefined,
       older: false,
-      limit: 100,
-      byFollowed: isActualFeedTypeFollowing.current
+      byFollowed: isActualFeedTypeFollowing.current,
+      username: userData?.username,
+      rank: true,
+      limit: 100
     };
 
     newTwits = await fetchTweets(params);
+
     if (newTwits.length > 0) {
-      // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
+      // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profilePictureURL)],
       setNeedRefresh(true);
     }
   };
@@ -150,7 +156,7 @@ export default function FeedScreen() {
       byFollowed: isActualFeedTypeFollowing.current
     };
 
-    const olderTwits: TwitSnap[] = await fetchTweets(params);
+    let olderTwits: TwitSnap[] = await fetchTweets(params);
 
     if (olderTwits.length === 0) {
       return;
@@ -160,24 +166,31 @@ export default function FeedScreen() {
       if (!prev_twits) {
         return olderTwits;
       }
-      return [...prev_twits, ...olderTwits];
+      return removeDuplicates([...prev_twits, ...olderTwits]);
     });
   };
 
   const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
-    let tweets: TwitSnap[] = [];
-    try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
+    var twits: TwitSnap[] = [];
+
+    await axios
+      .get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
         headers: { Authorization: `Bearer ${userData?.token}` },
         params: queryParams
+      })
+      .then((response) => {
+        console.log('Fetched: ', response.data.data.length, ' twits');
+        twits = response.data.data;
+      })
+      .catch((error) => {
+        console.error('Error response: ', error.response);
+        console.error('Error requeest: ', error.request);
+        console.error('error message: ', error.message);
+        console.error('error config: ', error.config);
+        alert('An error occurred. Please try again later.');
       });
-      tweets = response.data.data;
-      console.log('Fetched: ', tweets.length, ' twits');
-    } catch (error: any) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again later.');
-    }
-    return tweets;
+
+    return twits;
   };
 
   const sendTwit = async (tweetContent: string) => {
@@ -188,13 +201,14 @@ export default function FeedScreen() {
           authorId: userData?.id,
           authorName: userData?.name,
           authorUsername: userData?.username,
-          content: tweetContent
+          content: tweetContent.trim()
         },
         {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${userData?.token}`
-          }
+          },
+          timeout: 10000
         }
       );
       console.log('Twit sent: ', response.data);
@@ -284,7 +298,7 @@ export default function FeedScreen() {
           height: 55,
           borderRadius: 200,
           position: 'absolute',
-          top: window.height * 0.83,
+          top: window.height * 0.78,
           right: 15
         }}
         iconColor="rgb(255 255 255)"

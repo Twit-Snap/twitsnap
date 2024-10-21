@@ -45,7 +45,10 @@ export default function Interaction({
       onPress={async () => {
         const ret = await handler(state, count);
         setState(ret.state);
-        setCount(ret.count);
+
+        if (initCount) {
+          setCount(ret.count);
+        }
       }}
     >
       <IconButton
@@ -54,7 +57,7 @@ export default function Interaction({
         size={20}
         iconColor={icon_alt ? (state ? icon_alt_color : undefined) : undefined}
       />
-      <Text style={styles.interaction_label}>{count ? parseInteractionCount(count) : 0}</Text>
+      <Text style={styles.interaction_label}>{count != undefined ? parseInteractionCount(count) : ''}</Text>
     </TouchableOpacity>
   );
 }

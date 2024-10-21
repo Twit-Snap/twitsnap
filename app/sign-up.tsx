@@ -49,7 +49,8 @@ const SignUp: () => React.JSX.Element = () => {
         `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/register`,
         form,
         {
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000,
         }
       );
       if (response.status === 200) {
@@ -71,6 +72,10 @@ const SignUp: () => React.JSX.Element = () => {
       } else {
         console.error('Error:', JSON.stringify(error, null, 2));
         alert('Error! Some fields are missing or have incorrect format.');
+        console.error('Error response: ', error.response);
+        console.error('Error request: ', error.request);
+        console.error('error message: ', error.message);
+        console.error('error config: ', error.config);
       }
     }
   };

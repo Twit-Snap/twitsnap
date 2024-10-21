@@ -5,15 +5,25 @@ export interface SearchedUser {
   username: string;
   name: string;
   lastname: string;
-  birthdate: string;
-  createdAt: string;
   email: string;
-  profilePicture: string;
   providerId: string;
   ssoUid: string;
-  followed: boolean;
-  followersCount: number;
+  description: string;
+  birthdate: string;
+  createdAt: string;
+  profilePicture: string;
+  backgroundImage: string;
+  twits: TwitSnap[];
   following: boolean;
   followingCount: number;
-  twits: TwitSnap[];
+  followersCount: number;
+  followed: boolean;
+}
+
+export interface IReducedUser {
+  id: number;
+  name: string;
+  username: string;
+  description: string;
+  profilePicture: string;
 }
