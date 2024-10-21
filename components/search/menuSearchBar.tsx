@@ -1,7 +1,8 @@
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
-import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Dimensions, Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 const window = Dimensions.get('window');
 
@@ -25,14 +26,39 @@ const styles = StyleSheet.create({
     borderRadius: 200,
     alignSelf: 'center'
   },
-  fake_container: {
-    width: 40,
-    height: 40
+  searchbar: {
+    backgroundColor: 'rgb(46 46 46)',
+    width: window.width * 0.8,
+    height: 35,
+    marginHorizontal: 10,
+    paddingHorizontal: 20,
+    borderRadius: 200,
+    color: 'rgb(255 255 255)',
+    fontSize: 16
+  },
+  trendingText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+    color: 'rgb(255 255 255)'
+  },
+  chipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginVertical: 10
   }
 });
 
-export default function HomeHeader() {
+export default function MenuSearchBar() {
   const userData = useAtomValue(authenticatedAtom);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSubmit = () => {
+    if (searchQuery.length > 0) {
+      router.push({ pathname: `/searchResults`, params: { query: searchQuery } });
+      setSearchQuery('');
+    }
+  };
 
   if (!userData) {
     return <></>;
@@ -54,11 +80,15 @@ export default function HomeHeader() {
             source={require('@/assets/images/messi.jpg')}
           />
         </TouchableOpacity>
-        <Image
-          style={StyleSheet.compose(styles.logo, { marginTop: 5 })}
-          source={require('@/assets/images/logo.png')}
+        <TextInput
+          placeholder={'Search TwitSnap'}
+          placeholderTextColor="rgb(150 150 150)"
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          style={styles.searchbar}
+          maxLength={80}
+          onSubmitEditing={handleSubmit}
         />
-        <View style={styles.fake_container} />
       </View>
     </>
   );

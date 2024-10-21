@@ -49,7 +49,8 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
               <Text key={index}>
                 <Text
                   onPress={() =>
-                    router.push({ pathname: `/searchResults`, params: { hashtag: word } })
+                    router.push({ pathname: `/searchResults`,
+                      params: { query: word } })
                   }
                   style={styles.hashtag}
                 >
@@ -64,34 +65,17 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
     );
   };
 
-  const handleProfileClick = () => {
-    const isOwnProfile = userData?.username === item.user.username;
-    const currentRoute = segments.join('/');
-
-    const ownProfileRoute = '/profile';
-    const publicProfileRoute = `../searchProfile/[username]`;
-
-    if (
-      (isOwnProfile && currentRoute === ownProfileRoute) ||
-      (!isOwnProfile && currentRoute === `/searchProfile/${item.user.username}`)
-    ) {
-      return;
-    } else {
-      if (isOwnProfile) {
-        router.push(ownProfileRoute);
-      } else {
-        router.push({
-          pathname: publicProfileRoute,
-          params: { username: item.user.username }
-        });
-      }
-    }
-  };
-
   return (
     <TouchableOpacity style={styles.container} activeOpacity={0.4}>
       <>
-        <TouchableOpacity onPress={handleProfileClick}>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: '../profile/[username]',
+              params: { username: item.user.username }
+            })
+          }
+        >
           <Image
             source={
               item.profileImage
@@ -195,7 +179,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgb(50 50 50)',
+    borderBottomColor: 'rgb(25 25 25)',
     backgroundColor: 'rgb(5 5 5)'
   },
   profileImage: {
