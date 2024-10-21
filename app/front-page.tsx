@@ -5,8 +5,7 @@ import {
   GoogleSigninButton,
   isErrorWithCode,
   isSuccessResponse,
-  statusCodes,
-  User
+  statusCodes
 } from '@react-native-google-signin/google-signin';
 import axios, { AxiosError } from 'axios';
 import { router } from 'expo-router';
@@ -24,21 +23,25 @@ const window = Dimensions.get('window');
 
 export default function FrontPage() {
   const [authAtom, setAuthAtom] = useAtom(authenticatedAtom);
-  const [googleAuth, setGoogleAuth] = useState<{ userInfo: User } | undefined>();
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const [isInProgress, setIsInProgress] = useState(false);
 
   useEffect(() => {
     const loadAuth = async () => {
       console.log('effect', authAtom);
       if (!authAtom) {
-        const session: string | null = null; //await AsyncStorage.getItem('auth');
+        const session: string | null = await AsyncStorage.getItem('auth');
         console.log('if effect', session);
 
         if (!session) {
+          setIsLoadingSession(false);
           return;
         }
 
         setAuthAtom(JSON.parse(session));
         router.replace('/');
+      } else {
+        setIsLoadingSession(false);
       }
     };
 
@@ -135,13 +138,13 @@ export default function FrontPage() {
 
   const handleGoogleSignIn = useCallback(async () => {
     try {
+      setIsInProgress(true);
       await GoogleSignin.hasPlayServices();
       await GoogleSignin.signOut();
       const response = await GoogleSignin.signIn();
 
       console.log('success', JSON.stringify(response, null, 2));
       if (isSuccessResponse(response)) {
-        setGoogleAuth({ userInfo: response.data });
         const idToken = response.data.idToken;
         console.log('idToken', idToken);
         const credential = auth.GoogleAuthProvider.credential(idToken);
@@ -176,80 +179,92 @@ export default function FrontPage() {
         console.error('Unknown error', error);
       }
     }
+    setIsInProgress(false);
   }, [handleSuccessGoogleSignIn]);
 
   return (
-    <View style={styles.container}>
-      <Text
-        style={{
-          fontSize: 35,
-          fontWeight: '300',
-          textAlign: 'center',
-          marginBottom: 10,
-          marginVertical: 10
-        }}
-      >
-        Everything you love about Twitter,
-      </Text>
-      <Text style={{ fontSize: 60, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>
-        but better.
-      </Text>
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../assets/images/logo_light.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>
-          Already have an account?
-        </Text>
-        <Button
-          icon="account-outline"
-          mode="contained"
-          buttonColor={'#000'}
-          style={styles.buttonContent}
-          onPress={() => {
-            // call login API
-            router.push('/sign-in');
-          }}
-        >
-          Log In
-        </Button>
-      </View>
-      <View style={styles.buttonContainer}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>
-          New to TwitSnap?
-        </Text>
-        <Button
-          icon="account-plus-outline"
-          mode="contained"
-          buttonColor={'#000'}
-          style={styles.buttonContent}
-          onPress={() => {
-            router.push('/sign-up');
-          }}
-        >
-          Sign up
-        </Button>
-      </View>
-      <View style={styles.buttonContainer}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>
-          Or continue with
-        </Text>
-        <GoogleSigninButton
-          size={GoogleSigninButton.Size.Wide}
-          color={GoogleSigninButton.Color.Dark}
-          onPress={() => {
-            handleGoogleSignIn();
-            // initiate sign in
-          }}
-          // disabled={isInProgress}
-        />
-        <Text>{googleAuth?.userInfo.user.email}</Text>
-      </View>
-    </View>
+    <>
+      {isLoadingSession ? (
+        <Text>Loading...</Text>
+      ) : (
+        <View style={styles.container}>
+          <Text
+            style={{
+              fontSize: 35,
+              fontWeight: '300',
+              textAlign: 'center',
+              marginBottom: 10,
+              marginVertical: 10
+            }}
+          >
+            Everything you love about Twitter,
+          </Text>
+          <Text style={{ fontSize: 60, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>
+            but better.
+          </Text>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../assets/images/logo_light.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+          <View style={styles.buttonContainer}>
+            <Text
+              style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}
+            >
+              Already have an account?
+            </Text>
+            <Button
+              icon="account-outline"
+              mode="contained"
+              buttonColor={'#000'}
+              style={styles.buttonContent}
+              onPress={() => {
+                // call login API
+                router.push('/sign-in');
+              }}
+            >
+              Log In
+            </Button>
+          </View>
+          <View style={styles.buttonContainer}>
+            <Text
+              style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}
+            >
+              New to TwitSnap?
+            </Text>
+            <Button
+              icon="account-plus-outline"
+              mode="contained"
+              buttonColor={'#000'}
+              style={styles.buttonContent}
+              onPress={() => {
+                router.push('/sign-up');
+              }}
+            >
+              Sign up
+            </Button>
+          </View>
+          <View style={styles.buttonContainer}>
+            <Text
+              style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}
+            >
+              Or continue with
+            </Text>
+            <GoogleSigninButton
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Dark}
+              onPress={() => {
+                handleGoogleSignIn();
+                // initiate sign in
+              }}
+              disabled={isInProgress}
+            />
+          </View>
+        </View>
+      )}
+    </>
   );
 }
 
