@@ -66,7 +66,13 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
   };
 
   return (
-    <TouchableOpacity style={styles.container} activeOpacity={0.4}>
+    <TouchableOpacity style={styles.container} activeOpacity={0.4}
+      onPress={() =>
+      router.push({
+        pathname: '../twitView',
+        params: { id: item.id }
+      })
+    }>
       <>
         <TouchableOpacity
           onPress={() =>
