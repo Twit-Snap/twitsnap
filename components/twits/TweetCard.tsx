@@ -49,7 +49,8 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
               <Text key={index}>
                 <Text
                   onPress={() =>
-                    router.push({ pathname: `/searchResults`, params: { hashtag: word } })
+                    router.push({ pathname: `/searchResults`,
+                      params: { query: word } })
                   }
                   style={styles.hashtag}
                 >
