@@ -15,6 +15,7 @@ import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
 
 import { authenticatedAtom } from './authAtoms/authAtom';
+import { UserSSORegisterDto } from './types/authTypes';
 
 GoogleSignin.configure({
   webClientId: '224360780470-maj4ma0cdjlm1o2376lv28m45rvm2e8e.apps.googleusercontent.com'
@@ -29,7 +30,8 @@ export default function FrontPage() {
   useEffect(() => {
     const loadAuth = async () => {
       if (!authAtom) {
-        const session: string | null = await AsyncStorage.getItem('auth');
+        // const session: string | null = await AsyncStorage.getItem('auth');
+        const session: string | null = null;
 
         if (!session) {
           setIsLoadingSession(false);
@@ -81,54 +83,28 @@ export default function FrontPage() {
     [setAuthAtom]
   );
 
-  const handleGoogleSignUp = useCallback(
-    async (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
-      const { uid } = userCreds.user;
-      const { providerId } = userCreds.additionalUserInfo!;
-      const authData = {
-        uid,
-        providerId,
-        token,
-        username: userCreds.user.email?.split('@')[0],
-        birthdate: '2001-01-01'
-      };
-      try {
-        const response = await axios.post(
-          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/sso/register`,
-          authData,
-          {
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
-        if (response.status === 200) {
-          await AsyncStorage.setItem('auth', JSON.stringify(response.data));
-          setAuthAtom(response.data);
-          console.log('Login success: ', response.data);
-          router.replace('/');
-        }
-      } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-          console.log('Login failed: ', error.response.data);
-          alert('Invalid username or password');
-        } else {
-          console.error('Error:', JSON.stringify(error, null, 2));
-          console.error('Error data:', JSON.stringify(error.response?.data, null, 2));
-          alert('An error occurred. Please try again later.');
-        }
-      }
-    },
-    [setAuthAtom]
-  );
+  const navigateToSsoSignUp = (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
+    const params: Omit<UserSSORegisterDto, 'birthdate'> = {
+      uid: userCreds.user.uid,
+      token,
+      providerId: userCreds.additionalUserInfo?.providerId || '',
+      username: userCreds.user.email?.split('@')[0] || ''
+    };
+    router.push({
+      pathname: '/sso-sign-up',
+      params
+    });
+  };
 
   const handleSuccessGoogleSignIn = useCallback(
     async (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
       if (userCreds.additionalUserInfo?.isNewUser) {
-        handleGoogleSignUp(userCreds, token);
+        navigateToSsoSignUp(userCreds, token);
         return;
       }
       handleDirectGoogleLogin(userCreds, token);
     },
-    [handleDirectGoogleLogin, handleGoogleSignUp]
+    [handleDirectGoogleLogin]
   );
 
   const handleGoogleSignIn = useCallback(async () => {
