@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { parseISO } from 'date-fns';
-import { router, useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React, { useRef, useState } from 'react';
 import { Animated, Dimensions, Image, Keyboard, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

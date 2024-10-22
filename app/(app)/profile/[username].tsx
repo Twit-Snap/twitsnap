@@ -18,9 +18,12 @@ import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
 
 import { authenticatedAtom } from '../../authAtoms/authAtom';
+import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 
 export default function PublicProfileScreen() {
   const [userData] = useAtom(authenticatedAtom);
+  const [fetchDeletedTwits, setDeletedTwits] = useAtom(tweetDeleteAtom);
+
   const { username } = useLocalSearchParams<{ username: string }>();
 
   const [searchUserData, setSearchUserData] = useState<SearchedUser | null>(null);
@@ -67,6 +70,7 @@ export default function PublicProfileScreen() {
         : { limit: 20, username: username };
 
       try {
+
         setLoadingMore(true);
 
         const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/`, {
@@ -79,12 +83,22 @@ export default function PublicProfileScreen() {
         const newTwits = response.data.data;
 
         if (newTwits.length === 0) {
+          if (fetchDeletedTwits.shouldDelete) {
+            setTwits((prevTwits) => {
+              let twits = prevTwits?.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id)) ?? [];
+              setDeletedTwits({ shouldDelete: false, twitId: [] });
+              return twits;
+            });
+          }
           setHasMoreTwits(false);
         } else {
           setTwits((prevTwits) => {
-            if (!prevTwits) return newTwits;
-
-            return [...prevTwits, ...newTwits];
+            let twits = [...(prevTwits ?? []), ...newTwits];
+            if (fetchDeletedTwits.shouldDelete) {
+              twits = twits.filter((twit) => !fetchDeletedTwits.twitId.includes(twit._id));
+              setDeletedTwits({ shouldDelete: false, twitId: [] });
+            }
+            return twits;
           });
         }
       } catch (error) {

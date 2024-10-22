@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import axios from 'axios';
 import { useLocalSearchParams } from 'expo-router';
