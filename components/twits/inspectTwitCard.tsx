@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { parseISO } from 'date-fns';
-import { useRouter, useSegments } from 'expo-router';
+import { router, useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React, { useRef, useState } from 'react';
 import { Animated, Dimensions, Image, Keyboard, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -8,10 +8,10 @@ import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
 
 import Interaction, { handlerReturn } from './interaction';
-import { IconButton } from 'react-native-paper';
 import { useAtom } from 'jotai/index';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
+import { Divider, IconButton } from 'react-native-paper';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -84,8 +84,15 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
 
     return (
       <>
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <TouchableOpacity
+        <TouchableOpacity onPress={router.back} style={[styles.goBack, { marginTop: -28 }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <IconButton icon="arrow-left" iconColor="rgb(255 255 255)" size={24} />
+          <Text style={{ color: 'rgb(255 255 255)', fontSize: 20, marginLeft: 5 }}>Post</Text>
+          </View>
+          <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(255 255 255)' }} />
+        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop : 8 }}>
+      <TouchableOpacity
           onPress={() =>
             router.push({
               pathname: '../profile/[username]',
@@ -274,7 +281,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     fontSize: 14,
     height: 36
-  }
+  },
+  goBack: {
+    paddingRight: 9,
+    paddingTop: -10
+  },
 });
 
 export default InspectTweetCard;

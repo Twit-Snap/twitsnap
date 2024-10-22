@@ -15,6 +15,7 @@ import { SearchedUser } from '../types/publicUser';
 
 const axios = require('axios').default;
 const window = Dimensions.get('window');
+
 const parseQuery = (query: string): string => {
   query = query.trim();
 
