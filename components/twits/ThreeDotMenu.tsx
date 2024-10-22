@@ -6,41 +6,68 @@ import { IconButton } from 'react-native-paper';
 interface ThreeDotProps {
   onClose: () => void;
   onTwitDelete: () => void;
+  twitIsFromUser: boolean;
 }
 
-const ThreeDotMenu: React.FC<ThreeDotProps> = ({ onClose, onTwitDelete }) => {
+const ThreeDotMenu: React.FC<ThreeDotProps> = ({ onClose, onTwitDelete, twitIsFromUser }) => {
+
+  const getTwitMenu = () => {
+    if (twitIsFromUser) {
+      return (
+        <View style={styles.menu}>
+          <IconButton
+            icon="close"
+            size={25}
+            style={{ margin: 0 }}
+            onPress={onClose}
+            iconColor="rgb(255 255 255)"
+          />
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={onTwitDelete}
+        >
+          <Icon
+            name="trash"
+            size={20}
+            color="white"
+          />
+          <Text
+            style={styles.menuText}>
+            Delete
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem}>
+          <Icon name="pencil" size={20} color="white" />
+          <Text style={styles.menuText}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem}>
+          <Icon name="direction" size={20} color="white" />
+          <Text style={styles.menuText}>Share</Text>
+        </TouchableOpacity>
+      </View>
+        )
+    } else {
+      return (
+        <View style={styles.menu}>
+          <IconButton
+            icon="close"
+            size={25}
+            style={{ margin: 0 }}
+            onPress={onClose}
+            iconColor="rgb(255 255 255)"
+          />
+          <TouchableOpacity style={styles.menuItem}>
+            <Icon name="direction" size={20} color="white" />
+            <Text style={styles.menuText}>Share</Text>
+          </TouchableOpacity>
+        </View>
+        )
+    }
+  }
 
   return (
-    <View style={styles.menu}>
-        <IconButton
-          icon="close"
-          size={25}
-          style={{ margin: 0 }}
-          onPress={onClose}
-          iconColor="rgb(255 255 255)"
-        />
-      <TouchableOpacity
-        style={styles.menuItem}
-        onPress={onTwitDelete}
-      >
-        <Icon
-          name="trash"
-          size={20}
-          color="white"
-        />
-        <Text
-          style={styles.menuText}>
-          Delete
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.menuItem}>
-        <Icon name="pencil" size={20} color="white" />
-        <Text style={styles.menuText}>Edit</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.menuItem}>
-        <Icon name="direction" size={20} color="white" />
-        <Text style={styles.menuText}>Share</Text>
-      </TouchableOpacity>
+    <View>
+      {getTwitMenu()}
     </View>
   )
 }

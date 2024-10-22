@@ -293,6 +293,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
           <ThreeDotMenu
           onClose={handlePressThreeDot}
           onTwitDelete={onTwitDelete}
+          twitIsFromUser={item.user.username === userData?.username}
           />
         </View>
         </Animated.View>
