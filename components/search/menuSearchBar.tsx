@@ -1,8 +1,9 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import { useState } from 'react';
 import { Dimensions, Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 
 const window = Dimensions.get('window');
 
@@ -77,7 +78,11 @@ export default function MenuSearchBar() {
         >
           <Image
             style={StyleSheet.compose(styles.logo, styles.profile_logo)}
-            source={require('@/assets/images/messi.jpg')}
+            source={
+              userData?.profilePicture
+                ? { uri: userData.profilePicture }
+                : require('@/assets/images/messi.jpg')
+            }
           />
         </TouchableOpacity>
         <TextInput
