@@ -129,7 +129,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
           <IconButton icon="arrow-left" iconColor="rgb(255 255 255)" size={24} />
           <Text style={{ color: 'rgb(255 255 255)', fontSize: 20, marginLeft: 5 }}>Post</Text>
           </View>
-          <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(255 255 255)' }} />
+          <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(194,187,187)' }} />
         </TouchableOpacity>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop : 8 }}>
       <TouchableOpacity
@@ -289,7 +289,8 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             }
           ]}
         >
-        <View style={{ height: window.height, borderTopWidth: 1, borderTopColor: 'rgb(255 255 255)' }}>
+        <View style={{ borderRadius: 30}}>
+          <Divider style={{ height: 2, width: '30%', backgroundColor: 'rgb(194,187,187)', marginLeft: '35%', marginRight: '35%' }} />
           <ThreeDotMenu
           onClose={handlePressThreeDot}
           onTwitDelete={onTwitDelete}
