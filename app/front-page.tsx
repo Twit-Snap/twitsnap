@@ -28,10 +28,8 @@ export default function FrontPage() {
 
   useEffect(() => {
     const loadAuth = async () => {
-      console.log('effect', authAtom);
       if (!authAtom) {
         const session: string | null = await AsyncStorage.getItem('auth');
-        console.log('if effect', session);
 
         if (!session) {
           setIsLoadingSession(false);
@@ -63,13 +61,10 @@ export default function FrontPage() {
             headers: { 'Content-Type': 'application/json' }
           }
         );
-        console.log('response', response);
         if (response.status === 200) {
           await AsyncStorage.setItem('auth', JSON.stringify(response.data));
           setAuthAtom(response.data);
-          console.log('Login success: ', response.data);
           router.replace('/');
-          console.log('Login success: after');
         }
       } catch (error) {
         const errorAux = error as AxiosError;
@@ -143,20 +138,15 @@ export default function FrontPage() {
       await GoogleSignin.signOut();
       const response = await GoogleSignin.signIn();
 
-      console.log('success', JSON.stringify(response, null, 2));
       if (isSuccessResponse(response)) {
         const idToken = response.data.idToken;
-        console.log('idToken', idToken);
         const credential = auth.GoogleAuthProvider.credential(idToken);
-        console.log('credential', JSON.stringify(credential, null, 2));
         const userCredential = await auth().signInWithCredential(credential);
 
         // Get the Firebase ID token
         const firebaseIdToken = await userCredential.user.getIdToken();
-        console.log('firebaseIdToken', firebaseIdToken);
 
         handleSuccessGoogleSignIn(userCredential, firebaseIdToken!);
-        console.log('userSignin', JSON.stringify(userCredential, null, 2));
       } else {
         // sign in was cancelled by user
         console.log('signin cancelled');
