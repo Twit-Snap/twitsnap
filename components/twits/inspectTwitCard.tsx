@@ -12,6 +12,7 @@ import { useAtom } from 'jotai/index';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import { Divider, IconButton } from 'react-native-paper';
+import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -28,10 +29,14 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const router = useRouter(); // Obtener el objeto de router
   const segments = useSegments(); // Obtener la ruta actual
 
-  const [animatedValue] = useState(new Animated.Value(window.height));
+  const [animatedValueComment] = useState(new Animated.Value(window.height));
+  const [animatedValueThreeDot] = useState(new Animated.Value(window.height));
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const isExpandedRef = useRef(false);
+  const [isExpandedComment, setIsExpandedComment] = useState(false);
+  const isExpandedCommentRef = useRef(false);
+
+  const [isExpandedThreeDot, setIsExpandedThreeDot] = useState(false);
+  const isExpandedRefThreeDot = useRef(false);
 
   const [showTabs, setShowTabs] = useAtom(showTabsAtom);
 
@@ -70,14 +75,26 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
       );
     };
 
-  const handlePress = () => {
+  const handlePressComment = () => {
     setShowTabs(!showTabs);
-    Animated.timing(animatedValue, {
-      toValue: isExpanded ? window.height : 0, // Adjust the height as needed
+    Animated.timing(animatedValueComment, {
+      toValue: isExpandedComment ? window.height : 0, // Adjust the height as needed
       duration: 300, // Animation duration in milliseconds
       useNativeDriver: true
     }).start(() => {
-      setIsExpanded(!isExpanded);
+      setIsExpandedComment(!isExpandedComment);
+    });
+    Keyboard.dismiss();
+  };
+
+  const handlePressThreeDot = () => {
+    setShowTabs(!showTabs);
+    Animated.timing(animatedValueThreeDot, {
+      toValue: isExpandedThreeDot ?  window.height : 0, // Adjust the height as needed
+      duration: 300, // Animation duration in milliseconds
+      useNativeDriver: true
+    }).start(() => {
+      setIsExpandedThreeDot(!isExpandedThreeDot);
     });
     Keyboard.dismiss();
   };
@@ -109,9 +126,21 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             style={styles.profileImage}
           />
         </TouchableOpacity>
-      <View style={{ marginLeft: 10 }}>
-        <Text style={styles.name}>{item.user.name}</Text>
-        <Text style={styles.username}>@{item.user.username}</Text>
+      <View style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center' }}>
+        <View>
+          <Text style={styles.name}>{item.user.name}</Text>
+          <Text style={styles.username}>@{item.user.username}</Text>
+        </View>
+          <IconButton
+            icon="dots-horizontal"
+            style={{ position : "absolute", left: window.width - 120 }}
+            size={24}
+            onPress={() => {
+              isExpandedRefThreeDot.current = !isExpandedRefThreeDot.current;
+              setIsExpandedThreeDot(isExpandedRefThreeDot.current);
+              handlePressThreeDot();
+            }}
+          />
       </View>
     </View>
         <View style={{ flexDirection: 'column' }}>
@@ -124,9 +153,9 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
               initState={false}
               initCount={1_023_203}
               handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                isExpandedRef.current = !isExpandedRef.current;
-                setIsExpanded(isExpandedRef.current);
-                handlePress();
+                isExpandedCommentRef.current = !isExpandedCommentRef.current;
+                setIsExpandedComment(isExpandedCommentRef.current);
+                handlePressComment();
                 return { state: true, count: 0 };
               }}
             />
@@ -205,7 +234,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
               width: window.width
             },
             {
-              transform: [{ translateY: animatedValue }],
+              transform: [{ translateY: animatedValueComment }],
               bottom: 0
             }
           ]}
@@ -215,10 +244,33 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
               onTweetSend={(tweetContent) => {
                 console.log("tweetContent: ", tweetContent);
               }}
-              onClose={handlePress}
+              onClose={handlePressComment}
               placeholder={`Replying to @${item.user.username}`}
             />
           </View>
+        </Animated.View>
+        <Animated.View
+          style={[
+            {
+              backgroundColor: 'rgb(5 5 5)',
+              zIndex: 50,
+              position: 'absolute',
+              bottom: 0,
+              top: 0,
+              paddingTop: 35,
+              width: window.width
+            },
+            {
+              transform: [{ translateY: animatedValueThreeDot }],
+              top: '30%'
+            }
+          ]}
+        >
+        <View style={{ height: window.height, borderTopWidth: 1, borderTopColor: 'rgb(255 255 255)' }}>
+          <ThreeDotMenu
+          onClose={handlePressThreeDot}
+          />
+        </View>
         </Animated.View>
       </>
     )
