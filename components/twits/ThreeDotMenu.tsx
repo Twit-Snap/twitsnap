@@ -5,9 +5,10 @@ import { IconButton } from 'react-native-paper';
 
 interface ThreeDotProps {
   onClose: () => void;
+  onTwitDelete: () => void;
 }
 
-const ThreeDotMenu: React.FC<ThreeDotProps> = ({ onClose }) => {
+const ThreeDotMenu: React.FC<ThreeDotProps> = ({ onClose, onTwitDelete }) => {
 
   return (
     <View style={styles.menu}>
@@ -18,9 +19,19 @@ const ThreeDotMenu: React.FC<ThreeDotProps> = ({ onClose }) => {
           onPress={onClose}
           iconColor="rgb(255 255 255)"
         />
-      <TouchableOpacity style={styles.menuItem}>
-        <Icon name="trash" size={20} color="white" />
-        <Text style={styles.menuText}>Delete</Text>
+      <TouchableOpacity
+        style={styles.menuItem}
+        onPress={onTwitDelete}
+      >
+        <Icon
+          name="trash"
+          size={20}
+          color="white"
+        />
+        <Text
+          style={styles.menuText}>
+          Delete
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.menuItem}>
         <Icon name="pencil" size={20} color="white" />

@@ -10,6 +10,7 @@ import { TwitSnap } from '@/app/types/TwitSnap';
 import Interaction, { handlerReturn } from './interaction';
 import { useAtom } from 'jotai/index';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
+import {tweetDeleteAtom} from '@/atoms/deleteTweetAtom';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import { Divider, IconButton } from 'react-native-paper';
 import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
@@ -39,6 +40,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const isExpandedRefThreeDot = useRef(false);
 
   const [showTabs, setShowTabs] = useAtom(showTabsAtom);
+  const [tweetDelete, setTweetDelete] = useAtom(tweetDeleteAtom);
 
   const formatDate = (dateString: string): string => {
       const date = parseISO(dateString);
@@ -98,6 +100,27 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
     });
     Keyboard.dismiss();
   };
+
+  const onTwitDelete = async () => {
+    try {
+      console.log(`Deleting URL: ${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${item.id}`);
+      const response = await axios.delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${item.id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userData?.token}`
+        },
+        timeout: 10000
+      });
+      console.log('Response to delete: ', response.data, 'with id: ', item.id);
+      if (response.status === 204) {
+        setTweetDelete({ shouldDelete: true, twitId: [...tweetDelete.twitId, item.id] });
+        router.back();
+      }
+    }
+    catch (error) {
+      console.error('Error deleting tweet:', error);
+    }
+  }
 
     return (
       <>
@@ -269,6 +292,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
         <View style={{ height: window.height, borderTopWidth: 1, borderTopColor: 'rgb(255 255 255)' }}>
           <ThreeDotMenu
           onClose={handlePressThreeDot}
+          onTwitDelete={onTwitDelete}
           />
         </View>
         </Animated.View>

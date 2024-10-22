@@ -22,7 +22,6 @@ const TwitView: React.FC = () => {
           timeout: 10000
         });
         console.log(`Fetched twit with id ${id}`);
-        console.log(response.data.data);
         setTweet(response.data.data as TwitSnap);
       } catch (error) {
         console.error('Error fetching tweet:', error);

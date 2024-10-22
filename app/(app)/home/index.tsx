@@ -15,6 +15,7 @@ import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import { feedRefreshIntervalAtom } from '@/atoms/feedRefreshInterval';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
+import {tweetDeleteAtom} from '@/atoms/deleteTweetAtom';
 import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
@@ -38,6 +39,7 @@ export default function FeedScreen() {
   const [needRefresh, setNeedRefresh] = useState(false);
 
   const [fetchInterval, setFetchInterval] = useAtom(feedRefreshIntervalAtom);
+  const [fetchDeletedTwits, setDeletedTwits] = useAtom(tweetDeleteAtom);
 
   const isActualFeedTypeFollowing = useRef<boolean>(false);
 
@@ -50,7 +52,8 @@ export default function FeedScreen() {
         let new_twits: TwitSnap[] = [];
 
         if (prev_twits && newTwits) {
-          new_twits = [...newTwits, ...prev_twits];
+          new_twits = [...newTwits.filter(twit => !fetchDeletedTwits.twitId.includes(twit.id)), ...prev_twits];
+          setDeletedTwits({ shouldDelete: false, twitId: [] });
           newerTwitRef.current = new_twits[0];
           newTwits = null;
         }
@@ -114,7 +117,8 @@ export default function FeedScreen() {
 
     const fetchedTweets = await fetchTweets(params);
     newerTwitRef.current = fetchedTweets[0];
-    setTweets(fetchedTweets);
+    setTweets(fetchedTweets.filter(twit => !fetchDeletedTwits.twitId.includes(twit.id)));
+    setDeletedTwits({ shouldDelete: false, twitId: [] });
   };
 
   const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
@@ -160,7 +164,9 @@ export default function FeedScreen() {
       if (!prev_twits) {
         return olderTwits;
       }
-      return [...prev_twits, ...olderTwits];
+      const twits = [...prev_twits, ...olderTwits.filter(twit => !fetchDeletedTwits.twitId.includes(twit.id))];
+      setDeletedTwits({ shouldDelete: false, twitId: [] });
+      return twits
     });
   };
 
