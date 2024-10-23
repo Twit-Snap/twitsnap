@@ -109,7 +109,6 @@ export default function FeedScreen() {
     }
 
     const params = {
-      username: userData?.username,
       rank: true,
       limit: 20,
       byFollowed: byFollowed
@@ -130,7 +129,6 @@ export default function FeedScreen() {
       createdAt: newerTwit ? newerTwit.createdAt : undefined,
       older: false,
       byFollowed: isActualFeedTypeFollowing.current,
-      username: userData?.username,
       rank: true,
       limit: 100
     };
