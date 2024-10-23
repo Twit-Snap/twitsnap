@@ -24,8 +24,8 @@ import axios from 'axios';
 
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
-const intervalMinutes = 10 * 60 * 1000;
-//const intervalMinutes = 10 * 1000;
+// const intervalMinutes = 10 * 60 * 1000;
+const intervalMinutes = 30 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -121,9 +121,6 @@ export default function FeedScreen() {
 
   const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
     console.log(`refresh!`);
-    if (!newerTwit) {
-      return;
-    }
 
     const params = {
       createdAt: newerTwit ? newerTwit.createdAt : undefined,
