@@ -1,7 +1,5 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { router } from 'expo-router';
-import { useAtomValue } from 'jotai';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Dimensions, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 
@@ -52,7 +50,6 @@ interface IResultSearchBarProps {
 }
 
 export default function ResultSearchBar({ clearHandler, previousQuery }: IResultSearchBarProps) {
-  const userData = useAtomValue(authenticatedAtom);
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
 
   const handleSubmit = () => {
@@ -64,10 +61,6 @@ export default function ResultSearchBar({ clearHandler, previousQuery }: IResult
       setSearchQuery(undefined);
     }
   };
-
-  if (!userData) {
-    return <></>;
-  }
 
   return (
     <>
