@@ -50,7 +50,7 @@ const SignUp: () => React.JSX.Element = () => {
         form,
         {
           headers: { 'Content-Type': 'application/json' },
-          timeout: 10000,
+          timeout: 10000
         }
       );
       if (response.status === 200) {

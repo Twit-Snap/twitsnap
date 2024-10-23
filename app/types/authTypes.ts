@@ -11,3 +11,11 @@ export type UserAuth = {
   profilePicture: string;
   token: string;
 };
+
+export type UserSSORegisterDto = {
+  token: string;
+  uid: string;
+  providerId: string;
+  username: string;
+  birthdate: string;
+};
