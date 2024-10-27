@@ -3,7 +3,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
@@ -57,7 +57,32 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
                 </Text>{' '}
               </Text>
             );
+          } else if (word.startsWith('@')) {
+            return (
+              <Text key={index}>
+                <Text
+                  onPress={() =>
+                    router.push({
+                      pathname: `/(app)/profile/[username]`,
+                      params: { username: word.slice(1) }
+                    })
+                  }
+                  style={styles.hashtag}
+                >
+                  {word}
+                </Text>{' '}
+              </Text>
+            );
+          } else if (word.startsWith('https://')) {
+            return (
+              <Text key={index}>
+                <Text onPress={() => Linking.openURL(word)} style={styles.hashtag}>
+                  {word}
+                </Text>{' '}
+              </Text>
+            );
           }
+
           return <Text key={index}>{word} </Text>;
         })}
       </Text>
