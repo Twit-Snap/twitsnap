@@ -22,6 +22,8 @@ import TweetCard from '@/components/twits/TweetCard';
 import removeDuplicates from '@/utils/removeDup';
 import axios from 'axios';
 
+import debounce from 'lodash/debounce';
+
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
 // const intervalMinutes = 10 * 60 * 1000;
@@ -119,7 +121,7 @@ export default function FeedScreen() {
     setTweets(fetchedTweets);
   };
 
-  const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
+  const refreshTweets = debounce(async (newerTwit: TwitSnap | null): Promise<void> => {
     console.log(`refresh!`);
 
     const params = {
@@ -136,9 +138,9 @@ export default function FeedScreen() {
       // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profilePictureURL)],
       setNeedRefresh(true);
     }
-  };
+  }, 500);
 
-  const loadMoreTwits = async () => {
+  const loadMoreTwits = debounce(async () => {
     console.log('scroll refresh!');
     if (!tweets) {
       return;
@@ -163,7 +165,7 @@ export default function FeedScreen() {
       }
       return removeDuplicates([...prev_twits, ...olderTwits]);
     });
-  };
+  }, 500);
 
   const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
     var twits: TwitSnap[] = [];
