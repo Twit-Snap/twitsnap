@@ -114,7 +114,9 @@ export default function SearchResultsScreen() {
 
   return (
     <View style={styles.container}>
-      <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
+      <View style={{ height: 50 }}>
+        <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
+      </View>
       {tweets && users ? (
         <>
           {users.length > 0 && (
