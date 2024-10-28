@@ -31,8 +31,8 @@ const ThreeDotMenu: React.FC<ThreeDotProps> = ({
             <Icon name="trash" size={20} color="white" />
             <Text style={styles.menuText}>Delete</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
-            <Icon name="pencil" size={20} color="white" onPress={onTwitEdit}/>
+          <TouchableOpacity style={styles.menuItem} onPress={onTwitEdit}>
+            <Icon name="pencil" size={20} color="white" />
             <Text style={styles.menuText}>Edit</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem}>
