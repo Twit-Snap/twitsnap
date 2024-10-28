@@ -2,18 +2,28 @@ import axios from 'axios';
 import { parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
+import { useAtom } from 'jotai/index';
 import React, { useRef, useState } from 'react';
-import { Animated, Dimensions, Image, Keyboard, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Animated,
+  Dimensions,
+  Image,
+  Keyboard,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { Divider, IconButton } from 'react-native-paper';
+
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
+import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
+import { showTabsAtom } from '@/atoms/showTabsAtom';
+import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
+import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 
 import Interaction, { handlerReturn } from './interaction';
-import { useAtom } from 'jotai/index';
-import { showTabsAtom } from '@/atoms/showTabsAtom';
-import {tweetDeleteAtom} from '@/atoms/deleteTweetAtom';
-import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
-import { Divider, IconButton } from 'react-native-paper';
-import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -43,39 +53,39 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const [tweetDelete, setTweetDelete] = useAtom(tweetDeleteAtom);
 
   const formatDate = (dateString: string): string => {
-      const date = parseISO(dateString);
-      const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const formattedDate = date.toISOString().split('T')[0];
-      return `${time} | ${formattedDate}`;
+    const date = parseISO(dateString);
+    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const formattedDate = date.toISOString().split('T')[0];
+    return `${time} | ${formattedDate}`;
   };
 
-    const renderContent = (text: string) => {
-      const words = text.split(' ');
-      return (
-        <Text>
-          {words.map((word, index) => {
-            if (word.startsWith('#')) {
-              return (
-                <Text key={index}>
-                  <Text
-                    onPress={() =>
-                      router.push({
-                        pathname: `/searchResults`,
-                        params: { query: word }
-                      })
-                    }
-                    style={styles.hashtag}
-                  >
-                    {word}
-                  </Text>{' '}
-                </Text>
-              );
-            }
-            return <Text key={index}>{word} </Text>;
-          })}
-        </Text>
-      );
-    };
+  const renderContent = (text: string) => {
+    const words = text.split(' ');
+    return (
+      <Text>
+        {words.map((word, index) => {
+          if (word.startsWith('#')) {
+            return (
+              <Text key={index}>
+                <Text
+                  onPress={() =>
+                    router.push({
+                      pathname: `/searchResults`,
+                      params: { query: word }
+                    })
+                  }
+                  style={styles.hashtag}
+                >
+                  {word}
+                </Text>{' '}
+              </Text>
+            );
+          }
+          return <Text key={index}>{word} </Text>;
+        })}
+      </Text>
+    );
+  };
 
   const handlePressComment = () => {
     setShowTabs(!showTabs);
@@ -92,7 +102,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const handlePressThreeDot = () => {
     setShowTabs(!showTabs);
     Animated.timing(animatedValueThreeDot, {
-      toValue: isExpandedThreeDot ?  window.height : 0, // Adjust the height as needed
+      toValue: isExpandedThreeDot ? window.height : 0, // Adjust the height as needed
       duration: 300, // Animation duration in milliseconds
       useNativeDriver: true
     }).start(() => {
@@ -103,36 +113,60 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
 
   const onTwitDelete = async () => {
     try {
-      console.log(`Deleting URL: ${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${item.id}`);
-      const response = await axios.delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${item.id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userData?.token}`
-        },
-        timeout: 10000
-      });
-      console.log('Response to delete: ', response.data, 'with id: ', item.id);
+      const response = await axios.delete(
+        `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${item.id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userData?.token}`
+          },
+          timeout: 10000
+        }
+      );
       if (response.status === 204) {
         setTweetDelete({ shouldDelete: true, twitId: [...tweetDelete.twitId, item.id] });
         router.back();
       }
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error deleting tweet:', error);
     }
-  }
+  };
 
-    return (
-      <>
-        <TouchableOpacity onPress={router.back} style={[styles.goBack, { marginTop: -28 }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+  const onTwitEdit = async () => {
+    try {
+      const response = await axios.patch(
+        `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${item.id}`,
+        {
+          content: 'Edited content'
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userData?.token}`
+          },
+          timeout: 10000
+        }
+      );
+      if (response.status === 204) {
+        console.log('Successfully edited the tweet with id: ', item.id);
+        router.back();
+      }
+    } catch (error) {
+      console.error('Error editing tweet:', error);
+    }
+  };
+
+  return (
+    <>
+      <TouchableOpacity onPress={router.back} style={[styles.goBack, { marginTop: -28 }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <IconButton icon="arrow-left" iconColor="rgb(255 255 255)" size={24} />
           <Text style={{ color: 'rgb(255 255 255)', fontSize: 20, marginLeft: 5 }}>Post</Text>
-          </View>
-          <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(194,187,187)' }} />
-        </TouchableOpacity>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop : 8 }}>
-      <TouchableOpacity
+        </View>
+        <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(194,187,187)' }} />
+      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+        <TouchableOpacity
           onPress={() =>
             router.push({
               pathname: '../profile/[username]',
@@ -149,14 +183,14 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             style={styles.profileImage}
           />
         </TouchableOpacity>
-      <View style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center' }}>
-        <View>
-          <Text style={styles.name}>{item.user.name}</Text>
-          <Text style={styles.username}>@{item.user.username}</Text>
-        </View>
+        <View style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center' }}>
+          <View>
+            <Text style={styles.name}>{item.user.name}</Text>
+            <Text style={styles.username}>@{item.user.username}</Text>
+          </View>
           <IconButton
             icon="dots-horizontal"
-            style={{ position : "absolute", left: window.width - 120 }}
+            style={{ position: 'absolute', left: window.width - 120 }}
             size={24}
             onPress={() => {
               isExpandedRefThreeDot.current = !isExpandedRefThreeDot.current;
@@ -164,44 +198,44 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
               handlePressThreeDot();
             }}
           />
+        </View>
       </View>
-    </View>
-        <View style={{ flexDirection: 'column' }}>
-          <View style={styles.contentContainer}>
-            <Text style={styles.content}>{renderContent(item.content)}</Text>
-          </View>
-          <View style={{ flexDirection: 'row' }}>
-            <Interaction
-              icon="comment-outline"
-              initState={false}
-              initCount={1_023_203}
-              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                isExpandedCommentRef.current = !isExpandedCommentRef.current;
-                setIsExpandedComment(isExpandedCommentRef.current);
-                handlePressComment();
-                return { state: true, count: 0 };
-              }}
-            />
-            <Interaction
-              icon="repeat-off"
-              icon_alt="repeat"
-              icon_alt_color="rgb(47, 204, 110  )"
-              initState={false}
-              initCount={1_023_203}
-              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                console.log('asd');
-                return { state: true, count: 0 };
-              }}
-            />
-            <Interaction
-              icon="heart-outline"
-              icon_alt="heart"
-              icon_alt_color="rgb(255, 79, 56)"
-              initState={item.userLiked}
-              initCount={item.likesCount}
-              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                return state
-                  ? {
+      <View style={{ flexDirection: 'column' }}>
+        <View style={styles.contentContainer}>
+          <Text style={styles.content}>{renderContent(item.content)}</Text>
+        </View>
+        <View style={{ flexDirection: 'row' }}>
+          <Interaction
+            icon="comment-outline"
+            initState={false}
+            initCount={1_023_203}
+            handler={async (state: boolean, count: number): Promise<handlerReturn> => {
+              isExpandedCommentRef.current = !isExpandedCommentRef.current;
+              setIsExpandedComment(isExpandedCommentRef.current);
+              handlePressComment();
+              return { state: true, count: 0 };
+            }}
+          />
+          <Interaction
+            icon="repeat-off"
+            icon_alt="repeat"
+            icon_alt_color="rgb(47, 204, 110  )"
+            initState={false}
+            initCount={1_023_203}
+            handler={async (state: boolean, count: number): Promise<handlerReturn> => {
+              console.log('asd');
+              return { state: true, count: 0 };
+            }}
+          />
+          <Interaction
+            icon="heart-outline"
+            icon_alt="heart"
+            icon_alt_color="rgb(255, 79, 56)"
+            initState={item.userLiked}
+            initCount={item.likesCount}
+            handler={async (state: boolean, count: number): Promise<handlerReturn> => {
+              return state
+                ? {
                     state: await axios
                       .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
                         data: {
@@ -219,7 +253,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
                       }),
                     count: count - 1
                   }
-                  : {
+                : {
                     state: await axios
                       .post(
                         `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
@@ -240,66 +274,75 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
                       }),
                     count: count + 1
                   };
-              }}
-            />
-          </View>
-          <Text style={[styles.date]}>{formatDate(item.createdAt)}</Text>
-        </View>
-        <Animated.View
-          style={[
-            {
-              backgroundColor: 'rgb(5 5 5)',
-              zIndex: 50,
-              position: 'absolute',
-              bottom: 0,
-              top: 0,
-              paddingTop: 35,
-              width: window.width
-            },
-            {
-              transform: [{ translateY: animatedValueComment }],
-              bottom: 0
-            }
-          ]}
-        >
-          <View style={{ height: window.height }}>
-            <TweetBoxFeed
-              onTweetSend={(tweetContent) => {
-                console.log("tweetContent: ", tweetContent);
-              }}
-              onClose={handlePressComment}
-              placeholder={`Replying to @${item.user.username}`}
-            />
-          </View>
-        </Animated.View>
-        <Animated.View
-          style={[
-            {
-              backgroundColor: 'rgb(5 5 5)',
-              zIndex: 50,
-              position: 'absolute',
-              bottom: 0,
-              top: 0,
-              paddingTop: 35,
-              width: window.width
-            },
-            {
-              transform: [{ translateY: animatedValueThreeDot }],
-              top: '30%'
-            }
-          ]}
-        >
-        <View style={{ borderRadius: 30}}>
-          <Divider style={{ height: 2, width: '30%', backgroundColor: 'rgb(194,187,187)', marginLeft: '35%', marginRight: '35%' }} />
-          <ThreeDotMenu
-          onClose={handlePressThreeDot}
-          onTwitDelete={onTwitDelete}
-          twitIsFromUser={item.user.username === userData?.username}
+            }}
           />
         </View>
-        </Animated.View>
-      </>
-    )
+        <Text style={[styles.date]}>{formatDate(item.createdAt)}</Text>
+      </View>
+      <Animated.View
+        style={[
+          {
+            backgroundColor: 'rgb(5 5 5)',
+            zIndex: 50,
+            position: 'absolute',
+            bottom: 0,
+            top: 0,
+            paddingTop: 35,
+            width: window.width
+          },
+          {
+            transform: [{ translateY: animatedValueComment }],
+            bottom: 0
+          }
+        ]}
+      >
+        <View style={{ height: window.height }}>
+          <TweetBoxFeed
+            onTweetSend={(tweetContent) => {
+              console.log('tweetContent: ', tweetContent);
+            }}
+            onClose={handlePressComment}
+            placeholder={`Replying to @${item.user.username}`}
+          />
+        </View>
+      </Animated.View>
+      <Animated.View
+        style={[
+          {
+            backgroundColor: 'rgb(5 5 5)',
+            zIndex: 50,
+            position: 'absolute',
+            bottom: 0,
+            top: 0,
+            paddingTop: 35,
+            width: window.width
+          },
+          {
+            transform: [{ translateY: animatedValueThreeDot }],
+            top: '30%'
+          }
+        ]}
+      >
+        <View style={{ borderRadius: 30 }}>
+          <Divider
+            style={{
+              height: 2,
+              width: '30%',
+              backgroundColor: 'rgb(194,187,187)',
+              marginLeft: '35%',
+              marginRight: '35%'
+            }}
+          />
+          <ThreeDotMenu
+            onClose={handlePressThreeDot}
+            onTwitDelete={onTwitDelete}
+            onTwitEdit={onTwitEdit}
+            twitIsFromUser={item.user.username === userData?.username}
+          />
+        </View>
+      </Animated.View>
+    </>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -311,8 +354,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(5 5 5)'
   },
   profileImage: {
-      width: 50,
-      height: 50,
+    width: 50,
+    height: 50,
     borderRadius: 25,
     marginLeft: 10
   },
@@ -332,13 +375,13 @@ const styles = StyleSheet.create({
   content: {
     fontSize: 18,
     paddingVertical: 5,
-    color: 'rgb(220 220 220)',
+    color: 'rgb(220 220 220)'
   },
   date: {
     fontSize: 14,
     color: 'rgb(120 120 120)',
     marginLeft: 10,
-    marginTop: 5,
+    marginTop: 5
   },
   hashtag: {
     color: 'rgb(67,67,244)'
@@ -363,7 +406,7 @@ const styles = StyleSheet.create({
   goBack: {
     paddingRight: 9,
     paddingTop: -10
-  },
+  }
 });
 
 export default InspectTweetCard;
