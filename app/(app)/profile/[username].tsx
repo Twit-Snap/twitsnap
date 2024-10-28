@@ -25,7 +25,7 @@ export default function PublicProfileScreen() {
 
   const [searchUserData, setSearchUserData] = useState<SearchedUser | null>(null);
   const [twits, setTwits] = useState<TwitSnap[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<number | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreTwits, setHasMoreTwits] = useState(true);
 
@@ -46,11 +46,7 @@ export default function PublicProfileScreen() {
         );
         setSearchUserData(response.data.data);
       } catch (error: any) {
-        if (error.response?.status === 404) {
-          setError('User not found.');
-        } else {
-          setError('An error occurred while fetching user data.');
-        }
+        setError(error.status);
       }
     },
     [username]
@@ -129,7 +125,7 @@ export default function PublicProfileScreen() {
     }
   };
 
-  if (!searchUserData) {
+  if (!searchUserData && !error) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} />
@@ -151,9 +147,6 @@ export default function PublicProfileScreen() {
             <>
               <ProfileHeader
                 user={searchUserData}
-                bio={"Hi! Welcome to my profile. \nI'm a huge Messi fan!"}
-                profilePhoto={searchUserData.profilePicture || ''}
-                bannerPhoto={/*searchUserData.bannerPhoto ||*/ ''}
               />
               <View style={styles.divider} />
             </>

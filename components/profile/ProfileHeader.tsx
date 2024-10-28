@@ -13,19 +13,12 @@ import FollowButton from './followButton';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-interface IProfileHeader {
-  user: SearchedUser;
-  bannerPhoto: string;
-  profilePhoto: string;
-  bio: string;
-}
-
 const default_images = {
   profilePhoto: require('../../assets/images/messi.jpg'),
   bannerPhoto: require('../../assets/images/kanagawa.jpg')
 };
 
-const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePhoto, bio }) => {
+const ProfileHeader = ({ user }: { user: SearchedUser }) => {
   const formattedBirthdate = user.birthdate
     ? format(new Date(user.birthdate), 'MMMM dd, yyyy')
     : null;
@@ -58,11 +51,11 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
         onPress={router.back}
       />
       <Image
-        source={bannerPhoto ? { uri: bannerPhoto } : default_images.bannerPhoto}
+        source={user.backgroundImage ? { uri: user.backgroundImage } : default_images.bannerPhoto}
         style={styles.bannerPhoto}
       />
       <Image
-        source={profilePhoto ? { uri: profilePhoto } : default_images.profilePhoto}
+        source={user.profilePicture ? { uri: user.profilePicture } : default_images.profilePhoto}
         style={styles.profilePhoto}
       />
       <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
@@ -76,7 +69,7 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
         {user && <Text style={styles.name}>{user.name}</Text>}
         {user && <Text style={styles.username}>@{user.username}</Text>}
 
-        <Text style={styles.bio}>{bio}</Text>
+        <Text style={styles.bio}>{user.description}</Text>
         {/* Birthday and Join Date */}
         {formattedBirthdate && <Text style={styles.birthdate}>🎂 Born {formattedBirthdate}</Text>}
         {formattedJoinDate && <Text style={styles.joinDate}>📅 Joined {formattedJoinDate}</Text>}
