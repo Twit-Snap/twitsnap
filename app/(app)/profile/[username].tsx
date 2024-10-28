@@ -12,7 +12,7 @@ import {
   View
 } from 'react-native';
 
-import { SearchedUser } from '@/app/types/publicUser';
+import { ErrorUser, SearchedUser } from '@/app/types/publicUser';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
@@ -23,9 +23,8 @@ export default function PublicProfileScreen() {
   const [userData] = useAtom(authenticatedAtom);
   const { username } = useLocalSearchParams<{ username: string }>();
 
-  const [searchUserData, setSearchUserData] = useState<SearchedUser | null>(null);
+  const [searchUserData, setSearchUserData] = useState<SearchedUser | ErrorUser | null>(null);
   const [twits, setTwits] = useState<TwitSnap[] | null>(null);
-  const [error, setError] = useState<number | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreTwits, setHasMoreTwits] = useState(true);
 
@@ -33,7 +32,6 @@ export default function PublicProfileScreen() {
   const fetchUserData = useCallback(
     async (token: string) => {
       try {
-        setError(null);
         console.log('fetchUserData', username);
         const response = await axios.get(
           `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}`,
@@ -46,7 +44,19 @@ export default function PublicProfileScreen() {
         );
         setSearchUserData(response.data.data);
       } catch (error: any) {
-        setError(error.status);
+        if (error.status === 404) {
+          setSearchUserData({
+            name: 'This account does not exist!',
+            username: username,
+            description: 'Please try another search'
+          });
+        } else {
+          setSearchUserData({
+            name: 'Something went wrong!',
+            username: username,
+            description: 'Please try again later'
+          });
+        }
       }
     },
     [username]
@@ -125,7 +135,7 @@ export default function PublicProfileScreen() {
     }
   };
 
-  if (!searchUserData && !error) {
+  if (!searchUserData) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} />
@@ -135,34 +145,27 @@ export default function PublicProfileScreen() {
 
   return (
     <View style={styles.container}>
-      {error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : (
-        <ScrollView
-          scrollEventThrottle={16}
-          onScroll={handleScroll}
-          contentContainerStyle={styles.scrollViewContent}
-        >
-          {searchUserData && (
-            <>
-              <ProfileHeader
-                user={searchUserData}
-              />
-              <View style={styles.divider} />
-            </>
-          )}
-          {twits ? (
-            twits.length > 0 ? (
-              twits.map((twit) => <TweetCard item={twit} key={twit.id} />)
-            ) : (
-              <Text style={styles.noTwitsText}>No tweets available</Text>
-            )
+      <ScrollView
+        scrollEventThrottle={16}
+        onScroll={handleScroll}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <>
+          <ProfileHeader user={searchUserData as SearchedUser} />
+          <View style={styles.divider} />
+        </>
+
+        {twits ? (
+          twits.length > 0 ? (
+            twits.map((twit) => <TweetCard item={twit} key={twit.id} />)
           ) : (
-            <></>
-          )}
-          {loadingMore && <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} />}
-        </ScrollView>
-      )}
+            <Text style={styles.noTwitsText}>No tweets available</Text>
+          )
+        ) : (
+          <></>
+        )}
+        {loadingMore && <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} />}
+      </ScrollView>
     </View>
   );
 }
