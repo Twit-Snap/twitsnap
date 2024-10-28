@@ -3,9 +3,9 @@ import { IReducedUser } from '@/app/types/publicUser';
 import ListHeader from '@/components/profile/listHeader';
 import UserCard from '@/components/profile/userCard';
 import axios from 'axios';
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useAtomValue } from 'jotai';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 
@@ -64,7 +64,17 @@ export default function Follows() {
           users.length > 0 ? (
             <FlatList
               data={users}
-              renderItem={({ item }) => <UserCard item={item} />}
+              renderItem={({ item }) => (
+                <UserCard
+                  item={item}
+                  handler={(username: string) =>
+                    router.push({
+                      pathname: `/(app)/profile/[username]`,
+                      params: { username: username }
+                    })
+                  }
+                />
+              )}
               keyExtractor={(item) => item.id.toString()}
             />
           ) : byFollowers === 'true' ? (
