@@ -33,7 +33,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, pla
       const response = await axios.get(
         `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${userData?.username}/followers`,
         {
-          params: { byFollowers: true, limit: 20 },
+          params: { byFollowers: true, limit: 20, has: query },
           headers: {
             Authorization: `Bearer ${userData?.token}`
           },
