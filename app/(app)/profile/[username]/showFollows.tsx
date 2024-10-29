@@ -30,7 +30,7 @@ export default function Follows() {
       .get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}/followers`, {
         params: {
           byFollowers: byFollowers,
-          limit: 14,
+          limit: 20,
           createdAt: lastUserRef.current ? lastUserRef.current.followCreatedAt : undefined
         },
         headers: {
