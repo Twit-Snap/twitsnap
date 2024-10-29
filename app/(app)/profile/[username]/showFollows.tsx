@@ -84,7 +84,7 @@ export default function Follows() {
           users.length > 0 ? (
             <FlatList
               scrollEventThrottle={50}
-              onScroll={({ nativeEvent }) => {
+              onScroll={async ({ nativeEvent }) => {
                 if (!loadMoreRef.current) {
                   return;
                 }
@@ -94,7 +94,7 @@ export default function Follows() {
                   nativeEvent.contentSize.height * 0.8
                 ) {
                   loadMoreRef.current = false;
-                  fetchUsers();
+                  await fetchUsers();
                 }
               }}
               data={users}
