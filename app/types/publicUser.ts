@@ -32,4 +32,5 @@ export interface IReducedUser {
   username: string;
   description: string;
   profilePicture: string;
+  followCreatedAt?: string
 }

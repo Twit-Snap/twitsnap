@@ -5,7 +5,7 @@ import UserCard from '@/components/profile/userCard';
 import axios from 'axios';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useAtomValue } from 'jotai';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 
@@ -18,41 +18,61 @@ export default function Follows() {
   }>();
 
   const [users, setUsers] = useState<IReducedUser[] | null>(null);
+  const lastUserRef = useRef<IReducedUser | null>(null);
+  const loadMoreRef = useRef<boolean>(true);
+
+  const fetchUsers = async () => {
+    if (!byFollowers || !username || !userData?.token) {
+      return;
+    }
+
+    await axios
+      .get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}/followers`, {
+        params: {
+          byFollowers: byFollowers,
+          limit: 14,
+          createdAt: lastUserRef.current ? lastUserRef.current.followCreatedAt : undefined
+        },
+        headers: {
+          Authorization: `Bearer ${userData.token}`
+        },
+        timeout: 10000
+      })
+      .then(({ data }: { data: IReducedUser[] }) => {
+        console.log('Fetched ', data.length, ' users');
+
+        setUsers((prevUsers) => {
+          if (data.length !== 0) {
+            loadMoreRef.current = true;
+          }
+
+          const ret = prevUsers ? [...prevUsers, ...data] : data;
+          lastUserRef.current = ret[ret.length - 1];
+
+          return ret;
+        });
+      })
+      .catch((error) => {
+        if (error.status === 400) {
+          if (error.response.data.type === 'NOT MUTUAL FOLLOW') {
+            alert('You should not be here ;)');
+            setUsers([]);
+            loadMoreRef.current = false;
+          }
+        }
+
+        console.error(error);
+      });
+  };
 
   useFocusEffect(
     useCallback(() => {
-      const fetchUsers = async () => {
-        if (!byFollowers || !username || !userData?.token) {
-          return;
-        }
-
-        await axios
-          .get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}/followers`, {
-            params: { byFollowers: byFollowers },
-            headers: {
-              Authorization: `Bearer ${userData.token}`
-            },
-            timeout: 10000
-          })
-          .then((response) => {
-            setUsers(response.data);
-          })
-          .catch((error) => {
-            if (error.status === 400) {
-              if (error.response.data.type === 'NOT MUTUAL FOLLOW') {
-                alert('You should not be here ;)');
-                setUsers([]);
-              }
-            }
-
-            console.error(error);
-          });
-      };
-
       fetchUsers();
 
       return () => {
         setUsers(null);
+        loadMoreRef.current = true;
+        lastUserRef.current = null;
       };
     }, [userData?.token, byFollowers, username])
   );
@@ -63,6 +83,20 @@ export default function Follows() {
         {users ? (
           users.length > 0 ? (
             <FlatList
+              scrollEventThrottle={50}
+              onScroll={({ nativeEvent }) => {
+                if (!loadMoreRef.current) {
+                  return;
+                }
+                // User has reached the bottom?
+                if (
+                  nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >=
+                  nativeEvent.contentSize.height * 0.8
+                ) {
+                  loadMoreRef.current = false;
+                  fetchUsers();
+                }
+              }}
               data={users}
               renderItem={({ item }) => (
                 <UserCard
