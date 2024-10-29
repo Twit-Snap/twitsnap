@@ -1,6 +1,7 @@
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
+import React from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const default_images = {
