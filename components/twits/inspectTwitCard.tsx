@@ -132,12 +132,12 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
     }
   };
 
-  const onTwitEdit = async () => {
+  const onTwitEdit = async (tweetContent: string) => {
     try {
       const response = await axios.patch(
         `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${item.id}`,
         {
-          content: 'Edited content'
+          content: tweetContent
         },
         {
           headers: {
@@ -334,7 +334,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             }}
           />
           <ThreeDotMenu
-            onClose={handlePressThreeDot}
+            onCloseOrFinish={handlePressThreeDot}
             onTwitDelete={onTwitDelete}
             onTwitEdit={onTwitEdit}
             twitIsFromUser={item.user.username === userData?.username}
