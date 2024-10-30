@@ -337,6 +337,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             onCloseOrFinish={handlePressThreeDot}
             onTwitDelete={onTwitDelete}
             onTwitEdit={onTwitEdit}
+            twitContent={item.content}
             twitIsFromUser={item.user.username === userData?.username}
           />
         </View>

@@ -6,10 +6,16 @@ interface NewTweetInputProps {
   onTweetSend: (tweetContent: string) => void;
   onClose: () => void;
   placeholder?: string;
+  baseContent?: string;
 }
 
-const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, placeholder }) => {
-  const [tweetContent, setTweetContent] = useState<string>('');
+const NewTweetInput: React.FC<NewTweetInputProps> = ({
+  onTweetSend,
+  onClose,
+  placeholder,
+  baseContent
+}) => {
+  const [tweetContent, setTweetContent] = useState<string>(baseContent || '');
 
   const handleSendTweet = () => {
     if (tweetContent.trim().length > 0) {

@@ -22,12 +22,14 @@ interface ThreeDotProps {
   onTwitDelete: () => void;
   onTwitEdit: (tweetContent: string) => void;
   twitIsFromUser: boolean;
+  twitContent: string;
 }
 
 const ThreeDotMenu: React.FC<ThreeDotProps> = ({
   onCloseOrFinish,
   onTwitDelete,
   onTwitEdit,
+  twitContent,
   twitIsFromUser
 }) => {
   const [animatedEdit] = useState(new Animated.Value(window.height));
@@ -102,7 +104,7 @@ const ThreeDotMenu: React.FC<ThreeDotProps> = ({
                   onCloseOrFinish();
                 }}
                 onClose={handleEdit}
-                placeholder={'Editing your twit'}
+                baseContent={twitContent}
               />
             </View>
           </Animated.View>
