@@ -45,6 +45,8 @@ export default function FeedScreen() {
 
   const isActualFeedTypeFollowing = useRef<boolean>(false);
 
+  const loadMoreRef = useRef<boolean>(true);
+
   const refreshProps: IFeedRefreshProps = {
     profileURLs: [],
     handler: () => {
@@ -91,6 +93,7 @@ export default function FeedScreen() {
           resetState();
           initFeed();
           isActualFeedTypeFollowing.current = false;
+          loadMoreRef.current = true;
         },
         state: true
       },
@@ -100,6 +103,7 @@ export default function FeedScreen() {
           resetState();
           initFeed(true);
           isActualFeedTypeFollowing.current = true;
+          loadMoreRef.current = true;
         },
         state: false
       }
@@ -166,6 +170,8 @@ export default function FeedScreen() {
       }
       return removeDuplicates([...prev_twits, ...olderTwits]);
     });
+
+    loadMoreRef.current = true;
   }, 500);
 
   const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
@@ -238,11 +244,15 @@ export default function FeedScreen() {
         <ScrollView
           scrollEventThrottle={250}
           onScroll={({ nativeEvent }) => {
+            if (!loadMoreRef.current) {
+              return;
+            }
             // User has reached the bottom?
             if (
               nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >=
               nativeEvent.contentSize.height * 0.8
             ) {
+              loadMoreRef.current = false;
               loadMoreTwits();
             }
           }}
