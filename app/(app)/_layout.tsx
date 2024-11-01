@@ -5,9 +5,9 @@ import { StatusBar } from 'react-native';
 
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authenticatedAtom } from '../authAtoms/authAtom';
-import React from 'react';
 
 export default function RootLayout() {
   const [isAuthenticated] = useAtom(authenticatedAtom);

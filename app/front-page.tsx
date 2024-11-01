@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import {
   GoogleSignin,
-  GoogleSigninButton,
   isErrorWithCode,
   isSuccessResponse,
   statusCodes
@@ -11,12 +10,13 @@ import axios, { AxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
-import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Dimensions, Image, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Button, Divider } from 'react-native-paper';
 
+import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
-import React from 'react';
 
 GoogleSignin.configure({
   webClientId: '224360780470-maj4ma0cdjlm1o2376lv28m45rvm2e8e.apps.googleusercontent.com'
@@ -149,88 +149,150 @@ export default function FrontPage() {
     setIsInProgress(false);
   }, [handleSuccessGoogleSignIn]);
 
+  if (isLoadingSession) {
+    return <></>;
+  }
+
   return (
     <>
-      {isLoadingSession ? (
-        <Text>Loading...</Text>
-      ) : (
+      <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
+      <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
-          <Text
-            style={{
-              fontSize: 35,
-              fontWeight: '300',
-              textAlign: 'center',
-              marginBottom: 10,
-              marginVertical: 10
-            }}
-          >
-            Everything you love about Twitter,
-          </Text>
-          <Text style={{ fontSize: 60, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>
-            but better.
-          </Text>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../assets/images/logo_light.png')}
+              source={require('../assets/images/logo.png')}
               style={styles.logo}
               resizeMode="contain"
             />
           </View>
-          <View style={styles.buttonContainer}>
+          <View style={{ marginVertical: 150 }}>
             <Text
-              style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}
-            >
-              Already have an account?
-            </Text>
-            <Button
-              icon="account-outline"
-              mode="contained"
-              buttonColor={'#000'}
-              style={styles.buttonContent}
-              onPress={() => {
-                // call login API
-                router.push('/sign-in');
+              style={{
+                fontSize: 35,
+                fontWeight: '300',
+                textAlign: 'center',
+                color: 'white'
               }}
             >
-              Log In
-            </Button>
+              Everything you love about Twitter,
+            </Text>
+            <Text
+              style={{
+                fontSize: 60,
+                fontWeight: 'bold',
+                textAlign: 'center',
+                color: 'white'
+              }}
+            >
+              but better.
+            </Text>
           </View>
           <View style={styles.buttonContainer}>
-            <Text
-              style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}
-            >
-              New to TwitSnap?
-            </Text>
             <Button
-              icon="account-plus-outline"
               mode="contained"
-              buttonColor={'#000'}
+              buttonColor={'white'}
+              contentStyle={{
+                marginTop: 8
+              }}
+              style={[styles.buttonContent, {opacity: isInProgress ? 0.3 : 1}]}
+              onPress={
+                isInProgress
+                  ? () => {}
+                  : () => {
+                      handleGoogleSignIn();
+                      // initiate sign in
+                    }
+              }
+            >
+              <View style={{ flex: 1, flexDirection: 'row' }}>
+                <Image
+                  source={require('../assets/images/googleIcon.png')}
+                  style={{ width: 30, height: 30, marginRight: 10 }}
+                  resizeMode="contain"
+                />
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    verticalAlign: 'middle',
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    color: 'black'
+                  }}
+                >
+                  Continue with google
+                </Text>
+              </View>
+            </Button>
+          </View>
+          <View style={{ marginVertical: 10 }}>
+            <Divider
+              style={{
+                backgroundColor: 'rgb(80 80 80)',
+                height: 1.5,
+                width: '85%',
+                alignSelf: 'center'
+              }}
+            />
+            <Text
+              style={{
+                position: 'absolute',
+                bottom: -9,
+                alignSelf: 'center',
+                zIndex: 1,
+                backgroundColor: 'rgb(5 5 5)',
+                color: 'white',
+                paddingHorizontal: 10,
+                fontSize: 16
+              }}
+            >
+              or
+            </Text>
+          </View>
+          <View style={styles.buttonContainer}>
+            <Button
+              mode="contained"
+              buttonColor={'rgb(3, 165, 252)'}
+              labelStyle={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}
               style={styles.buttonContent}
               onPress={() => {
                 router.push('/sign-up');
               }}
             >
-              Sign up
+              Create account
             </Button>
           </View>
-          <View style={styles.buttonContainer}>
+          <View
+            style={[
+              styles.buttonContainer,
+              { position: 'absolute', bottom: 20, alignSelf: 'center' }
+            ]}
+          >
             <Text
-              style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}
-            >
-              Or continue with
-            </Text>
-            <GoogleSigninButton
-              size={GoogleSigninButton.Size.Wide}
-              color={GoogleSigninButton.Color.Dark}
-              onPress={() => {
-                handleGoogleSignIn();
-                // initiate sign in
+              style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                textAlign: 'center',
+                marginBottom: 20,
+                color: 'white'
               }}
-              disabled={isInProgress}
-            />
+            >
+              Already have an account?
+            </Text>
+            <Button
+              mode="contained"
+              buttonColor={'#000'}
+              labelStyle={{ color: 'rgb(3, 165, 252)', fontSize: 18, fontWeight: 'bold' }}
+              style={[styles.buttonContent, { borderColor: 'rgb(100 100 100)', borderWidth: 1 }]}
+              onPress={() => {
+                // call login API
+                router.push('/sign-in');
+              }}
+            >
+              Sign in
+            </Button>
           </View>
         </View>
-      )}
+      </SafeAreaView>
     </>
   );
 }
@@ -238,13 +300,10 @@ export default function FrontPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10
+    backgroundColor: 'rgb(5 5 5)'
   },
   logoContainer: {
-    transform: [{ scale: 5.5 }],
-    position: 'absolute',
-    top: window.height / 2 + 255,
-    left: window.width / 2 - 95
+    left: window.width / 2 - 77
   },
   logo: {
     width: 150,
@@ -253,7 +312,9 @@ const styles = StyleSheet.create({
   buttonContent: {
     height: 48,
     width: 350,
-    justifyContent: 'center'
+    justifyContent: 'center',
+    textAlign: 'center',
+    verticalAlign: 'middle'
   },
   buttonContainer: {
     alignItems: 'center',
