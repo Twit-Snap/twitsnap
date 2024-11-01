@@ -30,10 +30,6 @@ export default function useAxiosInstance(type: AxiosTypes) {
     AsyncStorage.removeItem('auth');
     setAuth(null);
     router.replace('/front-page');
-
-    alert(
-      "We're sorry, but your account has been temporarily suspended. Please contact our support team for more information."
-    );
   }
 
   const instance = axios.create({

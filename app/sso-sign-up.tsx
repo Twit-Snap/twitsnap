@@ -5,6 +5,8 @@ import { useSetAtom } from 'jotai';
 import React, { useCallback, useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { blockedAtom } from '@/atoms/blockedAtom';
+import useAxiosInstance from '@/hooks/useAxios';
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
 
@@ -14,6 +16,8 @@ const SignUpScreen = () => {
   const setAuthAtom = useSetAtom(authenticatedAtom);
   const [birthdate, setBirthdate] = useState('');
   const [usernameInput, setUsernameInput] = useState(username);
+  const setBlocked = useSetAtom(blockedAtom);
+  const axiosUsers = useAxiosInstance('users');
 
   const handleSignUp = useCallback(async () => {
     const authData: UserSSORegisterDto = {
@@ -24,8 +28,8 @@ const SignUpScreen = () => {
       birthdate
     };
     try {
-      const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/sso/register`,
+      const response = await axiosUsers.post(
+        `auth/sso/register`,
         authData,
         {
           headers: { 'Content-Type': 'application/json' }
@@ -34,6 +38,7 @@ const SignUpScreen = () => {
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setAuthAtom(response.data);
+        setBlocked(false);
         router.replace('/'); // Redirige a la página principal
       }
     } catch (error) {

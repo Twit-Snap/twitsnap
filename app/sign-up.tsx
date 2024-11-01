@@ -1,13 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 
+import { blockedAtom } from '@/atoms/blockedAtom';
+import useAxiosInstance from '@/hooks/useAxios';
 import { authenticatedAtom } from './authAtoms/authAtom';
-
-const axios = require('axios').default;
 
 interface SignUpForm {
   email: string;
@@ -21,6 +21,9 @@ interface SignUpForm {
 
 const SignUp: () => React.JSX.Element = () => {
   const [, setIsAuthenticated] = useAtom(authenticatedAtom);
+  const setBlocked = useSetAtom(blockedAtom);
+  const axiosUsers = useAxiosInstance('users');
+
   const [form, setForm] = useState<SignUpForm>({
     name: '',
     lastname: '',
@@ -45,17 +48,14 @@ const SignUp: () => React.JSX.Element = () => {
     }
 
     try {
-      const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/register`,
-        form,
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 10000
-        }
-      );
+      const response = await axiosUsers.post(`auth/register`, form, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 10000
+      });
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setIsAuthenticated(response.data);
+        setBlocked(false);
         console.log('Register success: ', response.data);
         alert('Success Registering!');
         router.replace('/');

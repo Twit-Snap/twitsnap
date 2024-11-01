@@ -6,13 +6,15 @@ import {
   isSuccessResponse,
   statusCodes
 } from '@react-native-google-signin/google-signin';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
 import { Dimensions, Image, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Button, Divider } from 'react-native-paper';
 
+import { blockedAtom } from '@/atoms/blockedAtom';
+import useAxiosInstance from '@/hooks/useAxios';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authenticatedAtom } from './authAtoms/authAtom';
@@ -27,6 +29,8 @@ export default function FrontPage() {
   const [authAtom, setAuthAtom] = useAtom(authenticatedAtom);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [isInProgress, setIsInProgress] = useState(false);
+  const [isBlocked, setBlocked] = useAtom(blockedAtom);
+  const axiosUsers = useAxiosInstance('users');
 
   useEffect(() => {
     const loadAuth = async () => {
@@ -57,16 +61,13 @@ export default function FrontPage() {
         token
       };
       try {
-        const response = await axios.post(
-          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/sso/login`,
-          authData,
-          {
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
+        const response = await axiosUsers.post(`auth/sso/login`, authData, {
+          headers: { 'Content-Type': 'application/json' }
+        });
         if (response.status === 200) {
           await AsyncStorage.setItem('auth', JSON.stringify(response.data));
           setAuthAtom(response.data);
+          setBlocked(false);
           router.replace('/');
         }
       } catch (error) {
@@ -187,6 +188,14 @@ export default function FrontPage() {
               but better.
             </Text>
           </View>
+          <View style={{ position: 'absolute', bottom: 350, alignSelf: 'center' }}>
+            {isBlocked && (
+              <Text style={{ color: 'red', textAlign: 'center', fontSize: 20, fontWeight: '600' }}>
+                We're sorry, but your account has been temporarily suspended. Please contact our
+                support team for more information.
+              </Text>
+            )}
+          </View>
           <View style={styles.buttonContainer}>
             <Button
               mode="contained"
@@ -194,7 +203,7 @@ export default function FrontPage() {
               contentStyle={{
                 marginTop: 8
               }}
-              style={[styles.buttonContent, {opacity: isInProgress ? 0.3 : 1}]}
+              style={[styles.buttonContent, { opacity: isInProgress ? 0.3 : 1 }]}
               onPress={
                 isInProgress
                   ? () => {}
