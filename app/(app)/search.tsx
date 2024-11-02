@@ -4,15 +4,6 @@ import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 export default function SearchScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSubmit = () => {
-    if (searchQuery.length > 0) {
-      router.push({ pathname: `/searchResults`, params: { query: searchQuery } });
-      setSearchQuery('');
-    }
-  };
-
   return (
     <MenuSearchBar />
     // <View style={styles.container}>

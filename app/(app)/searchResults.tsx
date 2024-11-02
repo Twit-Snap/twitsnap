@@ -1,5 +1,4 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useAtomValue } from 'jotai';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
@@ -10,10 +9,9 @@ import removeDuplicates from '@/utils/removeDup';
 
 import LargeUserCard from '@/components/search/largeUserCard';
 import ResultSearchBar from '@/components/search/resultSearchBar';
-import { authenticatedAtom } from '../authAtoms/authAtom';
+import useAxiosInstance from '@/hooks/useAxios';
 import { SearchedUser } from '../types/publicUser';
 
-const axios = require('axios').default;
 const window = Dimensions.get('window');
 const parseQuery = (query: string): string => {
   query = query.trim();
@@ -27,9 +25,10 @@ const parseQuery = (query: string): string => {
 
 export default function SearchResultsScreen() {
   const query = parseQuery(useLocalSearchParams<{ query: string }>().query);
-  const userData = useAtomValue(authenticatedAtom);
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
   const [users, setUsers] = useState<SearchedUser[] | null>(null);
+  const axiosUsers = useAxiosInstance('users');
+  const axiosTwits = useAxiosInstance('twits');
 
   useFocusEffect(
     useCallback(() => {
@@ -37,10 +36,8 @@ export default function SearchResultsScreen() {
       setUsers(null);
       const fetchByHashtag = async (): Promise<TwitSnap[]> => {
         try {
-          const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
-            headers: { Authorization: `Bearer ${userData?.token}` },
-            params: { has: query },
-            timeout: 10000
+          const response = await axiosTwits.get(`snaps`, {
+            params: { has: query }
           });
 
           console.log(`Fetched ${response.data.data.length} twits with "#${query}"`);
@@ -55,10 +52,8 @@ export default function SearchResultsScreen() {
 
       const fetchByText = async (): Promise<TwitSnap[]> => {
         try {
-          const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
-            headers: { Authorization: `Bearer ${userData?.token}` },
-            params: { has: query },
-            timeout: 10000
+          const response = await axiosTwits.get(`snaps`, {
+            params: { has: query }
           });
 
           console.log(
@@ -75,10 +70,8 @@ export default function SearchResultsScreen() {
 
       const fetchUsers = async (): Promise<SearchedUser[]> => {
         try {
-          const response = await axios.get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users`, {
-            headers: { Authorization: `Bearer ${userData?.token}` },
-            params: { has: query, limit: 20 },
-            timeout: 10000
+          const response = await axiosUsers.get(`users`, {
+            params: { has: query, limit: 20 }
           });
           console.log('Fetched ', response.data.length, ' users');
 
@@ -107,7 +100,7 @@ export default function SearchResultsScreen() {
         setTweets(null);
         setUsers(null);
       };
-    }, [query, userData?.token])
+    }, [query])
   );
 
   const clearTweets = () => {

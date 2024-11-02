@@ -2,7 +2,7 @@ import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { IReducedUser } from '@/app/types/publicUser';
 import ListHeader from '@/components/profile/listHeader';
 import UserCard from '@/components/profile/userCard';
-import axios from 'axios';
+import useAxiosInstance from '@/hooks/useAxios';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React, { useCallback, useRef, useState } from 'react';
@@ -20,23 +20,20 @@ export default function Follows() {
   const [users, setUsers] = useState<IReducedUser[] | null>(null);
   const lastUserRef = useRef<IReducedUser | null>(null);
   const loadMoreRef = useRef<boolean>(true);
+  const axiosUsers = useAxiosInstance('users');
 
   const fetchUsers = async () => {
     if (!byFollowers || !username || !userData?.token) {
       return;
     }
 
-    await axios
-      .get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}/followers`, {
+    await axiosUsers
+      .get(`users/${username}/followers`, {
         params: {
           byFollowers: byFollowers,
           limit: 20,
           createdAt: lastUserRef.current ? lastUserRef.current.followCreatedAt : undefined
-        },
-        headers: {
-          Authorization: `Bearer ${userData.token}`
-        },
-        timeout: 10000
+        }
       })
       .then(({ data }: { data: IReducedUser[] }) => {
         console.log('Fetched ', data.length, ' users');

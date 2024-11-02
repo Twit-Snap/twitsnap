@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useAtom } from 'jotai';
 import React, { useCallback, useState } from 'react';
@@ -17,6 +16,7 @@ import { TwitSnap } from '@/app/types/TwitSnap';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
 
+import useAxiosInstance from '@/hooks/useAxios';
 import { authenticatedAtom } from '../../authAtoms/authAtom';
 
 export default function PublicProfileScreen() {
@@ -27,21 +27,15 @@ export default function PublicProfileScreen() {
   const [twits, setTwits] = useState<TwitSnap[] | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreTwits, setHasMoreTwits] = useState(true);
+  const axiosUsers = useAxiosInstance('users');
+  const axiosTwits = useAxiosInstance('twits');
 
   // Cargar la información del usuario una sola vez
   const fetchUserData = useCallback(
     async (token: string) => {
       try {
         console.log('fetchUserData', username);
-        const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            },
-            timeout: 10000
-          }
-        );
+        const response = await axiosUsers.get(`users/${username}`);
         setSearchUserData(response.data.data);
       } catch (error: any) {
         if (error.status === 404) {
@@ -75,12 +69,8 @@ export default function PublicProfileScreen() {
       try {
         setLoadingMore(true);
 
-        const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/`, {
-          params: queryParams,
-          headers: {
-            Authorization: `Bearer ${userData?.token}`
-          },
-          timeout: 10000
+        const response = await axiosTwits.get(`snaps/`, {
+          params: queryParams
         });
         const newTwits = response.data.data;
 
@@ -99,7 +89,7 @@ export default function PublicProfileScreen() {
         setLoadingMore(false);
       }
     },
-    [hasMoreTwits, twits, username, userData?.token]
+    [hasMoreTwits, twits, username]
   );
 
   useFocusEffect(

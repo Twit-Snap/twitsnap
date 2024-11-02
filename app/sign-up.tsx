@@ -49,8 +49,7 @@ const SignUp: () => React.JSX.Element = () => {
 
     try {
       const response = await axiosUsers.post(`auth/register`, form, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 10000
+        headers: { 'Content-Type': 'application/json' }
       });
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));

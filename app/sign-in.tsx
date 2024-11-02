@@ -34,8 +34,7 @@ const SignIn: () => React.JSX.Element = () => {
   const handleSubmit = async () => {
     try {
       const response = await axiosUsers.post(`auth/login`, form, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 10000
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (response.status === 200) {

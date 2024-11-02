@@ -1,6 +1,5 @@
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
-import axios from 'axios';
 import { parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
@@ -18,6 +17,7 @@ import {
 
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
+import useAxiosInstance from '@/hooks/useAxios';
 import { useAtom } from 'jotai/index';
 import Interaction, { handlerReturn } from './interaction';
 
@@ -35,6 +35,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const userData = useAtomValue(authenticatedAtom);
   const router = useRouter(); // Obtener el objeto de router
   const segments = useSegments(); // Obtener la ruta actual
+  const axiosTwits = useAxiosInstance('twits');
 
   const [animatedValue] = useState(new Animated.Value(window.height));
 
@@ -151,14 +152,13 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             handler={async (state: boolean, count: number): Promise<handlerReturn> => {
               return state
                 ? {
-                    state: await axios
-                      .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
+                    state: await axiosTwits
+                      .delete(`likes`, {
                         data: {
                           twitId: item.id
                         },
                         headers: {
-                          'Content-Type': 'application/json',
-                          Authorization: `Bearer ${userData?.token}`
+                          'Content-Type': 'application/json'
                         }
                       })
                       .then(() => !state)
@@ -169,16 +169,15 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
                     count: count - 1
                   }
                 : {
-                    state: await axios
+                    state: await axiosTwits
                       .post(
-                        `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
+                        `likes`,
                         {
                           twitId: item.id
                         },
                         {
                           headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${userData?.token}`
+                            'Content-Type': 'application/json'
                           }
                         }
                       )
