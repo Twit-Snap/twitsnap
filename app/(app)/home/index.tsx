@@ -1,4 +1,6 @@
+import axios from 'axios';
 import { useAtom } from 'jotai';
+import debounce from 'lodash/debounce';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -20,14 +22,11 @@ import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
 import removeDuplicates from '@/utils/removeDup';
-import axios from 'axios';
-
-import debounce from 'lodash/debounce';
 
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
-// const intervalMinutes = 10 * 60 * 1000;
-const intervalMinutes = 30 * 1000;
+const intervalMinutes = 10 * 60 * 1000;
+//const intervalMinutes = 30 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -153,7 +152,7 @@ export default function FeedScreen() {
       byFollowed: isActualFeedTypeFollowing.current
     };
 
-    let olderTwits: TwitSnap[] = await fetchTweets(params);
+    const olderTwits: TwitSnap[] = await fetchTweets(params);
 
     if (olderTwits.length === 0) {
       return;
@@ -168,7 +167,7 @@ export default function FeedScreen() {
   }, 500);
 
   const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
-    var twits: TwitSnap[] = [];
+    let twits: TwitSnap[] = [];
 
     await axios
       .get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {

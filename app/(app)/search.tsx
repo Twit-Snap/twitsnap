@@ -1,28 +1,57 @@
+import axios from 'axios';
+import { useAtomValue } from 'jotai/index';
+import React, { useEffect, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Divider } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import MenuSearchBar from '@/components/search/menuSearchBar';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import TopicCard from '@/components/search/topicCard';
 
 export default function SearchScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const userData = useAtomValue(authenticatedAtom);
+  const [trendingTopics, setTrendingTopics] = useState([]);
 
-  const handleSubmit = () => {
-    if (searchQuery.length > 0) {
-      router.push({ pathname: `/searchResults`, params: { query: searchQuery } });
-      setSearchQuery('');
-    }
-  };
+  useEffect(() => {
+    const fetchTrendingTopics = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/trending`,
+          {
+            headers: {
+              Authorization: `Bearer ${userData?.token}`
+            },
+            timeout: 10000
+          }
+        );
+        const data = await response.data.data;
+        setTrendingTopics(data);
+      } catch (error) {
+        console.error('Error fetching trending topics:', error);
+      }
+    };
+
+    fetchTrendingTopics();
+  }, []);
 
   return (
-    <MenuSearchBar />
-    // <View style={styles.container}>
-    //   {/* <Text style={styles.trendingText}>Trending now</Text>
-    //   <View style={styles.chipsContainer}>
-    //     <TrendingHashtagChip trendingHashtag={'#Futbol'} />
-    //     <TrendingHashtagChip trendingHashtag={'#Messi'} />
-    //     <TrendingHashtagChip trendingHashtag={'#Test'} />
-    //   </View> */}
-    // </View>
+    <>
+      <MenuSearchBar />
+      <View style={styles.trendingContainer}>
+        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginLeft: 5 }}>
+          Now Trending
+        </Text>
+        <Divider />
+        <View style={{ flexDirection: 'column', marginVertical: 10 }}>
+          <FlatList<string>
+            data={trendingTopics}
+            renderItem={({ item }) => {
+              return <TopicCard topic={item} />;
+            }}
+          />
+        </View>
+      </View>
+    </>
   );
 }
 
@@ -35,15 +64,8 @@ const styles = StyleSheet.create({
   searchbar: {
     backgroundColor: '#2e2e2e'
   },
-  trendingText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    color: 'rgb(255 255 255)'
-  },
-  chipsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginVertical: 10
+  trendingContainer: {
+    marginTop: 20,
+    padding: 10
   }
 });
