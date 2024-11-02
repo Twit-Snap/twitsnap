@@ -49,6 +49,8 @@ const SignIn: () => React.JSX.Element = () => {
       if (error.response && error.response.status === 401) {
         console.log('Login failed: ', error.response.data);
         alert('Invalid username or password');
+      } else if (error.response?.status === 403) {
+        console.log('User blocked');
       } else {
         console.error('Error:', JSON.stringify(error, null, 2));
         alert('An error occurred. Please try again later.');

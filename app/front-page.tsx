@@ -75,6 +75,8 @@ export default function FrontPage() {
         if (errorAux.response && errorAux.response.status === 401) {
           console.log('Login failed: ', errorAux.response.data);
           alert('Invalid username or password');
+        } else if (errorAux.response?.status === 403) {
+          console.log('User blocked');
         } else {
           console.error('Error:', JSON.stringify(errorAux, null, 2));
           console.error('Error data:', JSON.stringify(errorAux.response?.data, null, 2));
