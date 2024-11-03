@@ -16,7 +16,6 @@ const TwitView: React.FC = () => {
       try {
         const response = await axiosTwits.get(`snaps/${id}`);
         console.log(`Fetched twit with id ${id}`);
-        console.log(response.data.data);
         setTweet(response.data.data as TwitSnap);
       } catch (error) {
         console.error('Error fetching tweet:', error);

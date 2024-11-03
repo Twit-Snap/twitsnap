@@ -15,10 +15,12 @@ interface NewTweetInputProps {
   onTweetSend: (tweetContent: string) => void;
   onClose: () => void;
   placeholder?: string;
+  baseContent?: string;
 }
 
-const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, placeholder }) => {
-  const [tweetContent, setTweetContent] = useState<string>('');
+const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, placeholder,
+  baseContent }) => {
+  const [tweetContent, setTweetContent] = useState<string>(baseContent || '');
   const [userData] = useAtom(authenticatedAtom);
   const [matchingUsers, setMatchingUsers] = useState<SearchedUser[] | null>(null);
   const timeout = useRef<NodeJS.Timeout | null>(null);

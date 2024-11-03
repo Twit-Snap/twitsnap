@@ -13,6 +13,7 @@ import useAxiosInstance from '@/hooks/useAxios';
 import { SearchedUser } from '../types/publicUser';
 
 const window = Dimensions.get('window');
+
 const parseQuery = (query: string): string => {
   query = query.trim();
 

@@ -3,6 +3,7 @@ import { TwitSnap } from '@/app/types/TwitSnap';
 import { parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
+import { useAtom } from 'jotai/index';
 import React, { useRef, useState } from 'react';
 import {
   Animated,
@@ -14,11 +15,14 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { Divider, IconButton } from 'react-native-paper';
+
+import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
+import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
 
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import useAxiosInstance from '@/hooks/useAxios';
-import { useAtom } from 'jotai/index';
 import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {
@@ -37,12 +41,17 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const segments = useSegments(); // Obtener la ruta actual
   const axiosTwits = useAxiosInstance('twits');
 
-  const [animatedValue] = useState(new Animated.Value(window.height));
+  const [animatedValueComment] = useState(new Animated.Value(window.height));
+  const [animatedValueThreeDot] = useState(new Animated.Value(window.height));
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const isExpandedRef = useRef(false);
+  const [isExpandedComment, setIsExpandedComment] = useState(false);
+  const isExpandedCommentRef = useRef(false);
+
+  const [isExpandedThreeDot, setIsExpandedThreeDot] = useState(false);
+  const isExpandedRefThreeDot = useRef(false);
 
   const [showTabs, setShowTabs] = useAtom(showTabsAtom);
+  const [tweetDelete, setTweetDelete] = useAtom(tweetDeleteAtom);
 
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
@@ -79,21 +88,78 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
     );
   };
 
-  const handlePress = () => {
+  const handlePressComment = () => {
     setShowTabs(!showTabs);
-    Animated.timing(animatedValue, {
-      toValue: isExpanded ? window.height : 0, // Adjust the height as needed
+    Animated.timing(animatedValueComment, {
+      toValue: isExpandedComment ? window.height : 0, // Adjust the height as needed
       duration: 300, // Animation duration in milliseconds
       useNativeDriver: true
     }).start(() => {
-      setIsExpanded(!isExpanded);
+      setIsExpandedComment(!isExpandedComment);
     });
     Keyboard.dismiss();
   };
 
+  const handlePressThreeDot = () => {
+    setShowTabs(!showTabs);
+    Animated.timing(animatedValueThreeDot, {
+      toValue: isExpandedThreeDot ? window.height : 0, // Adjust the height as needed
+      duration: 300, // Animation duration in milliseconds
+      useNativeDriver: true
+    }).start(() => {
+      setIsExpandedThreeDot(!isExpandedThreeDot);
+    });
+    Keyboard.dismiss();
+  };
+
+  const onTwitDelete = async () => {
+    try {
+      const response = await axiosTwits.delete(`snaps/${item.id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.status === 204) {
+        setTweetDelete({ shouldDelete: true, twitId: [...tweetDelete.twitId, item.id] });
+        router.back();
+      }
+    } catch (error) {
+      console.error('Error deleting tweet:', error);
+    }
+  };
+
+  const onTwitEdit = async (tweetContent: string) => {
+    try {
+      const response = await axiosTwits.patch(
+        `snaps/${item.id}`,
+        {
+          content: tweetContent
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      if (response.status === 204) {
+        console.log('Successfully edited the tweet with id: ', item.id);
+        router.back();
+      }
+    } catch (error) {
+      console.error('Error editing tweet:', error);
+    }
+  };
+
   return (
     <>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <TouchableOpacity onPress={router.back} style={[styles.goBack, { marginTop: -28 }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <IconButton icon="arrow-left" iconColor="rgb(255 255 255)" size={24} />
+          <Text style={{ color: 'rgb(255 255 255)', fontSize: 20, marginLeft: 5 }}>Post</Text>
+        </View>
+        <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(194,187,187)' }} />
+      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
         <TouchableOpacity
           onPress={() =>
             router.push({
@@ -111,9 +177,21 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             style={styles.profilePicture}
           />
         </TouchableOpacity>
-        <View style={{ marginLeft: 10 }}>
-          <Text style={styles.name}>{item.user.name}</Text>
-          <Text style={styles.username}>@{item.user.username}</Text>
+        <View style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center' }}>
+          <View>
+            <Text style={styles.name}>{item.user.name}</Text>
+            <Text style={styles.username}>@{item.user.username}</Text>
+          </View>
+          <IconButton
+            icon="dots-horizontal"
+            style={{ position: 'absolute', left: window.width - 120 }}
+            size={24}
+            onPress={() => {
+              isExpandedRefThreeDot.current = !isExpandedRefThreeDot.current;
+              setIsExpandedThreeDot(isExpandedRefThreeDot.current);
+              handlePressThreeDot();
+            }}
+          />
         </View>
       </View>
       <View style={{ flexDirection: 'column' }}>
@@ -126,9 +204,9 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             initState={false}
             initCount={1_023_203}
             handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-              isExpandedRef.current = !isExpandedRef.current;
-              setIsExpanded(isExpandedRef.current);
-              handlePress();
+              isExpandedCommentRef.current = !isExpandedCommentRef.current;
+              setIsExpandedComment(isExpandedCommentRef.current);
+              handlePressComment();
               return { state: true, count: 0 };
             }}
           />
@@ -205,7 +283,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             width: window.width
           },
           {
-            transform: [{ translateY: animatedValue }],
+            transform: [{ translateY: animatedValueComment }],
             bottom: 0
           }
         ]}
@@ -215,8 +293,44 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             onTweetSend={(tweetContent) => {
               console.log('tweetContent: ', tweetContent);
             }}
-            onClose={handlePress}
+            onClose={handlePressComment}
             placeholder={`Replying to @${item.user.username}`}
+          />
+        </View>
+      </Animated.View>
+      <Animated.View
+        style={[
+          {
+            backgroundColor: 'rgb(5 5 5)',
+            zIndex: 50,
+            position: 'absolute',
+            bottom: 0,
+            top: 0,
+            paddingTop: 35,
+            width: window.width
+          },
+          {
+            transform: [{ translateY: animatedValueThreeDot }],
+            top: '30%'
+          }
+        ]}
+      >
+        <View style={{ borderRadius: 30 }}>
+          <Divider
+            style={{
+              height: 2,
+              width: '30%',
+              backgroundColor: 'rgb(194,187,187)',
+              marginLeft: '35%',
+              marginRight: '35%'
+            }}
+          />
+          <ThreeDotMenu
+            onCloseOrFinish={handlePressThreeDot}
+            onTwitDelete={onTwitDelete}
+            onTwitEdit={onTwitEdit}
+            twitContent={item.content}
+            twitIsFromUser={item.user.username === userData?.username}
           />
         </View>
       </Animated.View>
@@ -281,6 +395,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     fontSize: 14,
     height: 36
+  },
+  goBack: {
+    paddingRight: 9,
+    paddingTop: -10
   }
 });
 
