@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -13,21 +14,20 @@ import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
+import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import { feedRefreshIntervalAtom } from '@/atoms/feedRefreshInterval';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
-import removeDuplicates from '@/utils/removeDup';
-import axios from 'axios';
 
 import debounce from 'lodash/debounce';
 
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
-// const intervalMinutes = 10 * 60 * 1000;
-const intervalMinutes = 30 * 1000;
+const intervalMinutes = 10 * 60 * 1000;
+//const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -41,6 +41,7 @@ export default function FeedScreen() {
   const [needRefresh, setNeedRefresh] = useState(false);
 
   const [fetchInterval, setFetchInterval] = useAtom(feedRefreshIntervalAtom);
+  const [fetchDeletedTwits, setDeletedTwits] = useAtom(tweetDeleteAtom);
 
   const isActualFeedTypeFollowing = useRef<boolean>(false);
 
@@ -53,7 +54,11 @@ export default function FeedScreen() {
         let new_twits: TwitSnap[] = [];
 
         if (prev_twits && newTwits) {
-          new_twits = removeDuplicates([...newTwits, ...prev_twits]);
+          new_twits = [
+            ...newTwits.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id)),
+            ...prev_twits
+          ];
+          setDeletedTwits({ shouldDelete: false, twitId: [] });
           newerTwitRef.current = new_twits[0];
           newTwits = null;
         }
@@ -118,7 +123,8 @@ export default function FeedScreen() {
 
     const fetchedTweets = await fetchTweets(params);
     newerTwitRef.current = fetchedTweets[0];
-    setTweets(fetchedTweets);
+    setTweets(fetchedTweets.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id)));
+    setDeletedTwits({ shouldDelete: false, twitId: [] });
   };
 
   const refreshTweets = debounce(async (newerTwit: TwitSnap | null): Promise<void> => {
@@ -163,12 +169,17 @@ export default function FeedScreen() {
       if (!prev_twits) {
         return olderTwits;
       }
-      return removeDuplicates([...prev_twits, ...olderTwits]);
+      const twits = [
+        ...prev_twits,
+        ...olderTwits.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id))
+      ];
+      setDeletedTwits({ shouldDelete: false, twitId: [] });
+      return twits;
     });
   }, 500);
 
   const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
-    var twits: TwitSnap[] = [];
+    let twits: TwitSnap[] = [];
 
     await axios
       .get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {

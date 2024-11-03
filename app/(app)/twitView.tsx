@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import axios from 'axios';
 import { useLocalSearchParams } from 'expo-router';
@@ -22,7 +22,6 @@ const TwitView: React.FC = () => {
           timeout: 10000
         });
         console.log(`Fetched twit with id ${id}`);
-        console.log(response.data.data);
         setTweet(response.data.data as TwitSnap);
       } catch (error) {
         console.error('Error fetching tweet:', error);
