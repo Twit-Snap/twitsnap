@@ -78,9 +78,11 @@ export default function SearchResultsScreen() {
         try {
           const response = await axios.get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users`, {
             headers: { Authorization: `Bearer ${userData?.token}` },
-            params: { has: query },
+            params: { has: query, limit: 20 },
             timeout: 10000
           });
+          console.log('Fetched ', response.data.length, ' users');
+
           return response.data;
         } catch (error) {
           console.log(`No users: ${query}, `, error);
@@ -94,8 +96,9 @@ export default function SearchResultsScreen() {
         const textTwits = await fetchByText();
 
         const twits = removeDuplicates([...hashtagTwits, ...textTwits]);
+        const fetchedUsers = await fetchUsers();
 
-        setUsers(await fetchUsers());
+        setUsers(fetchedUsers);
         setTweets([...twits]);
       };
 
@@ -115,51 +118,50 @@ export default function SearchResultsScreen() {
 
   return (
     <View style={styles.container}>
-      <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
+      <View style={{ height: 50 }}>
+        <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
+      </View>
       {tweets && users ? (
-        // true || users.length > 0 ? (
-        (
-          <View
-            style={{
-              paddingHorizontal: 10,
-              paddingTop: 10,
-              borderWidth: 1,
-              borderBottomColor: 'rgb(40 40 40)'
-            }}
-          >
-            <Text style={{ color: 'rgb(255 255 255)', fontSize: 20, fontWeight: '600' }}>
-              People
-            </Text>
+        <>
+          {users.length > 0 && (
+            <View
+              style={{
+                paddingHorizontal: 10,
+                paddingTop: 10,
+                borderWidth: 1,
+                borderBottomColor: 'rgb(40 40 40)'
+              }}
+            >
+              <Text style={{ color: 'rgb(255 255 255)', fontSize: 20, fontWeight: '600' }}>
+                People
+              </Text>
+              <FlatList
+                style={{ paddingVertical: 10 }}
+                horizontal={true}
+                data={users}
+                renderItem={({ item }) => <LargeUserCard item={item} />}
+                keyExtractor={(item) => item.id.toString()}
+              />
+            </View>
+          )}
+          {tweets.length > 0 && (
             <FlatList
-              style={{ paddingVertical: 10 }}
-              horizontal={true}
-              data={users}
-              renderItem={({ item }) => <LargeUserCard item={item} />}
-              keyExtractor={(item) => item.id.toString()}
+              data={tweets}
+              renderItem={({ item }) => <TweetCard item={item} />}
+              keyExtractor={(item) => item.id}
             />
-          </View>
-        )
-      ) : (
-        <></>
-      )}
-
-      {tweets && users ? (
-        tweets.length > 0 ? (
-          <FlatList
-            data={tweets}
-            renderItem={({ item }) => <TweetCard item={item} />}
-            keyExtractor={(item) => item.id}
-          />
-        ) : (
-          <View style={styles.error_container}>
-            <Text
-              numberOfLines={6}
-              ellipsizeMode="tail"
-              style={styles.error_label}
-            >{`No results for "${query}"`}</Text>
-            <Text style={styles.error_label_aux}>Try searching for something else</Text>
-          </View>
-        )
+          )}
+          {(tweets.length | users.length) === 0 && (
+            <View style={styles.error_container}>
+              <Text
+                numberOfLines={6}
+                ellipsizeMode="tail"
+                style={styles.error_label}
+              >{`No results for "${query}"`}</Text>
+              <Text style={styles.error_label_aux}>Try searching for something else</Text>
+            </View>
+          )}
+        </>
       ) : (
         <ActivityIndicator
           animating={true}

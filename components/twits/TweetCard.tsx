@@ -8,6 +8,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
 
+import ParsedContent from '../common/parsedContent';
 import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {
@@ -39,40 +40,17 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
     }
   };
 
-  const renderContent = (text: string) => {
-    const words = text.split(' ');
-    return (
-      <Text>
-        {words.map((word, index) => {
-          if (word.startsWith('#')) {
-            return (
-              <Text key={index}>
-                <Text
-                  onPress={() =>
-                    router.push({ pathname: `/searchResults`,
-                      params: { query: word } })
-                  }
-                  style={styles.hashtag}
-                >
-                  {word}
-                </Text>{' '}
-              </Text>
-            );
-          }
-          return <Text key={index}>{word} </Text>;
-        })}
-      </Text>
-    );
-  };
-
   return (
-    <TouchableOpacity style={styles.container} activeOpacity={0.4}
+    <TouchableOpacity
+      style={styles.container}
+      activeOpacity={0.4}
       onPress={() =>
-      router.push({
-        pathname: '../twitView',
-        params: { id: item.id }
-      })
-    }>
+        router.push({
+          pathname: '../twitView',
+          params: { id: item.id }
+        })
+      }
+    >
       <>
         <TouchableOpacity
           onPress={() =>
@@ -84,11 +62,11 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
         >
           <Image
             source={
-              item.profileImage
-                ? { uri: item.profileImage }
+              item.profilePicture
+                ? { uri: item.profilePicture }
                 : default_images.default_profile_picture
             }
-            style={styles.profileImage}
+            style={styles.profilePicture}
           />
         </TouchableOpacity>
         <View style={{ flex: 1, flexDirection: 'column' }}>
@@ -101,7 +79,9 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
                 <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
               </Text>
             </Text>
-            <Text style={styles.content}>{renderContent(item.content)}</Text>
+            <Text style={styles.content}>
+              <ParsedContent text={item.content} />
+            </Text>
           </View>
           <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
             <Interaction
@@ -188,7 +168,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgb(25 25 25)',
     backgroundColor: 'rgb(5 5 5)'
   },
-  profileImage: {
+  profilePicture: {
     width: 40,
     height: 40,
     borderRadius: 25
@@ -214,9 +194,6 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 12,
     color: 'rgb(120 120 120)'
-  },
-  hashtag: {
-    color: 'rgb(67,67,244)'
   },
   dot: {
     fontSize: 16,

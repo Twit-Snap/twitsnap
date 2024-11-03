@@ -1,54 +1,34 @@
 import { IReducedUser } from '@/app/types/publicUser';
-import { router } from 'expo-router';
+import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
 };
 
-export default function UserCard({ item }: { item: IReducedUser }) {
-  // const renderContent = (text: string) => {
-  //   const words = text.split(' ');
-  //   return (
-  //     <Text>
-  //       {words.map((word, index) => {
-  //         if (word.startsWith('#')) {
-  //           return (
-  //             <Text key={index}>
-  //               <Text
-  //                 onPress={() =>
-  //                   router.push({ pathname: `/searchResults`, params: { hashtag: word } })
-  //                 }
-  //                 style={styles.hashtag}
-  //               >
-  //                 {word}
-  //               </Text>{' '}
-  //             </Text>
-  //           );
-  //         }
-  //         return <Text key={index}>{word} </Text>;
-  //       })}
-  //     </Text>
-  //   );
-  // };
-
+export default function UserCard({
+  item,
+  handler
+}: {
+  item: IReducedUser;
+  handler: (username: string) => void;
+}) {
   return (
     <TouchableOpacity
-      onPress={() =>
-        router.push({
-          pathname: `/(app)/profile/[username]`,
-          params: { username: item.username }
-        })
-      }
+      onPress={() => {
+        handler(item.username);
+      }}
       style={styles.container}
       activeOpacity={0.4}
     >
       <>
         <Image
           source={
-            item.profileImage ? { uri: item.profileImage } : default_images.default_profile_picture
+            item.profilePicture
+              ? { uri: item.profilePicture }
+              : default_images.default_profile_picture
           }
-          style={styles.profileImage}
+          style={styles.profilePicture}
         />
         <View style={{ flex: 1, flexDirection: 'column' }}>
           <View style={styles.contentContainer}>
@@ -71,7 +51,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgb(50 50 50)',
     backgroundColor: 'rgb(5 5 5)'
   },
-  profileImage: {
+  profilePicture: {
     width: 40,
     height: 40,
     borderRadius: 25

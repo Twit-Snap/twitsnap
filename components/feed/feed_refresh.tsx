@@ -1,3 +1,4 @@
+import React from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { Avatar, Button, Text } from 'react-native-paper';
 
@@ -57,7 +58,7 @@ export default function FeedRefresh(props: IFeedRefreshProps) {
 const styles = StyleSheet.create({
   button: {
     margin: 0,
-    top: window.height * 0.18,
+    top: 110,
     position: 'absolute',
     zIndex: 40,
     height: 45,

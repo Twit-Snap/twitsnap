@@ -1,5 +1,6 @@
 import { Slot } from 'expo-router';
 import { Provider } from 'jotai';
+import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function Root() {

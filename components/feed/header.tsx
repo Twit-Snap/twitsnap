@@ -1,7 +1,12 @@
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
+import React from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+const default_images = {
+  default_profile_picture: require('../../assets/images/no-profile-picture.png')
+};
 
 const window = Dimensions.get('window');
 
@@ -51,7 +56,11 @@ export default function HomeHeader() {
         >
           <Image
             style={StyleSheet.compose(styles.logo, styles.profile_logo)}
-            source={require('@/assets/images/messi.jpg')}
+            source={
+              userData?.profilePicture
+                ? { uri: userData?.profilePicture }
+                : default_images.default_profile_picture
+            }
           />
         </TouchableOpacity>
         <Image

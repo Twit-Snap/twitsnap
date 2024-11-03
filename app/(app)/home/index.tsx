@@ -22,6 +22,8 @@ import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
 
+import debounce from 'lodash/debounce';
+
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
 const intervalMinutes = 10 * 60 * 1000;
@@ -114,6 +116,7 @@ export default function FeedScreen() {
     }
 
     const params = {
+      rank: true,
       limit: 20,
       byFollowed: byFollowed
     };
@@ -124,27 +127,26 @@ export default function FeedScreen() {
     setDeletedTwits({ shouldDelete: false, twitId: [] });
   };
 
-  const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
+  const refreshTweets = debounce(async (newerTwit: TwitSnap | null): Promise<void> => {
     console.log(`refresh!`);
-    if (!newerTwit) {
-      return;
-    }
 
     const params = {
       createdAt: newerTwit ? newerTwit.createdAt : undefined,
       older: false,
-      limit: 100,
-      byFollowed: isActualFeedTypeFollowing.current
+      byFollowed: isActualFeedTypeFollowing.current,
+      rank: true,
+      limit: 100
     };
 
     newTwits = await fetchTweets(params);
+
     if (newTwits.length > 0) {
-      // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profileImageURL)],
+      // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profilePictureURL)],
       setNeedRefresh(true);
     }
-  };
+  }, 500);
 
-  const loadMoreTwits = async () => {
+  const loadMoreTwits = debounce(async () => {
     console.log('scroll refresh!');
     if (!tweets) {
       return;
@@ -157,7 +159,7 @@ export default function FeedScreen() {
       byFollowed: isActualFeedTypeFollowing.current
     };
 
-    const olderTwits: TwitSnap[] = await fetchTweets(params);
+    let olderTwits: TwitSnap[] = await fetchTweets(params);
 
     if (olderTwits.length === 0) {
       return;
@@ -174,7 +176,7 @@ export default function FeedScreen() {
       setDeletedTwits({ shouldDelete: false, twitId: [] });
       return twits;
     });
-  };
+  }, 500);
 
   const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
     let twits: TwitSnap[] = [];

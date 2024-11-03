@@ -2,6 +2,7 @@ import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { SearchedUser } from '@/app/types/publicUser';
 import axios from 'axios';
 import { useAtomValue } from 'jotai';
+import React from 'react';
 import { useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';

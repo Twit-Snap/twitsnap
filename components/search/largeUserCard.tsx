@@ -1,5 +1,8 @@
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { SearchedUser } from '@/app/types/publicUser';
 import { router } from 'expo-router';
+import { useAtomValue } from 'jotai';
+import React from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import FollowButton from '../profile/followButton';
@@ -13,6 +16,8 @@ const default_images = {
 };
 
 export default function LargeUserCard({ item }: { item: SearchedUser }) {
+  const authUser = useAtomValue(authenticatedAtom);
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -31,7 +36,7 @@ export default function LargeUserCard({ item }: { item: SearchedUser }) {
         style={styles.backgroundImage}
       />
       <Image
-        source={item.profileImage ? { uri: item.profileImage } : default_images.profilePhoto}
+        source={item.profilePicture ? { uri: item.profilePicture } : default_images.profilePhoto}
         style={styles.profilePhoto}
       />
       <View
@@ -43,7 +48,9 @@ export default function LargeUserCard({ item }: { item: SearchedUser }) {
           top: -5
         }}
       >
-        <FollowButton extraCallback={() => {}} user={item} />
+        {item.username !== authUser?.username && (
+          <FollowButton extraCallback={() => {}} user={item} />
+        )}
       </View>
       <View style={styles.textContainer}>
         {item && <Text style={styles.name}>{item.name}</Text>}

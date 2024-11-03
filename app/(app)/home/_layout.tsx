@@ -2,6 +2,7 @@ import { Slot } from 'expo-router';
 import { Dimensions, StyleSheet, View } from 'react-native';
 
 import HomeHeader from '@/components/feed/header';
+import React from 'react';
 
 const window = Dimensions.get('window');
 

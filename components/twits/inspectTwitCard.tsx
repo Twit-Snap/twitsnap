@@ -1,3 +1,5 @@
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { TwitSnap } from '@/app/types/TwitSnap';
 import axios from 'axios';
 import { parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
@@ -16,13 +18,11 @@ import {
 } from 'react-native';
 import { Divider, IconButton } from 'react-native-paper';
 
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { TwitSnap } from '@/app/types/TwitSnap';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
-import { showTabsAtom } from '@/atoms/showTabsAtom';
 import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
-import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 
+import { showTabsAtom } from '@/atoms/showTabsAtom';
+import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {
@@ -176,11 +176,11 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
         >
           <Image
             source={
-              item.profileImage
-                ? { uri: item.profileImage }
+              item.profilePicture
+                ? { uri: item.profilePicture }
                 : default_images.default_profile_picture
             }
-            style={styles.profileImage}
+            style={styles.profilePicture}
           />
         </TouchableOpacity>
         <View style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center' }}>
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgb(25 25 25)',
     backgroundColor: 'rgb(5 5 5)'
   },
-  profileImage: {
+  profilePicture: {
     width: 50,
     height: 50,
     borderRadius: 25,
