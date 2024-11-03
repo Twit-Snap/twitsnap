@@ -3,16 +3,19 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Divider } from 'react-native-paper';
 
-export default function TopicCard({ topic }: { topic: string }) {
+export default function TopicCard({ topic }: { topic: { topicName: string; count: number } }) {
   const handlePress = () => {
-    router.push({ pathname: `/searchResults`, params: { query: topic } });
+    router.push({ pathname: `/searchResults`, params: { query: topic.topicName } });
   };
 
   return (
     <TouchableOpacity onPress={handlePress}>
       <View style={styles.container}>
         <Text style={styles.title}> Trending </Text>
-        <Text style={styles.text}>{topic.charAt(0).toUpperCase() + topic.slice(1)}</Text>
+        <Text style={styles.text}>
+          {topic.topicName.charAt(0).toUpperCase() + topic.topicName.slice(1)}
+        </Text>
+        <Text style={styles.postsAmmount}> {topic.count} Posts</Text>
         <Divider style={styles.divider} />
       </View>
     </TouchableOpacity>
@@ -39,5 +42,10 @@ const styles = StyleSheet.create({
   divider: {
     marginVertical: 15,
     backgroundColor: 'rgba(255, 255, 255, 0.7)'
+  },
+  postsAmmount: {
+    color: 'rgb(169, 169, 169)',
+    fontSize: 12,
+    marginTop: 5
   }
 });

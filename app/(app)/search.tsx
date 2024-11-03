@@ -25,6 +25,7 @@ export default function SearchScreen() {
           }
         );
         const data = await response.data.data;
+        console.log('Trending topics:', data);
         setTrendingTopics(data);
       } catch (error) {
         console.error('Error fetching trending topics:', error);
@@ -43,10 +44,12 @@ export default function SearchScreen() {
         </Text>
         <Divider />
         <View style={{ flexDirection: 'column', marginVertical: 10 }}>
-          <FlatList<string>
+          <FlatList<{ [key: string]: number }>
             data={trendingTopics}
             renderItem={({ item }) => {
-              return <TopicCard topic={item} />;
+              const topicName = Object.keys(item)[0];
+              const count = item[topicName];
+              return <TopicCard topic={{ topicName, count }} />;
             }}
           />
         </View>
