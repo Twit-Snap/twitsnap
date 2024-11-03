@@ -20,7 +20,7 @@ export default function Like({
       icon_alt_color="rgb(255, 79, 56)"
       initState={initState}
       initCount={initCount}
-      handler={async (state: boolean, count?: number): Promise<handlerReturn> => {
+      handler={async (state?: boolean, count?: number): Promise<handlerReturn> => {
         return state
           ? {
               state: await axiosTwits
@@ -36,8 +36,8 @@ export default function Like({
                 .catch((error) => {
                   console.error(error);
                   return state;
-                }),
-              count: count != undefined ? count - 1 : 0
+                }) === true,
+              count: count != undefined ? count - 1 : undefined
             }
           : {
               state: await axiosTwits
@@ -56,8 +56,8 @@ export default function Like({
                 .catch((error) => {
                   console.error(error);
                   return state;
-                }),
-              count: count != undefined ? count + 1 : 0
+                }) === true,
+              count: count != undefined ? count + 1 : undefined
             };
       }}
     />

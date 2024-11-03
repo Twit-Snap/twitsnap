@@ -1,5 +1,5 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 
 import { TwitSnap } from '@/app/types/TwitSnap';
@@ -19,7 +19,7 @@ import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import ParsedContent from '@/components/common/parsedContent';
-import Interaction, { handlerReturn } from '@/components/twits/interaction';
+import Interaction from '@/components/twits/interaction';
 import Like from '@/components/twits/Interactions/like';
 import Retwit from '@/components/twits/Interactions/retwit';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
@@ -53,7 +53,11 @@ const InteractionLabel = ({ count, label }: { count: number | undefined; label: 
 const TwitView: React.FC = () => {
   const [tweet, setTweet] = useState<TwitSnap | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, comm, openComment } = useLocalSearchParams<{
+    id: string;
+    comm: string;
+    openComment: string;
+  }>();
   const axiosTwits = useAxiosInstance('twits');
 
   const userData = useAtomValue(authenticatedAtom);
@@ -109,13 +113,14 @@ const TwitView: React.FC = () => {
   };
 
   const handlePressComment = () => {
+    isExpandedCommentRef.current = !isExpandedCommentRef.current;
     setShowTabs(!showTabs);
     Animated.timing(animatedValueComment, {
       toValue: isExpandedComment ? window.height : 0, // Adjust the height as needed
       duration: 300, // Animation duration in milliseconds
       useNativeDriver: true
     }).start(() => {
-      setIsExpandedComment(!isExpandedComment);
+      setIsExpandedComment(isExpandedCommentRef.current);
     });
     Keyboard.dismiss();
   };
@@ -196,18 +201,30 @@ const TwitView: React.FC = () => {
           })
           .catch(() => setComments([]));
       };
-      if (id) {
-        fetchTweet();
+      if (!id) {
+        return;
+      }
 
-        fetchComments();
+      fetchTweet();
+
+      fetchComments();
+
+      if (openComment === 'true') {
+        router.setParams({ comm: 'true' });
       }
 
       return () => {
         setComments(null);
         setTweet(null);
       };
-    }, [id])
+    }, [id, openComment])
   );
+
+  useEffect(() => {
+    if (comm === 'true') {
+      handlePressComment();
+    }
+  }, [comm]);
 
   if (loading || !tweet) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -273,21 +290,28 @@ const TwitView: React.FC = () => {
           <InteractionLabel count={tweet.likesCount} label={'Likes'} />
         </View>
 
-        <View style={{ flexDirection: 'row' }}>
+        <View style={{ flexDirection: 'row', paddingHorizontal: 10 }}>
           <Interaction
             icon="comment-outline"
             initState={false}
             initCount={undefined}
-            handler={async (state: boolean, count?: number): Promise<handlerReturn> => {
-              isExpandedCommentRef.current = !isExpandedCommentRef.current;
-              setIsExpandedComment(isExpandedCommentRef.current);
+            handler={async (): Promise<void> => {
               handlePressComment();
-              return { state: true, count: 0 };
             }}
           />
-          <Retwit initState={tweet.userRetwitted} initCount={tweet.retwitCount} twitId={tweet.id} />
-          <Like initState={tweet.userLiked} initCount={tweet.likesCount} twitId={tweet.id} />
+          <Retwit initState={tweet.userRetwitted} initCount={undefined} twitId={tweet.id} />
+          <Like initState={tweet.userLiked} initCount={undefined} twitId={tweet.id} />
         </View>
+        <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(60 60 60)' }} />
+        <>
+          {comments && comments.length > 0 && (
+            <FlatList
+              data={comments}
+              renderItem={({ item }) => <TweetCard item={item} />}
+              keyExtractor={(tweet) => tweet.id}
+            />
+          )}
+        </>
       </View>
       <Animated.View
         style={[
@@ -312,7 +336,8 @@ const TwitView: React.FC = () => {
               sendComment(tweetContent);
             }}
             onClose={handlePressComment}
-            placeholder={`Replying to @${tweet.user.username}`}
+            reply={`Replying to @${tweet.user.username}`}
+            placeholder={'Post your reply'}
           />
         </View>
       </Animated.View>
@@ -352,15 +377,6 @@ const TwitView: React.FC = () => {
           />
         </View>
       </Animated.View>
-      <>
-        {comments && comments.length > 0 && (
-          <FlatList
-            data={comments}
-            renderItem={({ item }) => <TweetCard item={item} />}
-            keyExtractor={(tweet) => tweet.id}
-          />
-        )}
-      </>
     </View>
   );
 };

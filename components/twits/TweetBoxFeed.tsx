@@ -7,6 +7,7 @@ import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { SearchedUser } from '@/app/types/publicUser';
 import useAxiosInstance from '@/hooks/useAxios';
 
+import ParsedContent from '../common/parsedContent';
 import UserCard from '../profile/userCard';
 
 const default_images = {
@@ -18,13 +19,15 @@ interface NewTweetInputProps {
   onClose: () => void;
   placeholder?: string;
   baseContent?: string;
+  reply?: string;
 }
 
 const NewTweetInput: React.FC<NewTweetInputProps> = ({
   onTweetSend,
   onClose,
   placeholder,
-  baseContent
+  baseContent,
+  reply
 }) => {
   const [tweetContent, setTweetContent] = useState<string>(baseContent || '');
   const [userData] = useAtom(authenticatedAtom);
@@ -108,6 +111,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
             onPress={onClose}
             iconColor="rgb(255 255 255)"
           />
+          {reply != undefined && reply?.length > 0 && <ParsedContent text={reply} color={'rgb(120 120 120)'} fontSize={16} />}
           <Button
             mode="contained"
             compact={true}

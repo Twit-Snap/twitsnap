@@ -10,7 +10,7 @@ import useAxiosInstance from '@/hooks/useAxios';
 
 import ParsedContent from '../common/parsedContent';
 
-import Interaction, { handlerReturn } from './interaction';
+import Interaction from './interaction';
 import Like from './Interactions/like';
 import Retwit from './Interactions/retwit';
 
@@ -92,9 +92,11 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
               icon="comment-outline"
               initState={false}
               initCount={1_023_002_230}
-              handler={async (state: boolean, count?: number): Promise<handlerReturn> => {
-                console.log('asd');
-                return { state: true, count: 0 };
+              handler={async () => {
+                router.push({
+                  pathname: '../twits/[id]',
+                  params: { id: item.id, openComment: 'true' }
+                });
               }}
             />
             <Retwit initState={item.userRetwitted} initCount={item.retwitCount} twitId={item.id} />
