@@ -77,9 +77,11 @@ export default function SearchResultsScreen() {
         try {
           const response = await axios.get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users`, {
             headers: { Authorization: `Bearer ${userData?.token}` },
-            params: { has: query },
+            params: { has: query, limit: 20 },
             timeout: 10000
           });
+          console.log('Fetched ', response.data.length, ' users');
+
           return response.data;
         } catch (error) {
           console.log(`No users: ${query}, `, error);
@@ -93,8 +95,9 @@ export default function SearchResultsScreen() {
         const textTwits = await fetchByText();
 
         const twits = removeDuplicates([...hashtagTwits, ...textTwits]);
+        const fetchedUsers = await fetchUsers();
 
-        setUsers(await fetchUsers());
+        setUsers(fetchedUsers);
         setTweets([...twits]);
       };
 
@@ -114,7 +117,9 @@ export default function SearchResultsScreen() {
 
   return (
     <View style={styles.container}>
-      <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
+      <View style={{ height: 50 }}>
+        <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
+      </View>
       {tweets && users ? (
         <>
           {users.length > 0 && (

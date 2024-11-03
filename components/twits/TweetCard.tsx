@@ -8,6 +8,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
 
+import ParsedContent from '../common/parsedContent';
 import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {
@@ -37,31 +38,6 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
     } else {
       return formatDistanceToNow(date, { addSuffix: true });
     }
-  };
-
-  const renderContent = (text: string) => {
-    const words = text.split(' ');
-    return (
-      <Text>
-        {words.map((word, index) => {
-          if (word.startsWith('#')) {
-            return (
-              <Text key={index}>
-                <Text
-                  onPress={() =>
-                    router.push({ pathname: `/searchResults`, params: { query: word } })
-                  }
-                  style={styles.hashtag}
-                >
-                  {word}
-                </Text>{' '}
-              </Text>
-            );
-          }
-          return <Text key={index}>{word} </Text>;
-        })}
-      </Text>
-    );
   };
 
   return (
@@ -103,7 +79,9 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
                 <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
               </Text>
             </Text>
-            <Text style={styles.content}>{renderContent(item.content)}</Text>
+            <Text style={styles.content}>
+              <ParsedContent text={item.content} />
+            </Text>
           </View>
           <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
             <Interaction
@@ -216,9 +194,6 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 12,
     color: 'rgb(120 120 120)'
-  },
-  hashtag: {
-    color: 'rgb(67,67,244)'
   },
   dot: {
     fontSize: 16,

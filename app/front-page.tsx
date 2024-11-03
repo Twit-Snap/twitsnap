@@ -16,6 +16,7 @@ import { Button } from 'react-native-paper';
 
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
+import React from 'react';
 
 GoogleSignin.configure({
   webClientId: '224360780470-maj4ma0cdjlm1o2376lv28m45rvm2e8e.apps.googleusercontent.com'

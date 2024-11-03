@@ -13,7 +13,7 @@ export default function ListHeader({
   return (
     <View style={styles.container}>
       <View
-        style={{ flex: 1, flexDirection: 'row', maxHeight: 57}}
+        style={{ flex: 1, flexDirection: 'row', minHeight: 57, maxHeight: 57, zIndex: 1}}
       >
         <TouchableOpacity onPress={router.back}>
           <IconButton icon="arrow-left" iconColor="rgb(255 255 255)" size={30} />
