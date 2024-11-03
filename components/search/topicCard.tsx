@@ -1,14 +1,21 @@
+import { router } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Divider } from 'react-native-paper';
 
 export default function TopicCard({ topic }: { topic: string }) {
+  const handlePress = () => {
+    router.push({ pathname: `/searchResults`, params: { query: topic } });
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}> Trending </Text>
-      <Text style={styles.text}>{topic.charAt(0).toUpperCase() + topic.slice(1)}</Text>
-      <Divider style={styles.divider} />
-    </View>
+    <TouchableOpacity onPress={handlePress}>
+      <View style={styles.container}>
+        <Text style={styles.title}> Trending </Text>
+        <Text style={styles.text}>{topic.charAt(0).toUpperCase() + topic.slice(1)}</Text>
+        <Divider style={styles.divider} />
+      </View>
+    </TouchableOpacity>
   );
 }
 
