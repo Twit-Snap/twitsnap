@@ -37,7 +37,7 @@ export default function Like({
                   console.error(error);
                   return state;
                 }),
-              count: count && count - 1
+              count: count != undefined ? count - 1 : 0
             }
           : {
               state: await axiosTwits
@@ -57,7 +57,7 @@ export default function Like({
                   console.error(error);
                   return state;
                 }),
-              count: count && count + 1
+              count: count != undefined ? count + 1 : 0
             };
       }}
     />
