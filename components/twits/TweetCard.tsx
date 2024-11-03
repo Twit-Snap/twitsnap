@@ -50,7 +50,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
       activeOpacity={0.4}
       onPress={() =>
         router.push({
-          pathname: '../twitView/[id]',
+          pathname: '../twits/[id]',
           params: { id: item.id }
         })
       }
