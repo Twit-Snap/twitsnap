@@ -1,11 +1,12 @@
 import { parseISO } from 'date-fns';
-import { useRouter, useSegments } from 'expo-router';
+import { useFocusEffect, useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import { useAtom } from 'jotai/index';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
+  FlatList,
   Image,
   Keyboard,
   StyleSheet,
@@ -23,7 +24,11 @@ import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import useAxiosInstance from '@/hooks/useAxios';
 
+import ParsedContent from '../common/parsedContent';
 import Interaction, { handlerReturn } from './interaction';
+import Like from './Interactions/like';
+import Retwit from './Interactions/retwit';
+import TweetCard from './TweetCard';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -68,6 +73,8 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const [showTabs, setShowTabs] = useAtom(showTabsAtom);
   const [tweetDelete, setTweetDelete] = useAtom(tweetDeleteAtom);
 
+  const [comments, setComments] = useState<TwitSnap[] | null>(null);
+
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
     const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -75,32 +82,31 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
     return `${time} | ${formattedDate}`;
   };
 
-  const renderContent = (text: string) => {
-    const words = text.split(' ');
-    return (
-      <Text>
-        {words.map((word, index) => {
-          if (word.startsWith('#')) {
-            return (
-              <Text key={index}>
-                <Text
-                  onPress={() =>
-                    router.push({
-                      pathname: `/searchResults`,
-                      params: { query: word }
-                    })
-                  }
-                  style={styles.hashtag}
-                >
-                  {word}
-                </Text>{' '}
-              </Text>
-            );
+  const sendComment = async (tweetContent: string) => {
+    try {
+      const response = await axiosTwits.post(
+        `snaps`,
+        {
+          user: {
+            userId: userData?.id,
+            name: userData?.name,
+            username: userData?.username
+          },
+          content: tweetContent.trim(),
+          type: 'comment',
+          parent: item.id
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
           }
-          return <Text key={index}>{word} </Text>;
-        })}
-      </Text>
-    );
+        }
+      );
+      console.log('Twit sent: ', response.data);
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again later.');
+    }
   };
 
   const handlePressComment = () => {
@@ -165,6 +171,29 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const fetchComments = async (queryParams: object | undefined = undefined): Promise<void> => {
+        await axiosTwits
+          .get(`snaps`, {
+            params: { ...queryParams, parent: item.id, type: 'comment' }
+          })
+          .then((response) => {
+            console.log('Fetched: ', response.data.data.length, ' twits');
+            setComments(response.data.data);
+          })
+          .catch(() => setComments([]));
+      };
+
+      fetchComments();
+
+      return () => {
+        setComments(null)
+
+      }
+    }, [])
+  );
+
   return (
     <>
       <TouchableOpacity onPress={router.back} style={[styles.goBack, { marginTop: -28 }]}>
@@ -172,7 +201,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
           <IconButton icon="arrow-left" iconColor="rgb(255 255 255)" size={24} />
           <Text style={{ color: 'rgb(255 255 255)', fontSize: 20, marginLeft: 5 }}>Post</Text>
         </View>
-        <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(194,187,187)' }} />
+        <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(60 60 60)' }} />
       </TouchableOpacity>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
         <TouchableOpacity
@@ -185,8 +214,8 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
         >
           <Image
             source={
-              item.profilePicture
-                ? { uri: item.profilePicture }
+              item.user.profilePicture
+                ? { uri: item.user.profilePicture }
                 : default_images.default_profile_picture
             }
             style={styles.profilePicture}
@@ -211,7 +240,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
       </View>
       <View style={{ flexDirection: 'column' }}>
         <View style={styles.contentContainer}>
-          <Text style={styles.content}>{renderContent(item.content)}</Text>
+          <Text style={styles.content}>{<ParsedContent text={item.content} />}</Text>
         </View>
 
         <Text style={[styles.date]}>{formatDate(item.createdAt)}</Text>
@@ -225,74 +254,17 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
           <Interaction
             icon="comment-outline"
             initState={false}
-            initCount={1_023_203}
-            handler={async (state: boolean, count: number): Promise<handlerReturn> => {
+            initCount={undefined}
+            handler={async (state: boolean, count?: number): Promise<handlerReturn> => {
               isExpandedCommentRef.current = !isExpandedCommentRef.current;
               setIsExpandedComment(isExpandedCommentRef.current);
               handlePressComment();
               return { state: true, count: 0 };
             }}
           />
-          <Interaction
-            icon="repeat-off"
-            icon_alt="repeat"
-            icon_alt_color="rgb(47, 204, 110  )"
-            initState={false}
-            initCount={1_023_203}
-            handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-              console.log('asd');
-              return { state: true, count: 0 };
-            }}
-          />
-          <Interaction
-            icon="heart-outline"
-            icon_alt="heart"
-            icon_alt_color="rgb(255, 79, 56)"
-            initState={item.userLiked}
-            initCount={item.likesCount}
-            handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-              return state
-                ? {
-                    state: await axiosTwits
-                      .delete(`likes`, {
-                        data: {
-                          twitId: item.id
-                        },
-                        headers: {
-                          'Content-Type': 'application/json'
-                        }
-                      })
-                      .then(() => !state)
-                      .catch((error) => {
-                        console.error(error);
-                        return state;
-                      }),
-                    count: count - 1
-                  }
-                : {
-                    state: await axiosTwits
-                      .post(
-                        `likes`,
-                        {
-                          twitId: item.id
-                        },
-                        {
-                          headers: {
-                            'Content-Type': 'application/json'
-                          }
-                        }
-                      )
-                      .then(() => !state)
-                      .catch((error) => {
-                        console.error(error);
-                        return state;
-                      }),
-                    count: count + 1
-                  };
-            }}
-          />
+          <Retwit initState={item.userRetwitted} initCount={item.retwitCount} twitId={item.id} />
+          <Like initState={item.userLiked} initCount={item.likesCount} twitId={item.id} />
         </View>
-        <Text style={[styles.date]}>{formatDate(item.createdAt)}</Text>
       </View>
       <Animated.View
         style={[
@@ -314,7 +286,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
         <View style={{ height: window.height }}>
           <TweetBoxFeed
             onTweetSend={(tweetContent) => {
-              console.log('tweetContent: ', tweetContent);
+              sendComment(tweetContent);
             }}
             onClose={handlePressComment}
             placeholder={`Replying to @${item.user.username}`}
@@ -357,6 +329,15 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
           />
         </View>
       </Animated.View>
+      <>
+        {comments && comments.length > 0 && (
+          <FlatList
+            data={comments}
+            renderItem={({ item }) => <TweetCard item={item} />}
+            keyExtractor={(item) => item.id}
+          />
+        )}
+      </>
     </>
   );
 };
@@ -376,7 +357,7 @@ const styles = StyleSheet.create({
     marginLeft: 10
   },
   contentContainer: {
-    marginLeft: 10
+    marginHorizontal: 10
   },
   name: {
     fontWeight: 'bold',

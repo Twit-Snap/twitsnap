@@ -211,16 +211,19 @@ export default function FeedScreen() {
       const response = await axiosTwits.post(
         `snaps`,
         {
-          authorId: userData?.id,
-          authorName: userData?.name,
-          authorUsername: userData?.username,
-          content: tweetContent.trim()
+          user: {
+            userId: userData?.id,
+            name: userData?.name,
+            username: userData?.username
+          },
+          content: tweetContent.trim(),
+          type: 'original',
+          parent: undefined
         },
         {
           headers: {
             'Content-Type': 'application/json'
-          },
-          timeout: 10000
+          }
         }
       );
       console.log('Twit sent: ', response.data);
