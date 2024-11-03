@@ -35,6 +35,21 @@ interface TweetCardProps {
 
 const window = Dimensions.get('screen');
 
+const InteractionLabel = ({ count, label }: { count: number | undefined; label: string }) => {
+  return (
+    <>
+      {count != undefined && count > 0 && (
+        <View style={{ flexDirection: 'row', marginLeft: 10 }}>
+          <Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 17, color: 'white' }}>{count || ''}</Text>
+            <Text style={{ fontSize: 17, color: 'rgb(120 120 120)' }}> {label || ''} </Text>
+          </Text>
+        </View>
+      )}
+    </>
+  );
+};
+
 const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const userData = useAtomValue(authenticatedAtom);
   const router = useRouter(); // Obtener el objeto de router
@@ -198,6 +213,14 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
         <View style={styles.contentContainer}>
           <Text style={styles.content}>{renderContent(item.content)}</Text>
         </View>
+
+        <Text style={[styles.date]}>{formatDate(item.createdAt)}</Text>
+
+        <View style={{ flexDirection: 'row', marginVertical: 10 }}>
+          <InteractionLabel count={item.retwitCount} label={'Retwits'} />
+          <InteractionLabel count={item.likesCount} label={'Likes'} />
+        </View>
+
         <View style={{ flexDirection: 'row' }}>
           <Interaction
             icon="comment-outline"
