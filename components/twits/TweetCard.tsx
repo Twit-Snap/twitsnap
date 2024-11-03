@@ -11,6 +11,8 @@ import useAxiosInstance from '@/hooks/useAxios';
 import ParsedContent from '../common/parsedContent';
 
 import Interaction, { handlerReturn } from './interaction';
+import Like from './Interactions/like';
+import Retwit from './Interactions/retwit';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -48,7 +50,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
       activeOpacity={0.4}
       onPress={() =>
         router.push({
-          pathname: '../twitView',
+          pathname: '../twitView/[id]',
           params: { id: item.id }
         })
       }
@@ -64,8 +66,8 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
         >
           <Image
             source={
-              item.profilePicture
-                ? { uri: item.profilePicture }
+              item.user.profilePicture
+                ? { uri: item.user.profilePicture }
                 : default_images.default_profile_picture
             }
             style={styles.profilePicture}
@@ -90,69 +92,13 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
               icon="comment-outline"
               initState={false}
               initCount={1_023_002_230}
-              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
+              handler={async (state: boolean, count?: number): Promise<handlerReturn> => {
                 console.log('asd');
                 return { state: true, count: 0 };
               }}
             />
-            <Interaction
-              icon="repeat-off"
-              icon_alt="repeat"
-              icon_alt_color="rgb(47, 204, 110  )"
-              initState={false}
-              initCount={1_023_203}
-              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                console.log('asd');
-                return { state: true, count: 0 };
-              }}
-            />
-            <Interaction
-              icon="heart-outline"
-              icon_alt="heart"
-              icon_alt_color="rgb(255, 79, 56)"
-              initState={item.userLiked}
-              initCount={item.likesCount}
-              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                return state
-                  ? {
-                      state: await axiosTwits
-                        .delete(`likes`, {
-                          data: {
-                            twitId: item.id
-                          },
-                          headers: {
-                            'Content-Type': 'application/json'
-                          }
-                        })
-                        .then(() => !state)
-                        .catch((error) => {
-                          console.error(error);
-                          return state;
-                        }),
-                      count: count - 1
-                    }
-                  : {
-                      state: await axiosTwits
-                        .post(
-                          `likes`,
-                          {
-                            twitId: item.id
-                          },
-                          {
-                            headers: {
-                              'Content-Type': 'application/json'
-                            }
-                          }
-                        )
-                        .then(() => !state)
-                        .catch((error) => {
-                          console.error(error);
-                          return state;
-                        }),
-                      count: count + 1
-                    };
-              }}
-            />
+            <Retwit initState={item.userRetwitted} initCount={item.retwitCount} twitId={item.id} />
+            <Like initState={item.userLiked} initCount={item.likesCount} twitId={item.id} />
           </View>
         </View>
       </>
