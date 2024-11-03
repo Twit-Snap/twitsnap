@@ -1,4 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai';
+import debounce from 'lodash/debounce';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -13,16 +14,14 @@ import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
+import { blockedAtom } from '@/atoms/blockedAtom';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
-
-import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance, { intervals } from '@/hooks/useAxios';
-import debounce from 'lodash/debounce';
 
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
@@ -165,7 +164,7 @@ export default function FeedScreen() {
       byFollowed: isActualFeedTypeFollowing.current
     };
 
-    let olderTwits: TwitSnap[] = await fetchTweets(params);
+    const olderTwits: TwitSnap[] = await fetchTweets(params);
 
     if (olderTwits.length === 0) {
       return;

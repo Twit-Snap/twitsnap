@@ -1,13 +1,14 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { IReducedUser } from '@/app/types/publicUser';
-import ListHeader from '@/components/profile/listHeader';
-import UserCard from '@/components/profile/userCard';
-import useAxiosInstance from '@/hooks/useAxios';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React, { useCallback, useRef, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { IReducedUser } from '@/app/types/publicUser';
+import ListHeader from '@/components/profile/listHeader';
+import UserCard from '@/components/profile/userCard';
+import useAxiosInstance from '@/hooks/useAxios';
 
 export default function Follows() {
   const userData = useAtomValue(authenticatedAtom);

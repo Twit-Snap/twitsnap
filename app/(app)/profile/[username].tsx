@@ -13,12 +13,12 @@ import {
 
 import { ErrorUser, SearchedUser } from '@/app/types/publicUser';
 import { TwitSnap } from '@/app/types/TwitSnap';
+import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
-
 import useAxiosInstance from '@/hooks/useAxios';
+
 import { authenticatedAtom } from '../../authAtoms/authAtom';
-import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 
 export default function PublicProfileScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -70,7 +70,6 @@ export default function PublicProfileScreen() {
         : { limit: 20, username: username };
 
       try {
-
         setLoadingMore(true);
 
         const response = await axiosTwits.get(`snaps/`, {
@@ -81,7 +80,8 @@ export default function PublicProfileScreen() {
         if (newTwits.length === 0) {
           if (fetchDeletedTwits.shouldDelete) {
             setTwits((prevTwits) => {
-              let twits = prevTwits?.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id)) ?? [];
+              const twits =
+                prevTwits?.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id)) ?? [];
               setDeletedTwits({ shouldDelete: false, twitId: [] });
               return twits;
             });

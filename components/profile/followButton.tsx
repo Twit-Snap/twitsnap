@@ -1,10 +1,11 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { SearchedUser } from '@/app/types/publicUser';
-import useAxiosInstance from '@/hooks/useAxios';
 import { useAtomValue } from 'jotai';
 import React, { useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { SearchedUser } from '@/app/types/publicUser';
+import useAxiosInstance from '@/hooks/useAxios';
 
 type SpecialButtonProps = {
   color: string;

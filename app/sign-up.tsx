@@ -7,6 +7,7 @@ import { Button, TextInput } from 'react-native-paper';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 interface SignUpForm {

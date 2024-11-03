@@ -1,13 +1,14 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { blockedAtom } from '@/atoms/blockedAtom';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useAtomValue, useSetAtom } from 'jotai';
 
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { blockedAtom } from '@/atoms/blockedAtom';
+
 type AxiosTypes = 'users' | 'twits';
 
-export var intervals: Map<string, NodeJS.Timeout> = new Map<string, NodeJS.Timeout>();
+export const intervals: Map<string, NodeJS.Timeout> = new Map<string, NodeJS.Timeout>();
 
 const getURL = (type: AxiosTypes): string => {
   switch (type) {

@@ -1,9 +1,10 @@
-import { TwitSnap } from '@/app/types/TwitSnap';
-import InspectTweetCard from '@/components/twits/inspectTwitCard';
-import useAxiosInstance from '@/hooks/useAxios';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+
+import { TwitSnap } from '@/app/types/TwitSnap';
+import InspectTweetCard from '@/components/twits/inspectTwitCard';
+import useAxiosInstance from '@/hooks/useAxios';
 
 const TwitView: React.FC = () => {
   const [tweet, setTweet] = useState<TwitSnap | null>(null);

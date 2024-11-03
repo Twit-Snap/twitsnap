@@ -1,10 +1,12 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { SearchedUser } from '@/app/types/publicUser';
-import useAxiosInstance from '@/hooks/useAxios';
 import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, Image, Keyboard, KeyboardAvoidingView, StyleSheet, View } from 'react-native';
 import { Button, IconButton, TextInput } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { SearchedUser } from '@/app/types/publicUser';
+import useAxiosInstance from '@/hooks/useAxios';
+
 import UserCard from '../profile/userCard';
 
 const default_images = {
@@ -18,8 +20,12 @@ interface NewTweetInputProps {
   baseContent?: string;
 }
 
-const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, placeholder,
-  baseContent }) => {
+const NewTweetInput: React.FC<NewTweetInputProps> = ({
+  onTweetSend,
+  onClose,
+  placeholder,
+  baseContent
+}) => {
   const [tweetContent, setTweetContent] = useState<string>(baseContent || '');
   const [userData] = useAtom(authenticatedAtom);
   const [matchingUsers, setMatchingUsers] = useState<SearchedUser[] | null>(null);
@@ -75,7 +81,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, pla
   };
 
   const setLastWordToUsername = (username: string) => {
-    let contentArr = tweetContent.split(/\s+/);
+    const contentArr = tweetContent.split(/\s+/);
     contentArr[contentArr.length - 1] = `@${username}`;
     setTweetContent(contentArr.join(' '));
   };

@@ -12,12 +12,13 @@ import {
   TouchableWithoutFeedback,
   View
 } from 'react-native';
+import { TextInput as RNTextInput } from 'react-native';
 import { Button, IconButton, TextInput } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
-import { TextInput as RNTextInput } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 const window = Dimensions.get('window');

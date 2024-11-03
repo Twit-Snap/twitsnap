@@ -10,13 +10,14 @@ import { AxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { Dimensions, Image, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Button, Divider } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
 

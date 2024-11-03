@@ -1,12 +1,13 @@
 import { format } from 'date-fns';
+import { router } from 'expo-router';
+import { useAtomValue } from 'jotai';
 import React, { useRef, useState } from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { IconButton } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { SearchedUser } from '@/app/types/publicUser';
-import { router } from 'expo-router';
-import { useAtomValue } from 'jotai';
-import { IconButton } from 'react-native-paper';
+
 import EditButton from './editButton';
 import FollowButton from './followButton';
 

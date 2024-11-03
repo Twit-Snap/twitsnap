@@ -1,8 +1,9 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')

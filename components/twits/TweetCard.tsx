@@ -6,9 +6,10 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
-
 import useAxiosInstance from '@/hooks/useAxios';
+
 import ParsedContent from '../common/parsedContent';
+
 import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {

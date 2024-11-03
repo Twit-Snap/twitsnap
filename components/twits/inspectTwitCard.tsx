@@ -1,5 +1,3 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { TwitSnap } from '@/app/types/TwitSnap';
 import { parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
@@ -17,12 +15,14 @@ import {
 } from 'react-native';
 import { Divider, IconButton } from 'react-native-paper';
 
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { TwitSnap } from '@/app/types/TwitSnap';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
-import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
-
 import { showTabsAtom } from '@/atoms/showTabsAtom';
+import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import useAxiosInstance from '@/hooks/useAxios';
+
 import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {

@@ -7,6 +7,7 @@ import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
 
@@ -28,13 +29,9 @@ const SignUpScreen = () => {
       birthdate
     };
     try {
-      const response = await axiosUsers.post(
-        `auth/sso/register`,
-        authData,
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
+      const response = await axiosUsers.post(`auth/sso/register`, authData, {
+        headers: { 'Content-Type': 'application/json' }
+      });
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setAuthAtom(response.data);

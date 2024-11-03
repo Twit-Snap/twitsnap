@@ -4,12 +4,12 @@ import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 
 import { TwitSnap } from '@/app/types/TwitSnap';
-import TweetCard from '@/components/twits/TweetCard';
-import removeDuplicates from '@/utils/removeDup';
-
 import LargeUserCard from '@/components/search/largeUserCard';
 import ResultSearchBar from '@/components/search/resultSearchBar';
+import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance from '@/hooks/useAxios';
+import removeDuplicates from '@/utils/removeDup';
+
 import { SearchedUser } from '../types/publicUser';
 
 const window = Dimensions.get('window');
