@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import { useState } from 'react';
+import React from 'react';
 import { Dimensions, Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import React from 'react';
 
 const window = Dimensions.get('window');
 

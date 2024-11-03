@@ -1,11 +1,11 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { SearchedUser } from '@/app/types/publicUser';
-import axios from 'axios';
 import { useAtomValue } from 'jotai';
-import React from 'react';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { SearchedUser } from '@/app/types/publicUser';
+import useAxiosInstance from '@/hooks/useAxios';
 
 type SpecialButtonProps = {
   color: string;
@@ -22,6 +22,7 @@ interface IFollowButtonProps {
 export default function FollowButton({ extraCallback, user }: IFollowButtonProps) {
   const authUser = useAtomValue(authenticatedAtom);
   const following = useRef<boolean>(user.following ? true : false);
+  const axiosUsers = useAxiosInstance('users');
 
   const defineButtonProps = (following: boolean | undefined): SpecialButtonProps => {
     if (following) {
@@ -30,18 +31,12 @@ export default function FollowButton({ extraCallback, user }: IFollowButtonProps
         text: 'Following',
         textColor: 'rgb(255 255 255)',
         handler: async () => {
-          await axios
-            .delete(
-              `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${authUser?.username}/followers`,
-              {
-                data: {
-                  followedUsername: user.username
-                },
-                headers: {
-                  Authorization: `Bearer ${authUser?.token}`
-                }
+          await axiosUsers
+            .delete(`users/${authUser?.username}/followers`, {
+              data: {
+                followedUsername: user.username
               }
-            )
+            })
             .then(() => {
               setFollowingState();
               extraCallback(false);
@@ -58,18 +53,10 @@ export default function FollowButton({ extraCallback, user }: IFollowButtonProps
       text: 'Follow',
       textColor: 'rgb(0 0 0)',
       handler: async () => {
-        await axios
-          .post(
-            `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${authUser?.username}/followers`,
-            {
-              followedUsername: user.username
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${authUser?.token}`
-              }
-            }
-          )
+        await axiosUsers
+          .post(`users/${authUser?.username}/followers`, {
+            followedUsername: user.username
+          })
           .then(() => {
             setFollowingState();
             extraCallback(true);

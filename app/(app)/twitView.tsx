@@ -1,26 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { TwitSnap } from '@/app/types/TwitSnap';
-import axios from 'axios';
 import { useLocalSearchParams } from 'expo-router';
-import { useAtomValue } from 'jotai/index';
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import InspectTweetCard from '@/components/twits/inspectTwitCard';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 
+import { TwitSnap } from '@/app/types/TwitSnap';
+import InspectTweetCard from '@/components/twits/inspectTwitCard';
+import useAxiosInstance from '@/hooks/useAxios';
 
 const TwitView: React.FC = () => {
   const [tweet, setTweet] = useState<TwitSnap | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const userData = useAtomValue(authenticatedAtom);
   const { id } = useLocalSearchParams<{ id: string }>();
+  const axiosTwits = useAxiosInstance('twits');
 
   useEffect(() => {
     const fetchTweet = async () => {
       try {
-        const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${id}`, {
-          headers: { Authorization: `Bearer ${userData?.token}` },
-          timeout: 10000
-        });
+        const response = await axiosTwits.get(`snaps/${id}`);
         console.log(`Fetched twit with id ${id}`);
         setTweet(response.data.data as TwitSnap);
       } catch (error) {
@@ -45,9 +40,9 @@ const TwitView: React.FC = () => {
 
   return (
     <View style={{ flex: 1, paddingVertical: 30 }}>
-    <InspectTweetCard item={tweet} />
+      <InspectTweetCard item={tweet} />
     </View>
   );
-}
+};
 
 export default TwitView;

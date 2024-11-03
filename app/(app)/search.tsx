@@ -1,18 +1,9 @@
-import MenuSearchBar from '@/components/search/menuSearchBar';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 
+import MenuSearchBar from '@/components/search/menuSearchBar';
+
 export default function SearchScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSubmit = () => {
-    if (searchQuery.length > 0) {
-      router.push({ pathname: `/searchResults`, params: { query: searchQuery } });
-      setSearchQuery('');
-    }
-  };
-
   return (
     <MenuSearchBar />
     // <View style={styles.container}>

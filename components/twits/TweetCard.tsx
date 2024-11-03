@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
@@ -7,8 +6,10 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
+import useAxiosInstance from '@/hooks/useAxios';
 
 import ParsedContent from '../common/parsedContent';
+
 import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {
@@ -23,6 +24,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const userData = useAtomValue(authenticatedAtom);
   const router = useRouter(); // Obtener el objeto de router
   const segments = useSegments(); // Obtener la ruta actual
+  const axiosTwits = useAxiosInstance('twits');
 
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
@@ -113,14 +115,13 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
               handler={async (state: boolean, count: number): Promise<handlerReturn> => {
                 return state
                   ? {
-                      state: await axios
-                        .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
+                      state: await axiosTwits
+                        .delete(`likes`, {
                           data: {
                             twitId: item.id
                           },
                           headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${userData?.token}`
+                            'Content-Type': 'application/json'
                           }
                         })
                         .then(() => !state)
@@ -131,16 +132,15 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
                       count: count - 1
                     }
                   : {
-                      state: await axios
+                      state: await axiosTwits
                         .post(
-                          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
+                          `likes`,
                           {
                             twitId: item.id
                           },
                           {
                             headers: {
-                              'Content-Type': 'application/json',
-                              Authorization: `Bearer ${userData?.token}`
+                              'Content-Type': 'application/json'
                             }
                           }
                         )

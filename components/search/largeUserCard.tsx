@@ -1,10 +1,12 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { SearchedUser } from '@/app/types/publicUser';
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { SearchedUser } from '@/app/types/publicUser';
+
 import FollowButton from '../profile/followButton';
 
 const windowWidth = Dimensions.get('window').width;

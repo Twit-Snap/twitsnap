@@ -1,6 +1,3 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { TwitSnap } from '@/app/types/TwitSnap';
-import axios from 'axios';
 import { parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
@@ -18,11 +15,14 @@ import {
 } from 'react-native';
 import { Divider, IconButton } from 'react-native-paper';
 
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { TwitSnap } from '@/app/types/TwitSnap';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
-import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
-
 import { showTabsAtom } from '@/atoms/showTabsAtom';
+import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
+import useAxiosInstance from '@/hooks/useAxios';
+
 import Interaction, { handlerReturn } from './interaction';
 
 const default_images = {
@@ -39,6 +39,7 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
   const userData = useAtomValue(authenticatedAtom);
   const router = useRouter(); // Obtener el objeto de router
   const segments = useSegments(); // Obtener la ruta actual
+  const axiosTwits = useAxiosInstance('twits');
 
   const [animatedValueComment] = useState(new Animated.Value(window.height));
   const [animatedValueThreeDot] = useState(new Animated.Value(window.height));
@@ -113,16 +114,11 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
 
   const onTwitDelete = async () => {
     try {
-      const response = await axios.delete(
-        `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${item.id}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userData?.token}`
-          },
-          timeout: 10000
+      const response = await axiosTwits.delete(`snaps/${item.id}`, {
+        headers: {
+          'Content-Type': 'application/json'
         }
-      );
+      });
       if (response.status === 204) {
         setTweetDelete({ shouldDelete: true, twitId: [...tweetDelete.twitId, item.id] });
         router.back();
@@ -134,17 +130,15 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
 
   const onTwitEdit = async (tweetContent: string) => {
     try {
-      const response = await axios.patch(
-        `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/${item.id}`,
+      const response = await axiosTwits.patch(
+        `snaps/${item.id}`,
         {
           content: tweetContent
         },
         {
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userData?.token}`
-          },
-          timeout: 10000
+            'Content-Type': 'application/json'
+          }
         }
       );
       if (response.status === 204) {
@@ -236,14 +230,13 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
             handler={async (state: boolean, count: number): Promise<handlerReturn> => {
               return state
                 ? {
-                    state: await axios
-                      .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
+                    state: await axiosTwits
+                      .delete(`likes`, {
                         data: {
                           twitId: item.id
                         },
                         headers: {
-                          'Content-Type': 'application/json',
-                          Authorization: `Bearer ${userData?.token}`
+                          'Content-Type': 'application/json'
                         }
                       })
                       .then(() => !state)
@@ -254,16 +247,15 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
                     count: count - 1
                   }
                 : {
-                    state: await axios
+                    state: await axiosTwits
                       .post(
-                        `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
+                        `likes`,
                         {
                           twitId: item.id
                         },
                         {
                           headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${userData?.token}`
+                            'Content-Type': 'application/json'
                           }
                         }
                       )

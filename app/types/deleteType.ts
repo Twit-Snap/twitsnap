@@ -1,4 +1,4 @@
 export type DeletedTwits = {
-  shouldDelete : boolean;
-  twitId : string[];
+  shouldDelete: boolean;
+  twitId: string[];
 };

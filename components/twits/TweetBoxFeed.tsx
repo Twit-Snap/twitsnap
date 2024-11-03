@@ -1,10 +1,12 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { SearchedUser } from '@/app/types/publicUser';
-import axios from 'axios';
 import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, Image, Keyboard, KeyboardAvoidingView, StyleSheet, View } from 'react-native';
 import { Button, IconButton, TextInput } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { SearchedUser } from '@/app/types/publicUser';
+import useAxiosInstance from '@/hooks/useAxios';
+
 import UserCard from '../profile/userCard';
 
 const default_images = {
@@ -18,13 +20,18 @@ interface NewTweetInputProps {
   baseContent?: string;
 }
 
-const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, placeholder,
-  baseContent }) => {
+const NewTweetInput: React.FC<NewTweetInputProps> = ({
+  onTweetSend,
+  onClose,
+  placeholder,
+  baseContent
+}) => {
   const [tweetContent, setTweetContent] = useState<string>(baseContent || '');
   const [userData] = useAtom(authenticatedAtom);
   const [matchingUsers, setMatchingUsers] = useState<SearchedUser[] | null>(null);
   const timeout = useRef<NodeJS.Timeout | null>(null);
   const lastWordRef = useRef<string | undefined>(undefined);
+  const axiosUsers = useAxiosInstance('users');
 
   const fetchUsers = async (query: string): Promise<SearchedUser[]> => {
     if (query === undefined) {
@@ -32,16 +39,9 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, pla
     }
 
     try {
-      const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${userData?.username}/followers`,
-        {
-          params: { byFollowers: true, limit: 20, has: query },
-          headers: {
-            Authorization: `Bearer ${userData?.token}`
-          },
-          timeout: 10000
-        }
-      );
+      const response = await axiosUsers.get(`users/${userData?.username}/followers`, {
+        params: { byFollowers: true, limit: 20, has: query }
+      });
 
       console.log('Fetched ', response.data.length, ' users');
 
@@ -81,7 +81,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({ onTweetSend, onClose, pla
   };
 
   const setLastWordToUsername = (username: string) => {
-    let contentArr = tweetContent.split(/\s+/);
+    const contentArr = tweetContent.split(/\s+/);
     contentArr[contentArr.length - 1] = `@${username}`;
     setTweetContent(contentArr.join(' '));
   };
