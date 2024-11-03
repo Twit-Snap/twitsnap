@@ -5,9 +5,12 @@ import { Text } from 'react-native-paper';
 
 interface IParsedContentProps {
   text: string | undefined;
+  color?: string;
+  fontSize?: number;
+  fontWeight?: 'bold' | 'normal';
 }
 
-export default function ParsedContent({ text }: IParsedContentProps) {
+export default function ParsedContent({ text, color, fontSize, fontWeight }: IParsedContentProps) {
   if (!text) {
     return <Text>{''}</Text>;
   }
@@ -21,7 +24,13 @@ export default function ParsedContent({ text }: IParsedContentProps) {
             <Text key={index}>
               <Text
                 onPress={() => router.push({ pathname: `/searchResults`, params: { query: word } })}
-                style={styles.special}
+                style={[
+                  styles.special,
+                  {
+                    fontSize: fontSize,
+                    fontWeight: fontWeight
+                  }
+                ]}
               >
                 {word}
               </Text>{' '}
@@ -37,7 +46,13 @@ export default function ParsedContent({ text }: IParsedContentProps) {
                     params: { username: word.slice(1) }
                   })
                 }
-                style={styles.special}
+                style={[
+                  styles.special,
+                  {
+                    fontSize: fontSize,
+                    fontWeight: fontWeight
+                  }
+                ]}
               >
                 {word}
               </Text>{' '}
@@ -46,7 +61,16 @@ export default function ParsedContent({ text }: IParsedContentProps) {
         } else if (word.startsWith('https://')) {
           return (
             <Text key={index}>
-              <Text onPress={() => Linking.openURL(word)} style={styles.special}>
+              <Text
+                onPress={() => Linking.openURL(word)}
+                style={[
+                  styles.special,
+                  {
+                    fontSize: fontSize,
+                    fontWeight: fontWeight
+                  }
+                ]}
+              >
                 {word}
               </Text>{' '}
             </Text>
@@ -54,7 +78,14 @@ export default function ParsedContent({ text }: IParsedContentProps) {
         }
 
         return (
-          <Text key={index} style={styles.normal}>
+          <Text
+            key={index}
+            style={{
+              color: color || 'white',
+              fontSize: fontSize,
+              fontWeight: fontWeight
+            }}
+          >
             {word}{' '}
           </Text>
         );
@@ -64,10 +95,7 @@ export default function ParsedContent({ text }: IParsedContentProps) {
 }
 
 const styles = StyleSheet.create({
-  normal: {
-    color: 'rgb(255 255 255)'
-  },
   special: {
-    color: 'rgb(67,67,244)'
+    color: 'rgb(3 165 252)'
   }
 });
