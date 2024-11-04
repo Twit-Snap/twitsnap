@@ -146,8 +146,8 @@ export default function PublicProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
-        setTwits(null);
-        setHasMoreTwits(true);
+        resetState();
+        isActualFeedTypeTwit.current = true;
         await fetchUserData();
         await fetchTweets();
       };
@@ -156,7 +156,7 @@ export default function PublicProfileScreen() {
 
       return () => {
         setSearchUserData(null);
-        setTwits(null);
+        resetState();
         isActualFeedTypeTwit.current = true;
       };
     }, [fetchUserData])
