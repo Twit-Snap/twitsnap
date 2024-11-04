@@ -52,7 +52,7 @@ const InteractionLabel = ({ count, label }: { count: number | undefined; label: 
 
 const TwitView: React.FC = () => {
   const [tweet, setTweet] = useState<TwitSnap | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
   const { id, comm, openComment } = useLocalSearchParams<{
     id: string;
     comm: string;
@@ -185,8 +185,6 @@ const TwitView: React.FC = () => {
           setTweet(response.data.data as TwitSnap);
         } catch (error) {
           console.error('Error fetching tweet:', error);
-        } finally {
-          setLoading(false);
         }
       };
 
@@ -205,6 +203,11 @@ const TwitView: React.FC = () => {
         return;
       }
 
+      if (id === 'nonExistentId') {
+        setError('Tweet not found');
+        return;
+      }
+
       fetchTweet();
 
       fetchComments();
@@ -216,6 +219,7 @@ const TwitView: React.FC = () => {
       return () => {
         setComments(null);
         setTweet(null);
+        setError('');
       };
     }, [id, openComment])
   );
@@ -226,12 +230,8 @@ const TwitView: React.FC = () => {
     }
   }, [comm]);
 
-  if (loading || !tweet) {
+  if (!tweet && !comments && !error) {
     return <ActivityIndicator size="large" color="#0000ff" />;
-  }
-
-  if (!tweet) {
-    return <Text>Tweet not found</Text>;
   }
 
   return (
@@ -243,140 +243,156 @@ const TwitView: React.FC = () => {
         </View>
         <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(60 60 60)' }} />
       </TouchableOpacity>
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: '../profile/[username]',
-              params: { username: tweet.user.username }
-            })
-          }
-        >
-          <Image
-            source={
-              tweet.user.profilePicture
-                ? { uri: tweet.user.profilePicture }
-                : default_images.default_profile_picture
-            }
-            style={styles.profilePicture}
-          />
-        </TouchableOpacity>
-        <View style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center' }}>
-          <View>
-            <Text style={styles.name}>{tweet.user.name}</Text>
-            <Text style={styles.username}>@{tweet.user.username}</Text>
-          </View>
-          <IconButton
-            icon="dots-horizontal"
-            style={{ position: 'absolute', left: window.width - 120 }}
-            size={24}
-            onPress={() => {
-              isExpandedRefThreeDot.current = !isExpandedRefThreeDot.current;
-              setIsExpandedThreeDot(isExpandedRefThreeDot.current);
-              handlePressThreeDot();
-            }}
-          />
-        </View>
-      </View>
-      <View style={{ flexDirection: 'column' }}>
-        <View style={styles.contentContainer}>
-          <Text style={styles.content}>{<ParsedContent text={tweet.content} />}</Text>
-        </View>
-
-        <Text style={[styles.date]}>{formatDate(tweet.createdAt)}</Text>
-
-        <View style={{ flexDirection: 'row', marginVertical: 10 }}>
-          <InteractionLabel count={tweet.retwitCount} label={'Retwits'} />
-          <InteractionLabel count={tweet.likesCount} label={'Likes'} />
-        </View>
-
-        <View style={{ flexDirection: 'row', paddingHorizontal: 10 }}>
-          <Interaction
-            icon="comment-outline"
-            initState={false}
-            initCount={undefined}
-            handler={async (): Promise<void> => {
-              handlePressComment();
-            }}
-          />
-          <Retwit initState={tweet.userRetwitted} initCount={undefined} twitId={tweet.id} />
-          <Like initState={tweet.userLiked} initCount={undefined} twitId={tweet.id} />
-        </View>
-        <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(60 60 60)' }} />
+      {tweet && comments ? (
         <>
-          {comments && comments.length > 0 && (
-            <FlatList
-              data={comments}
-              renderItem={({ item }) => <TweetCard item={item} />}
-              keyExtractor={(tweet) => tweet.id}
-            />
-          )}
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: '../profile/[username]',
+                  params: { username: tweet.user.username }
+                })
+              }
+            >
+              <Image
+                source={
+                  tweet.user.profilePicture
+                    ? { uri: tweet.user.profilePicture }
+                    : default_images.default_profile_picture
+                }
+                style={styles.profilePicture}
+              />
+            </TouchableOpacity>
+            <View style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center' }}>
+              <View>
+                <Text style={styles.name}>{tweet.user.name}</Text>
+                <Text style={styles.username}>@{tweet.user.username}</Text>
+              </View>
+              <IconButton
+                icon="dots-horizontal"
+                style={{ position: 'absolute', left: window.width - 120 }}
+                size={24}
+                onPress={() => {
+                  isExpandedRefThreeDot.current = !isExpandedRefThreeDot.current;
+                  setIsExpandedThreeDot(isExpandedRefThreeDot.current);
+                  handlePressThreeDot();
+                }}
+              />
+            </View>
+          </View>
+          <View style={{ flexDirection: 'column' }}>
+            <View style={styles.contentContainer}>
+              <Text style={styles.content}>{<ParsedContent text={tweet.content} />}</Text>
+            </View>
+
+            <Text style={[styles.date]}>{formatDate(tweet.createdAt)}</Text>
+
+            <View style={{ flexDirection: 'row', marginVertical: 10 }}>
+              <InteractionLabel count={tweet.retwitCount} label={'Retwits'} />
+              <InteractionLabel count={tweet.likesCount} label={'Likes'} />
+            </View>
+
+            <View style={{ flexDirection: 'row', paddingHorizontal: 10 }}>
+              <Interaction
+                icon="comment-outline"
+                initState={false}
+                initCount={undefined}
+                handler={async (): Promise<void> => {
+                  handlePressComment();
+                }}
+              />
+              <Retwit initState={tweet.userRetwitted} initCount={undefined} twitId={tweet.id} />
+              <Like initState={tweet.userLiked} initCount={undefined} twitId={tweet.id} />
+            </View>
+            <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(60 60 60)' }} />
+            <>
+              {comments && comments.length > 0 && (
+                <FlatList
+                  data={comments}
+                  renderItem={({ item }) => <TweetCard item={item} showReply={false} />}
+                  keyExtractor={(tweet) => tweet.id}
+                />
+              )}
+            </>
+          </View>
+          <Animated.View
+            style={[
+              {
+                backgroundColor: 'rgb(5 5 5)',
+                zIndex: 50,
+                position: 'absolute',
+                bottom: 0,
+                top: 0,
+                paddingTop: 35,
+                width: window.width
+              },
+              {
+                transform: [{ translateY: animatedValueComment }],
+                bottom: 0
+              }
+            ]}
+          >
+            <View style={{ height: window.height }}>
+              <TweetBoxFeed
+                onTweetSend={(tweetContent) => {
+                  sendComment(tweetContent);
+                }}
+                onClose={handlePressComment}
+                reply={`Replying to @${tweet.user.username}`}
+                placeholder={'Post your reply'}
+              />
+            </View>
+          </Animated.View>
+          <Animated.View
+            style={[
+              {
+                backgroundColor: 'rgb(5 5 5)',
+                zIndex: 50,
+                position: 'absolute',
+                bottom: 0,
+                top: 0,
+                paddingTop: 35,
+                width: window.width
+              },
+              {
+                transform: [{ translateY: animatedValueThreeDot }],
+                top: '30%'
+              }
+            ]}
+          >
+            <View style={{ borderRadius: 30 }}>
+              <Divider
+                style={{
+                  height: 2,
+                  width: '30%',
+                  backgroundColor: 'rgb(194,187,187)',
+                  marginLeft: '35%',
+                  marginRight: '35%'
+                }}
+              />
+              <ThreeDotMenu
+                onCloseOrFinish={handlePressThreeDot}
+                onTwitDelete={onTwitDelete}
+                onTwitEdit={onTwitEdit}
+                twitContent={tweet.content}
+                twitIsFromUser={tweet.user.username === userData?.username}
+              />
+            </View>
+          </Animated.View>
         </>
-      </View>
-      <Animated.View
-        style={[
-          {
-            backgroundColor: 'rgb(5 5 5)',
-            zIndex: 50,
-            position: 'absolute',
-            bottom: 0,
-            top: 0,
-            paddingTop: 35,
-            width: window.width
-          },
-          {
-            transform: [{ translateY: animatedValueComment }],
-            bottom: 0
-          }
-        ]}
-      >
-        <View style={{ height: window.height }}>
-          <TweetBoxFeed
-            onTweetSend={(tweetContent) => {
-              sendComment(tweetContent);
-            }}
-            onClose={handlePressComment}
-            reply={`Replying to @${tweet.user.username}`}
-            placeholder={'Post your reply'}
-          />
-        </View>
-      </Animated.View>
-      <Animated.View
-        style={[
-          {
-            backgroundColor: 'rgb(5 5 5)',
-            zIndex: 50,
-            position: 'absolute',
-            bottom: 0,
-            top: 0,
-            paddingTop: 35,
-            width: window.width
-          },
-          {
-            transform: [{ translateY: animatedValueThreeDot }],
-            top: '30%'
-          }
-        ]}
-      >
-        <View style={{ borderRadius: 30 }}>
-          <Divider
-            style={{
-              height: 2,
-              width: '30%',
-              backgroundColor: 'rgb(194,187,187)',
-              marginLeft: '35%',
-              marginRight: '35%'
-            }}
-          />
-          <ThreeDotMenu
-            onCloseOrFinish={handlePressThreeDot}
-            onTwitDelete={onTwitDelete}
-            onTwitEdit={onTwitEdit}
-            twitContent={tweet.content}
-            twitIsFromUser={tweet.user.username === userData?.username}
-          />
-        </View>
-      </Animated.View>
+      ) : (
+        <Text
+          style={{
+            color: 'red',
+            alignSelf: 'center',
+            fontSize: 20,
+            height: '100%',
+            textAlignVertical: 'center'
+          }}
+        >
+          {error}
+        </Text>
+      )}
     </View>
   );
 };
