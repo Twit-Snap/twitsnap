@@ -191,7 +191,7 @@ const TwitView: React.FC = () => {
       const fetchComments = async (queryParams: object | undefined = undefined): Promise<void> => {
         await axiosTwits
           .get(`snaps`, {
-            params: { ...queryParams, parent: id, type: 'comment' }
+            params: { ...queryParams, parent: id, type: '["comment"]' }
           })
           .then((response) => {
             console.log('Fetched: ', response.data.data.length, ' twits');
