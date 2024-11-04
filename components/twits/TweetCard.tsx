@@ -10,6 +10,7 @@ import useAxiosInstance from '@/hooks/useAxios';
 
 import ParsedContent from '../common/parsedContent';
 
+import { Icon } from 'react-native-paper';
 import Interaction from './interaction';
 import Like from './Interactions/like';
 import Retwit from './Interactions/retwit';
@@ -20,13 +21,14 @@ const default_images = {
 
 interface TweetCardProps {
   item: TwitSnap;
+  showReply?: boolean;
 }
 
-const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
+const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
   const userData = useAtomValue(authenticatedAtom);
-  const router = useRouter(); // Obtener el objeto de router
-  const segments = useSegments(); // Obtener la ruta actual
-  const axiosTwits = useAxiosInstance('twits');
+  const router = useRouter(); // Obtener el objeto de router\
+
+  const tweet = item.type === 'retwit' ? item.parent : item;
 
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
@@ -51,56 +53,91 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
       onPress={() =>
         router.push({
           pathname: '../twits/[id]',
-          params: { id: item.id }
+          params: { id: tweet.id }
         })
       }
     >
       <>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: '../profile/[username]',
-              params: { username: item.user.username }
-            })
-          }
-        >
-          <Image
-            source={
-              item.user.profilePicture
-                ? { uri: item.user.profilePicture }
-                : default_images.default_profile_picture
-            }
-            style={styles.profilePicture}
-          />
-        </TouchableOpacity>
-        <View style={{ flex: 1, flexDirection: 'column' }}>
-          <View style={styles.contentContainer}>
-            <Text style={styles.name}>
-              {item.user.name}{' '}
-              <Text style={styles.username}>
-                @{item.user.username}
-                <Text style={styles.dot}>{' - '}</Text>
-                <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
-              </Text>
-            </Text>
-            <Text style={styles.content}>
-              <ParsedContent text={item.content} />
-            </Text>
+        {item.type === 'retwit' && (
+          <View style={{ flexDirection: 'row', marginLeft: 22, marginBottom: 5 }}>
+            <Icon source="repeat" size={20} color="rgb(120 120 120)" />
+            <Text
+              style={{ color: 'rgb(120 120 120)', marginLeft: 8, fontWeight: 'bold' }}
+            >{`${item.user.username === userData?.username ? 'You' : item.user.username} retwitted`}</Text>
           </View>
-          <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
-            <Interaction
-              icon="comment-outline"
-              initState={false}
-              initCount={1_023_002_230}
-              handler={async () => {
-                router.push({
-                  pathname: '../twits/[id]',
-                  params: { id: item.id, openComment: 'true' }
-                });
-              }}
+        )}
+        {tweet.type === 'comment' && showReply && (
+          <TouchableOpacity
+            style={{ flexDirection: 'row', paddingLeft: 50, width: '100%', marginBottom: 5 }}
+            onPress={() =>
+              router.push({
+                pathname: '../twits/[id]',
+                params: { id: item.parent ? item.parent.id : 'nonExistentId' }
+              })
+            }
+          >
+            <Text style={{ color: 'rgb(120 120 120)', fontWeight: 'bold' }}>
+              {
+                <ParsedContent
+                  text={`Replying to @${tweet.user.username}`}
+                  color={'rgb(120 120 120)'}
+                  fontSize={13}
+                />
+              }
+            </Text>
+          </TouchableOpacity>
+        )}
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: '../profile/[username]',
+                params: { username: tweet.user.username }
+              })
+            }
+          >
+            <Image
+              source={
+                tweet.user.profilePicture
+                  ? { uri: tweet.user.profilePicture }
+                  : default_images.default_profile_picture
+              }
+              style={styles.profilePicture}
             />
-            <Retwit initState={item.userRetwitted} initCount={item.retwitCount} twitId={item.id} />
-            <Like initState={item.userLiked} initCount={item.likesCount} twitId={item.id} />
+          </TouchableOpacity>
+          <View style={{ flex: 1, flexDirection: 'column' }}>
+            <View style={styles.contentContainer}>
+              <Text style={styles.name}>
+                {tweet.user.name}{' '}
+                <Text style={styles.username}>
+                  @{tweet.user.username}
+                  <Text style={styles.dot}>{' - '}</Text>
+                  <Text style={styles.date}>{formatDate(tweet.createdAt)}</Text>
+                </Text>
+              </Text>
+              <Text style={styles.content}>
+                <ParsedContent text={tweet.content} />
+              </Text>
+            </View>
+            <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
+              <Interaction
+                icon="comment-outline"
+                initState={false}
+                initCount={item.commentCount}
+                handler={async () => {
+                  router.push({
+                    pathname: '../twits/[id]',
+                    params: { id: tweet.id, openComment: 'true' }
+                  });
+                }}
+              />
+              <Retwit
+                initState={item.userRetwitted}
+                initCount={item.retwitCount}
+                twitId={tweet.id}
+              />
+              <Like initState={item.userLiked} initCount={item.likesCount} twitId={tweet.id} />
+            </View>
           </View>
         </View>
       </>
@@ -110,7 +147,6 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'rgb(25 25 25)',

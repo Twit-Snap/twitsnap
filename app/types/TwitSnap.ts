@@ -14,7 +14,10 @@ export interface TwitSnap {
   likesCount: number;
   userLiked: boolean;
   retwitCount: number;
+  commentCount: number;
   userRetwitted: boolean;
+  type: string;
+  parent: TwitSnap;
   //entities: Entities;
   //inReplyToTweetId: string | null;
   //inReplyToUserId: string | null;
