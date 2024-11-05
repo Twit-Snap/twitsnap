@@ -14,6 +14,7 @@ export interface TwitSnap {
   likesCount: number;
   userLiked: boolean;
   profilePicture: string;
+  privacy: string;
   //entities: Entities;
   //inReplyToTweetId: string | null;
   //inReplyToUserId: string | null;

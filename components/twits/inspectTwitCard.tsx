@@ -270,6 +270,21 @@ const InspectTweetCard: React.FC<TweetCardProps> = ({ item }) => {
           />
         </View>
         <Text style={[styles.date]}>{formatDate(item.createdAt)}</Text>
+        {item.privacy !== 'Everyone' && (
+          <>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <IconButton
+                icon={'lock'}
+                size={16}
+                iconColor="#1DA1F2"
+                style={{ alignContent: 'center' }}
+              />
+              <Text style={styles.visibilityText}>
+                Only people who @{item.user.username} follows can see this twit
+              </Text>
+            </View>
+          </>
+        )}
       </View>
       <Animated.View
         style={[
@@ -374,7 +389,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgb(120 120 120)',
     marginLeft: 10,
-    marginTop: 5
+    marginTop: 5,
+    marginBottom: 10
   },
   hashtag: {
     color: 'rgb(67,67,244)'
@@ -399,6 +415,12 @@ const styles = StyleSheet.create({
   goBack: {
     paddingRight: 9,
     paddingTop: -10
+  },
+  visibilityText: {
+    color: '#1DA1F2', // Twitter blue color
+    fontWeight: 'bold',
+    fontSize: 15,
+    alignContent: 'center'
   }
 });
 

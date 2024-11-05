@@ -3,6 +3,7 @@ import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
@@ -73,14 +74,22 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
         </TouchableOpacity>
         <View style={{ flex: 1, flexDirection: 'column' }}>
           <View style={styles.contentContainer}>
-            <Text style={styles.name}>
-              {item.user.name}{' '}
-              <Text style={styles.username}>
-                @{item.user.username}
-                <Text style={styles.dot}>{' - '}</Text>
-                <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.name}>
+                {item.user.name}{' '}
+                <Text style={styles.username}>
+                  @{item.user.username}
+                  <Text style={styles.dot}>{' · '}</Text>
+                  <Text style={styles.date}>
+                    {formatDate(item.createdAt)}
+                    {'   '}
+                  </Text>
+                </Text>
               </Text>
-            </Text>
+              {item.privacy === 'Only Followers' && (
+                <Icon source={'lock'} size={22} color={'rgb(120, 120, 120)'} />
+              )}
+            </View>
             <Text style={styles.content}>
               <ParsedContent text={item.content} />
             </Text>
@@ -193,7 +202,8 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 12,
-    color: 'rgb(120 120 120)'
+    color: 'rgb(120 120 120)',
+    marginEnd: 10
   },
   dot: {
     fontSize: 16,
