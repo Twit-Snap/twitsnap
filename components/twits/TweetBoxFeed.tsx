@@ -30,7 +30,7 @@ const default_images = {
 };
 
 interface NewTweetInputProps {
-  onTweetSend: (tweetContent: string) => void;
+  onTweetSend: (tweetContent: string, tweetPrivacy: string) => void;
   onClose: () => void;
   placeholder?: string;
   baseContent?: string;
@@ -73,7 +73,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
 
   const handleSendTweet = () => {
     if (tweetContent.trim().length > 0) {
-      onTweetSend(tweetContent);
+      onTweetSend(tweetContent, mapVisibility[visibility]);
       setTweetContent(''); // Clear the input after sending the tweet
       onClose();
     }
@@ -128,6 +128,11 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
       setPrivacyMenuVisibility(!isPrivacyMenuVisible);
     });
     Keyboard.dismiss();
+  };
+
+  const mapVisibility: { [key: string]: string } = {
+    'Everyone can reply': 'Everyone',
+    'Only Followers': 'Only Followers'
   };
 
   return (
