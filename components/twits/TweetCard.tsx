@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useRouter, useSegments } from 'expo-router';
 import { useAtomValue } from 'jotai';
@@ -7,8 +6,14 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
+import useAxiosInstance from '@/hooks/useAxios';
 
-import Interaction, { handlerReturn } from './interaction';
+import ParsedContent from '../common/parsedContent';
+
+import { Icon } from 'react-native-paper';
+import Interaction from './interaction';
+import Like from './Interactions/like';
+import Retwit from './Interactions/retwit';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -16,12 +21,14 @@ const default_images = {
 
 interface TweetCardProps {
   item: TwitSnap;
+  showReply?: boolean;
 }
 
-const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
+const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
   const userData = useAtomValue(authenticatedAtom);
-  const router = useRouter(); // Obtener el objeto de router
-  const segments = useSegments(); // Obtener la ruta actual
+  const router = useRouter(); // Obtener el objeto de router\
+
+  const tweet = item.type === 'retwit' ? item.parent : item;
 
   const formatDate = (dateString: string): string => {
     const date = parseISO(dateString);
@@ -39,142 +46,98 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
     }
   };
 
-  const renderContent = (text: string) => {
-    const words = text.split(' ');
-    return (
-      <Text>
-        {words.map((word, index) => {
-          if (word.startsWith('#')) {
-            return (
-              <Text key={index}>
-                <Text
-                  onPress={() =>
-                    router.push({ pathname: `/searchResults`, params: { query: word } })
-                  }
-                  style={styles.hashtag}
-                >
-                  {word}
-                </Text>{' '}
-              </Text>
-            );
-          }
-          return <Text key={index}>{word} </Text>;
-        })}
-      </Text>
-    );
-  };
-
   return (
     <TouchableOpacity
       style={styles.container}
       activeOpacity={0.4}
       onPress={() =>
         router.push({
-          pathname: '../twitView',
-          params: { id: item.id }
+          pathname: '../twits/[id]',
+          params: { id: tweet.id }
         })
       }
     >
       <>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: '../profile/[username]',
-              params: { username: item.user.username }
-            })
-          }
-        >
-          <Image
-            source={
-              item.profilePicture
-                ? { uri: item.profilePicture }
-                : default_images.default_profile_picture
-            }
-            style={styles.profilePicture}
-          />
-        </TouchableOpacity>
-        <View style={{ flex: 1, flexDirection: 'column' }}>
-          <View style={styles.contentContainer}>
-            <Text style={styles.name}>
-              {item.user.name}{' '}
-              <Text style={styles.username}>
-                @{item.user.username}
-                <Text style={styles.dot}>{' - '}</Text>
-                <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
-              </Text>
-            </Text>
-            <Text style={styles.content}>{renderContent(item.content)}</Text>
+        {item.type === 'retwit' && (
+          <View style={{ flexDirection: 'row', marginLeft: 22, marginBottom: 5 }}>
+            <Icon source="repeat" size={20} color="rgb(120 120 120)" />
+            <Text
+              style={{ color: 'rgb(120 120 120)', marginLeft: 8, fontWeight: 'bold' }}
+            >{`${item.user.username === userData?.username ? 'You' : item.user.username} retwitted`}</Text>
           </View>
-          <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
-            <Interaction
-              icon="comment-outline"
-              initState={false}
-              initCount={1_023_002_230}
-              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                console.log('asd');
-                return { state: true, count: 0 };
-              }}
+        )}
+        {tweet.type === 'comment' && showReply && (
+          <TouchableOpacity
+            style={{ flexDirection: 'row', paddingLeft: 50, width: '100%', marginBottom: 5 }}
+            onPress={() =>
+              router.push({
+                pathname: '../twits/[id]',
+                params: { id: item.parent ? item.parent.id : 'nonExistentId' }
+              })
+            }
+          >
+            <Text style={{ color: 'rgb(120 120 120)', fontWeight: 'bold' }}>
+              {
+                <ParsedContent
+                  text={`Replying to @${tweet.user.username}`}
+                  color={'rgb(120 120 120)'}
+                  fontSize={13}
+                />
+              }
+            </Text>
+          </TouchableOpacity>
+        )}
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: '../profile/[username]',
+                params: { username: tweet.user.username }
+              })
+            }
+          >
+            <Image
+              source={
+                tweet.user.profilePicture
+                  ? { uri: tweet.user.profilePicture }
+                  : default_images.default_profile_picture
+              }
+              style={styles.profilePicture}
             />
-            <Interaction
-              icon="repeat-off"
-              icon_alt="repeat"
-              icon_alt_color="rgb(47, 204, 110  )"
-              initState={false}
-              initCount={1_023_203}
-              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                console.log('asd');
-                return { state: true, count: 0 };
-              }}
-            />
-            <Interaction
-              icon="heart-outline"
-              icon_alt="heart"
-              icon_alt_color="rgb(255, 79, 56)"
-              initState={item.userLiked}
-              initCount={item.likesCount}
-              handler={async (state: boolean, count: number): Promise<handlerReturn> => {
-                return state
-                  ? {
-                      state: await axios
-                        .delete(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`, {
-                          data: {
-                            twitId: item.id
-                          },
-                          headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${userData?.token}`
-                          }
-                        })
-                        .then(() => !state)
-                        .catch((error) => {
-                          console.error(error);
-                          return state;
-                        }),
-                      count: count - 1
-                    }
-                  : {
-                      state: await axios
-                        .post(
-                          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}likes`,
-                          {
-                            twitId: item.id
-                          },
-                          {
-                            headers: {
-                              'Content-Type': 'application/json',
-                              Authorization: `Bearer ${userData?.token}`
-                            }
-                          }
-                        )
-                        .then(() => !state)
-                        .catch((error) => {
-                          console.error(error);
-                          return state;
-                        }),
-                      count: count + 1
-                    };
-              }}
-            />
+          </TouchableOpacity>
+          <View style={{ flex: 1, flexDirection: 'column' }}>
+            <View style={styles.contentContainer}>
+              <Text style={styles.name}>
+                {tweet.user.name}{' '}
+                <Text style={styles.username}>
+                  @{tweet.user.username}
+                  <Text style={styles.dot}>{' - '}</Text>
+                  <Text style={styles.date}>{formatDate(tweet.createdAt)}</Text>
+                </Text>
+              </Text>
+              <Text style={styles.content}>
+                <ParsedContent text={tweet.content} />
+              </Text>
+            </View>
+            <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
+              <Interaction
+                icon="comment-outline"
+                initState={false}
+                initCount={item.commentCount}
+                handler={async () => {
+                  router.push({
+                    pathname: '../twits/[id]',
+                    params: { id: tweet.id, openComment: 'true' }
+                  });
+                }}
+              />
+              <Retwit
+                initState={item.userRetwitted}
+                initCount={item.retwitCount}
+                twitId={tweet.id}
+              />
+              <Like initState={item.userLiked} initCount={item.likesCount} twitId={tweet.id} />
+            </View>
           </View>
         </View>
       </>
@@ -184,7 +147,6 @@ const TweetCard: React.FC<TweetCardProps> = ({ item }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'rgb(25 25 25)',
@@ -216,9 +178,6 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 12,
     color: 'rgb(120 120 120)'
-  },
-  hashtag: {
-    color: 'rgb(67,67,244)'
   },
   dot: {
     fontSize: 16,

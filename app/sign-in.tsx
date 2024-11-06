@@ -1,13 +1,27 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { useAtom } from 'jotai';
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import { useAtom, useSetAtom } from 'jotai';
+import React, { useRef, useState } from 'react';
+import {
+  Dimensions,
+  Image,
+  Keyboard,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View
+} from 'react-native';
+import { TextInput as RNTextInput } from 'react-native';
+import { Button, IconButton, TextInput } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { blockedAtom } from '@/atoms/blockedAtom';
+import useAxiosInstance from '@/hooks/useAxios';
 
 import { authenticatedAtom } from './authAtoms/authAtom';
 
-const axios = require('axios').default;
+const window = Dimensions.get('window');
 
 interface signInForm {
   emailOrUsername: string;
@@ -16,6 +30,13 @@ interface signInForm {
 
 const SignIn: () => React.JSX.Element = () => {
   const [, setIsAuthenticated] = useAtom(authenticatedAtom);
+  const setBlocked = useSetAtom(blockedAtom);
+  const axiosUsers = useAxiosInstance('users');
+  const [next, setNext] = useState<boolean>(false);
+  const [hidePassword, setHidePassword] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const emailOrUsernameRef = useRef<RNTextInput | null>(null);
+  const passwordRef = useRef<RNTextInput | null>(null);
 
   const [form, setForm] = useState<signInForm>({
     emailOrUsername: '',
@@ -29,72 +50,240 @@ const SignIn: () => React.JSX.Element = () => {
     });
   };
 
+  const closeInput = () => {
+    Keyboard.dismiss();
+    emailOrUsernameRef.current?.blur();
+    passwordRef.current?.blur();
+  };
+
+  const handleNext = () => {
+    closeInput();
+
+    if (form.emailOrUsername.length === 0) {
+      setError('Please enter a valid username.');
+      return;
+    }
+
+    setNext(true);
+  };
+
+  const areValidFields = () => {
+    if (form.emailOrUsername.length === 0) {
+      setError('Please enter a valid username.');
+      return false;
+    }
+
+    if (form.password.length === 0) {
+      setError('Please enter a valid password.');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async () => {
+    closeInput();
+
+    if (!areValidFields()) {
+      return;
+    }
+
     try {
-      const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_USER_SERVICE_URL}auth/login`,
-        form,
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 10000,
-        }
-      );
+      const response = await axiosUsers.post(`auth/login`, form, {
+        headers: { 'Content-Type': 'application/json' }
+      });
 
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setIsAuthenticated(response.data);
+        setBlocked(false);
         console.log('Login success: ', response.data);
         router.replace('/');
       }
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
         console.log('Login failed: ', error.response.data);
-        alert('Invalid username or password');
+        setError('Invalid username or password');
+      } else if (error.response?.status === 403) {
+        console.log('User blocked');
       } else {
         console.error('Error:', JSON.stringify(error, null, 2));
-        alert('An error occurred. Please try again later.');
+        setError('An error occurred. Please try again later.');
       }
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={{ marginTop: 10 }}>Username or Email:</Text>
-      <TextInput
-        style={styles.input}
-        value={form.emailOrUsername}
-        mode="flat"
-        onChangeText={(value) => handleChange('emailOrUsername', value)}
-        placeholder="Username"
-      />
-      <Text>Password:</Text>
-      <TextInput
-        style={styles.input}
-        value={form.password}
-        mode="flat"
-        onChangeText={(value) => handleChange('password', value)}
-        placeholder="Password"
-        secureTextEntry
-      />
-      <Button icon="form-select" mode="contained" buttonColor={'#000'} onPress={handleSubmit}>
-        Sign Up
-      </Button>
-    </View>
+    <>
+      <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
+      <TouchableWithoutFeedback onPress={closeInput}>
+        <SafeAreaView style={{ flex: 1, flexDirection: 'column', backgroundColor: 'rgb(5 5 5)' }}>
+          <View style={styles.header}>
+            <IconButton icon="close" size={24} onPress={router.back} iconColor="white" />
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('../assets/images/logo.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
+          </View>
+          <View style={styles.container}>
+            <Text
+              style={{
+                marginVertical: 10,
+                fontWeight: 'bold',
+                fontSize: 26,
+                color: 'white',
+                lineHeight: 30
+              }}
+            >
+              {next
+                ? 'Enter your password'
+                : 'To get started, first enter your email, or @username'}
+            </Text>
+            <TextInput
+              value={form.emailOrUsername}
+              onChangeText={(value) => handleChange('emailOrUsername', value)}
+              style={styles.input}
+              mode="outlined"
+              label="Email or username"
+              ref={emailOrUsernameRef}
+              theme={{
+                colors: {
+                  background: 'rgb(5 5 5)',
+                  onSurfaceVariant:
+                    error && form.emailOrUsername.length === 0 ? 'rgb(255 100 100)' : 'white'
+                }
+              }}
+              outlineColor={
+                error && form.emailOrUsername.length === 0 ? 'rgb(255 100 100)' : 'rgb(100 100 100)'
+              }
+              activeOutlineColor={
+                error && form.emailOrUsername.length === 0 ? 'rgb(255 100 100)' : 'rgb(3, 165, 252)'
+              }
+              contentStyle={{ color: 'white' }}
+              selectionColor="rgb(3 165 252)"
+              cursorColor="white"
+              onFocus={() => setError('')}
+            />
+            {next && (
+              <TextInput
+                value={form.password}
+                onChangeText={(value) => handleChange('password', value)}
+                style={styles.input}
+                mode="outlined"
+                label="Password"
+                right={
+                  <TextInput.Icon
+                    icon={hidePassword ? 'eye-outline' : 'eye-off-outline'}
+                    onPress={() => setHidePassword(!hidePassword)}
+                    color={
+                      error && form.password.length === 0 ? 'rgb(255 100 100)' : 'rgb(100 100 100)'
+                    }
+                    size={25}
+                  />
+                }
+                secureTextEntry={hidePassword}
+                theme={{
+                  colors: {
+                    background: 'rgb(5 5 5)',
+                    onSurfaceVariant:
+                      error && form.password.length === 0 ? 'rgb(255 100 100)' : 'white'
+                  }
+                }}
+                outlineColor={
+                  error && form.password.length === 0 ? 'rgb(255 100 100)' : 'rgb(100 100 100)'
+                }
+                activeOutlineColor={
+                  error && form.password.length === 0 ? 'rgb(255 100 100)' : 'rgb(3, 165, 252)'
+                }
+                contentStyle={{ color: 'white' }}
+                selectionColor="rgb(3 165 252)"
+                cursorColor="white"
+                onFocus={() => setError('')}
+              />
+            )}
+            {error && (
+              <Text
+                style={{
+                  color: 'rgb(255 100 100)',
+                  fontSize: 22,
+                  fontWeight: 'bold',
+                  textAlign: 'center'
+                }}
+              >
+                {error}
+              </Text>
+            )}
+          </View>
+          <View style={styles.footer}>
+            <Button
+              labelStyle={{
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: 16,
+                lineHeight: 16,
+                marginBottom: 1
+              }}
+              buttonColor="rgb(5 5 5)"
+              style={{ borderWidth: 1, borderColor: 'rgb(80 80 80)', height: 35 }}
+              onPress={() => {}}
+            >
+              Forgot password?
+            </Button>
+            <Button
+              labelStyle={{
+                color: 'black',
+                fontWeight: 'bold',
+                fontSize: 16,
+                lineHeight: 16,
+                marginBottom: 1
+              }}
+              buttonColor="white"
+              style={{ borderWidth: 1, borderColor: 'rgb(5 5 5)', height: 35, width: 80 }}
+              onPress={next ? handleSubmit : handleNext}
+            >
+              {next ? 'Log in' : 'Next'}
+            </Button>
+          </View>
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff'
+    padding: 16
+  },
+  logoContainer: {
+    left: window.width / 2 - 129
+  },
+  logo: {
+    width: 150,
+    height: 50
+  },
+  header: {
+    flex: 1,
+    flexDirection: 'row',
+    maxHeight: 60,
+    minWidth: window.width,
+    maxWidth: window.width
+  },
+  footer: {
+    flex: 1,
+    flexDirection: 'row',
+    maxHeight: 60,
+    minWidth: window.width,
+    maxWidth: window.width,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
     marginBottom: 25,
-    paddingHorizontal: 10,
     marginTop: 10
   }
 });

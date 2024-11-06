@@ -16,7 +16,7 @@ const parseInteractionCount = (n: number): string => {
 
 export interface handlerReturn {
   state: boolean;
-  count: number;
+  count?: number;
 }
 
 export interface InteractionProps {
@@ -24,8 +24,8 @@ export interface InteractionProps {
   icon_alt?: string;
   icon_alt_color?: string;
   initState: boolean;
-  initCount: number;
-  handler: (state: boolean, count: number) => Promise<handlerReturn>;
+  initCount?: number;
+  handler: (state?: boolean, count?: number) => Promise<handlerReturn | void>;
 }
 
 export default function Interaction({
@@ -37,13 +37,18 @@ export default function Interaction({
   icon_alt_color
 }: InteractionProps) {
   const [state, setState] = useState<boolean>(initState);
-  const [count, setCount] = useState<number>(initCount);
+  const [count, setCount] = useState<number | undefined>(initCount);
 
   return (
     <TouchableOpacity
       style={{ flex: 1, flexDirection: 'row' }}
       onPress={async () => {
         const ret = await handler(state, count);
+
+        if (!ret) {
+          return;
+        }
+
         setState(ret.state);
 
         if (initCount != undefined) {
@@ -57,9 +62,9 @@ export default function Interaction({
         size={20}
         iconColor={icon_alt ? (state ? icon_alt_color : undefined) : undefined}
       />
-      <Text style={styles.interaction_label}>
-        {count != undefined ? parseInteractionCount(count) : ''}
-      </Text>
+      {count != undefined && (
+        <Text style={styles.interaction_label}>{parseInteractionCount(count)}</Text>
+      )}
     </TouchableOpacity>
   );
 }

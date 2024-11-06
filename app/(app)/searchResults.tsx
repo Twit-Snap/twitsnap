@@ -1,20 +1,19 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useAtomValue } from 'jotai';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 
 import { TwitSnap } from '@/app/types/TwitSnap';
-import TweetCard from '@/components/twits/TweetCard';
-import removeDuplicates from '@/utils/removeDup';
-
 import LargeUserCard from '@/components/search/largeUserCard';
 import ResultSearchBar from '@/components/search/resultSearchBar';
-import { authenticatedAtom } from '../authAtoms/authAtom';
+import TweetCard from '@/components/twits/TweetCard';
+import useAxiosInstance from '@/hooks/useAxios';
+import removeDuplicates from '@/utils/removeDup';
+
 import { SearchedUser } from '../types/publicUser';
 
-const axios = require('axios').default;
 const window = Dimensions.get('window');
+
 const parseQuery = (query: string): string => {
   query = query.trim();
 
@@ -27,9 +26,10 @@ const parseQuery = (query: string): string => {
 
 export default function SearchResultsScreen() {
   const query = parseQuery(useLocalSearchParams<{ query: string }>().query);
-  const userData = useAtomValue(authenticatedAtom);
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
   const [users, setUsers] = useState<SearchedUser[] | null>(null);
+  const axiosUsers = useAxiosInstance('users');
+  const axiosTwits = useAxiosInstance('twits');
 
   useFocusEffect(
     useCallback(() => {
@@ -37,10 +37,8 @@ export default function SearchResultsScreen() {
       setUsers(null);
       const fetchByHashtag = async (): Promise<TwitSnap[]> => {
         try {
-          const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
-            headers: { Authorization: `Bearer ${userData?.token}` },
-            params: { has: query },
-            timeout: 10000
+          const response = await axiosTwits.get(`snaps`, {
+            params: { has: query }
           });
 
           console.log(`Fetched ${response.data.data.length} twits with "#${query}"`);
@@ -55,10 +53,8 @@ export default function SearchResultsScreen() {
 
       const fetchByText = async (): Promise<TwitSnap[]> => {
         try {
-          const response = await axios.get(`${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps`, {
-            headers: { Authorization: `Bearer ${userData?.token}` },
-            params: { has: query },
-            timeout: 10000
+          const response = await axiosTwits.get(`snaps`, {
+            params: { has: query }
           });
 
           console.log(
@@ -75,11 +71,11 @@ export default function SearchResultsScreen() {
 
       const fetchUsers = async (): Promise<SearchedUser[]> => {
         try {
-          const response = await axios.get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users`, {
-            headers: { Authorization: `Bearer ${userData?.token}` },
-            params: { has: query },
-            timeout: 10000
+          const response = await axiosUsers.get(`users`, {
+            params: { has: query, limit: 20 }
           });
+          console.log('Fetched ', response.data.length, ' users');
+
           return response.data;
         } catch (error) {
           console.log(`No users: ${query}, `, error);
@@ -93,8 +89,9 @@ export default function SearchResultsScreen() {
         const textTwits = await fetchByText();
 
         const twits = removeDuplicates([...hashtagTwits, ...textTwits]);
+        const fetchedUsers = await fetchUsers();
 
-        setUsers(await fetchUsers());
+        setUsers(fetchedUsers);
         setTweets([...twits]);
       };
 
@@ -104,7 +101,7 @@ export default function SearchResultsScreen() {
         setTweets(null);
         setUsers(null);
       };
-    }, [query, userData?.token])
+    }, [query])
   );
 
   const clearTweets = () => {
@@ -114,7 +111,9 @@ export default function SearchResultsScreen() {
 
   return (
     <View style={styles.container}>
-      <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
+      <View style={{ height: 50 }}>
+        <ResultSearchBar clearHandler={clearTweets} previousQuery={query} />
+      </View>
       {tweets && users ? (
         <>
           {users.length > 0 && (

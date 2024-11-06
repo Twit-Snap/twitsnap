@@ -1,29 +1,19 @@
-import axios from 'axios';
-import { useAtomValue } from 'jotai/index';
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Divider } from 'react-native-paper';
 
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import MenuSearchBar from '@/components/search/menuSearchBar';
 import TopicCard from '@/components/search/topicCard';
+import useAxiosInstance from '@/hooks/useAxios';
 
 export default function SearchScreen() {
-  const userData = useAtomValue(authenticatedAtom);
   const [trendingTopics, setTrendingTopics] = useState([]);
+  const axiosTwits = useAxiosInstance('twits');
 
   useEffect(() => {
     const fetchTrendingTopics = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}snaps/trending`,
-          {
-            headers: {
-              Authorization: `Bearer ${userData?.token}`
-            },
-            timeout: 10000
-          }
-        );
+        const response = await axiosTwits.get(`snaps/trending`, {});
         const data = await response.data.data;
         console.log('Trending topics:', data);
         setTrendingTopics(data);

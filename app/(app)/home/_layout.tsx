@@ -1,4 +1,5 @@
 import { Slot } from 'expo-router';
+import React from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 
 import HomeHeader from '@/components/feed/header';

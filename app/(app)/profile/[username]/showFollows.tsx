@@ -1,13 +1,14 @@
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useAtomValue } from 'jotai';
+import React, { useCallback, useRef, useState } from 'react';
+import { FlatList, View } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native-paper';
+
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { IReducedUser } from '@/app/types/publicUser';
 import ListHeader from '@/components/profile/listHeader';
 import UserCard from '@/components/profile/userCard';
-import axios from 'axios';
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useAtomValue } from 'jotai';
-import { useCallback, useState } from 'react';
-import { FlatList, View } from 'react-native';
-import { ActivityIndicator, Text } from 'react-native-paper';
+import useAxiosInstance from '@/hooks/useAxios';
 
 export default function Follows() {
   const userData = useAtomValue(authenticatedAtom);
@@ -18,41 +19,58 @@ export default function Follows() {
   }>();
 
   const [users, setUsers] = useState<IReducedUser[] | null>(null);
+  const lastUserRef = useRef<IReducedUser | null>(null);
+  const loadMoreRef = useRef<boolean>(true);
+  const axiosUsers = useAxiosInstance('users');
+
+  const fetchUsers = async () => {
+    if (!byFollowers || !username || !userData?.token) {
+      return;
+    }
+
+    await axiosUsers
+      .get(`users/${username}/followers`, {
+        params: {
+          byFollowers: byFollowers,
+          limit: 20,
+          createdAt: lastUserRef.current ? lastUserRef.current.followCreatedAt : undefined
+        }
+      })
+      .then(({ data }: { data: IReducedUser[] }) => {
+        console.log('Fetched ', data.length, ' users');
+
+        setUsers((prevUsers) => {
+          if (data.length !== 0) {
+            loadMoreRef.current = true;
+          }
+
+          const ret = prevUsers ? [...prevUsers, ...data] : data;
+          lastUserRef.current = ret[ret.length - 1];
+
+          return ret;
+        });
+      })
+      .catch((error) => {
+        if (error.status === 400) {
+          if (error.response.data.type === 'NOT MUTUAL FOLLOW') {
+            alert('You should not be here ;)');
+            setUsers([]);
+            loadMoreRef.current = false;
+          }
+        }
+
+        console.error(error);
+      });
+  };
 
   useFocusEffect(
     useCallback(() => {
-      const fetchUsers = async () => {
-        if (!byFollowers || !username || !userData?.token) {
-          return;
-        }
-
-        await axios
-          .get(`${process.env.EXPO_PUBLIC_USER_SERVICE_URL}users/${username}/followers`, {
-            params: { byFollowers: byFollowers },
-            headers: {
-              Authorization: `Bearer ${userData.token}`
-            },
-            timeout: 10000
-          })
-          .then((response) => {
-            setUsers(response.data);
-          })
-          .catch((error) => {
-            if (error.status === 400) {
-              if (error.response.data.type === 'NOT MUTUAL FOLLOW') {
-                alert('You should not be here ;)');
-                setUsers([]);
-              }
-            }
-
-            console.error(error);
-          });
-      };
-
       fetchUsers();
 
       return () => {
         setUsers(null);
+        loadMoreRef.current = true;
+        lastUserRef.current = null;
       };
     }, [userData?.token, byFollowers, username])
   );
@@ -63,8 +81,32 @@ export default function Follows() {
         {users ? (
           users.length > 0 ? (
             <FlatList
+              scrollEventThrottle={50}
+              onScroll={async ({ nativeEvent }) => {
+                if (!loadMoreRef.current) {
+                  return;
+                }
+                // User has reached the bottom?
+                if (
+                  nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >=
+                  nativeEvent.contentSize.height * 0.8
+                ) {
+                  loadMoreRef.current = false;
+                  await fetchUsers();
+                }
+              }}
               data={users}
-              renderItem={({ item }) => <UserCard item={item} />}
+              renderItem={({ item }) => (
+                <UserCard
+                  item={item}
+                  handler={(username: string) =>
+                    router.push({
+                      pathname: `/(app)/profile/[username]`,
+                      params: { username: username }
+                    })
+                  }
+                />
+              )}
               keyExtractor={(item) => item.id.toString()}
             />
           ) : byFollowers === 'true' ? (

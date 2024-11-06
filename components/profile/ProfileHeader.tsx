@@ -1,44 +1,44 @@
 import { format } from 'date-fns';
+import { router } from 'expo-router';
+import { useAtomValue } from 'jotai';
 import React, { useRef, useState } from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { IconButton } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { SearchedUser } from '@/app/types/publicUser';
-import { router } from 'expo-router';
-import { useAtomValue } from 'jotai';
-import { IconButton } from 'react-native-paper';
+
 import EditButton from './editButton';
 import FollowButton from './followButton';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-interface IProfileHeader {
-  user: SearchedUser;
-  bannerPhoto: string;
-  profilePhoto: string;
-  bio: string;
-}
-
 const default_images = {
   profilePhoto: require('../../assets/images/messi.jpg'),
   bannerPhoto: require('../../assets/images/kanagawa.jpg')
 };
 
-const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePhoto, bio }) => {
-  const formattedBirthdate = user.birthdate
+const ProfileHeader = ({ user }: { user: SearchedUser }) => {
+  const formattedBirthdate = user?.birthdate
     ? format(new Date(user.birthdate), 'MMMM dd, yyyy')
     : null;
-  const formattedJoinDate = user.createdAt ? format(new Date(user.createdAt), 'MMMM yyyy') : null;
+  const formattedJoinDate = user?.createdAt ? format(new Date(user.createdAt), 'MMMM yyyy') : null;
 
   const authUser = useAtomValue(authenticatedAtom);
 
   const canViewFollowList = (following: boolean): boolean => {
-    return user.username === authUser?.username ? true : user.followed && following ? true : false;
+    return user?.username === authUser?.username
+      ? true
+      : user?.followed && following
+        ? true
+        : false;
   };
 
-  const [canViewList, setCanViewList] = useState<boolean>(canViewFollowList(user.following));
-  const followersCount = useRef<number>(user.followersCount ? user.followersCount : 0);
+  const [canViewList, setCanViewList] = useState<boolean>(
+    canViewFollowList(user?.following ? user.following : false)
+  );
+  const followersCount = useRef<number>(user?.followersCount ? user.followersCount : 0);
   const [followersCountRendered, refreshCount] = useState<number>(followersCount.current);
 
   const setFollowingCount = (nowFollowing: boolean) => {
@@ -58,68 +58,77 @@ const ProfileHeader: React.FC<IProfileHeader> = ({ user, bannerPhoto, profilePho
         onPress={router.back}
       />
       <Image
-        source={bannerPhoto ? { uri: bannerPhoto } : default_images.bannerPhoto}
+        source={user?.backgroundImage ? { uri: user.backgroundImage } : default_images.bannerPhoto}
         style={styles.bannerPhoto}
       />
       <Image
-        source={profilePhoto ? { uri: profilePhoto } : default_images.profilePhoto}
+        source={user?.profilePicture ? { uri: user.profilePicture } : default_images.profilePhoto}
         style={styles.profilePhoto}
       />
       <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
-        {user.username === authUser?.username ? (
-          <EditButton />
+        {user?.id ? (
+          user.username === authUser?.username ? (
+            <EditButton />
+          ) : (
+            <FollowButton extraCallback={setFollowingCount} user={user} />
+          )
         ) : (
-          <FollowButton extraCallback={setFollowingCount} user={user} />
+          <View style={{ height: 30 }} />
         )}
       </View>
       <View style={styles.textContainer}>
-        {user && <Text style={styles.name}>{user.name}</Text>}
-        {user && <Text style={styles.username}>@{user.username}</Text>}
+        <Text style={styles.name}>{user?.name || ''}</Text>
+        <Text style={styles.username}>@{user?.username || ''}</Text>
 
-        <Text style={styles.bio}>{bio}</Text>
-        {/* Birthday and Join Date */}
+        {user?.description && <Text style={styles.bio}>{user?.description || ''}</Text>}
+
         {formattedBirthdate && <Text style={styles.birthdate}>🎂 Born {formattedBirthdate}</Text>}
         {formattedJoinDate && <Text style={styles.joinDate}>📅 Joined {formattedJoinDate}</Text>}
       </View>
       <View style={{ flex: 1, flexDirection: 'row' }}>
-        <TouchableOpacity
-          activeOpacity={canViewList ? 0.4 : 1}
-          onPress={
-            canViewList
-              ? () =>
-                  router.push({
-                    pathname: `../profile/[username]/showFollows`,
-                    params: { username: user.username, byFollowers: 'false' }
-                  })
-              : () => {}
-          }
-        >
-          <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 10 }}>
-            <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
-              {user.followingCount}
-            </Text>
-            {'  Following'}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={canViewList ? 0.4 : 1}
-          onPress={
-            canViewList
-              ? () =>
-                  router.push({
-                    pathname: `../profile/[username]/showFollows`,
-                    params: { username: user.username, byFollowers: 'true' }
-                  })
-              : () => {}
-          }
-        >
-          <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 20 }}>
-            <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
-              {followersCountRendered}
-            </Text>
-            {'  Followers'}
-          </Text>
-        </TouchableOpacity>
+        {/* If you just check var1 && var2 && ..., it breaks. It must be var1 != undefined && var2 != undefined */}
+        {user?.followersCount != undefined && user?.followingCount != undefined && (
+          <>
+            <TouchableOpacity
+              activeOpacity={canViewList ? 0.4 : 1}
+              onPress={
+                canViewList
+                  ? () =>
+                      router.push({
+                        pathname: `../profile/[username]/showFollows`,
+                        params: { username: user.username, byFollowers: 'false' }
+                      })
+                  : () => {}
+              }
+            >
+              <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 10 }}>
+                <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
+                  {user.followingCount}
+                </Text>
+                {'  Following'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={canViewList ? 0.4 : 1}
+              onPress={
+                canViewList
+                  ? () =>
+                      router.push({
+                        pathname: `../profile/[username]/showFollows`,
+                        params: { username: user.username, byFollowers: 'true' }
+                      })
+                  : () => {}
+              }
+            >
+              <Text style={{ color: 'rgb(100 100 100)', fontSize: 17, marginLeft: 20 }}>
+                <Text style={{ color: 'rgb(255 255 255)', fontWeight: 'bold' }}>
+                  {followersCountRendered}
+                </Text>
+                {'  Followers'}
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </>
   );

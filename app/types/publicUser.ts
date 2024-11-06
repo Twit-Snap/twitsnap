@@ -20,10 +20,17 @@ export interface SearchedUser {
   followed: boolean;
 }
 
+export interface ErrorUser {
+  name: string;
+  username: string;
+  description: string;
+}
+
 export interface IReducedUser {
   id: number;
   name: string;
   username: string;
   description: string;
   profilePicture: string;
+  followCreatedAt?: string;
 }

@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import { useAtom, useAtomValue } from 'jotai';
+import React from 'react';
 import { StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { authenticatedAtom } from '../authAtoms/authAtom';
-import React from 'react';
 
 export default function RootLayout() {
   const [isAuthenticated] = useAtom(authenticatedAtom);
@@ -75,7 +75,7 @@ export default function RootLayout() {
             }}
           />
           <Tabs.Screen
-            name="twitView"
+            name="twits/[id]"
             options={{
               tabBarButton: () => null, // Hide the tab
               header: () => null,
