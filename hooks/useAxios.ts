@@ -52,6 +52,8 @@ export default function useAxiosInstance(type: AxiosTypes) {
         HandleBlock();
       }
 
+      console.error(error.response.data);
+
       return Promise.reject(error);
     }
   );

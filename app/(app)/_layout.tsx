@@ -75,7 +75,7 @@ export default function RootLayout() {
             }}
           />
           <Tabs.Screen
-            name="twitView"
+            name="twits/[id]"
             options={{
               tabBarButton: () => null, // Hide the tab
               header: () => null,
