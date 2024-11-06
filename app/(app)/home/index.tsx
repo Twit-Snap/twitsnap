@@ -25,7 +25,7 @@ import useAxiosInstance, { intervals } from '@/hooks/useAxios';
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
 const intervalMinutes = 10 * 60 * 1000;
-//const intervalMinutes = 10 * 1000;
+//const intervalMinutes = 30 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);

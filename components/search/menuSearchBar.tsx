@@ -16,6 +16,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingLeft: 10,
     paddingRight: 10,
+    paddingTop: 20,
     width: window.width,
     maxHeight: 50,
     alignItems: 'center'
