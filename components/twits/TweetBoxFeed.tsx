@@ -43,7 +43,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
 
     try {
       const response = await axiosUsers.get(`users/${userData?.username}/followers`, {
-        params: { byFollowers: true, limit: 20, has: query }
+        params: { byFollowers: false, limit: 20, has: query }
       });
 
       console.log('Fetched ', response.data.length, ' users');
@@ -111,7 +111,9 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
             onPress={onClose}
             iconColor="rgb(255 255 255)"
           />
-          {reply != undefined && reply?.length > 0 && <ParsedContent text={reply} color={'rgb(120 120 120)'} fontSize={16} />}
+          {reply != undefined && reply?.length > 0 && (
+            <ParsedContent text={reply} color={'rgb(120 120 120)'} fontSize={16} />
+          )}
           <Button
             mode="contained"
             compact={true}
