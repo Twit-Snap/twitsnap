@@ -26,6 +26,7 @@ const window = Dimensions.get('window');
 interface signInForm {
   emailOrUsername: string;
   password: string;
+  loginTime: number;
 }
 
 const SignIn: () => React.JSX.Element = () => {
@@ -37,11 +38,18 @@ const SignIn: () => React.JSX.Element = () => {
   const [error, setError] = useState<string | null>(null);
   const emailOrUsernameRef = useRef<RNTextInput | null>(null);
   const passwordRef = useRef<RNTextInput | null>(null);
+  const [entryTime, setEntryTime] = useState<Date>(new Date());
 
   const [form, setForm] = useState<signInForm>({
     emailOrUsername: '',
-    password: ''
+    password: '',
+    loginTime: 0
   });
+
+  const calculateEventTime = () => {
+    const now = new Date();
+    return now.getTime() - entryTime.getTime();
+  };
 
   const handleChange = (name: string, value: string) => {
     setForm({
@@ -88,10 +96,16 @@ const SignIn: () => React.JSX.Element = () => {
       return;
     }
 
+    const timeSpent = calculateEventTime();
+
     try {
-      const response = await axiosUsers.post(`auth/login`, form, {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await axiosUsers.post(
+        `auth/login`,
+        { ...form, loginTime: timeSpent },
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
 
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
@@ -111,6 +125,7 @@ const SignIn: () => React.JSX.Element = () => {
         setError('An error occurred. Please try again later.');
       }
     }
+    setEntryTime(new Date());
   };
 
   return (

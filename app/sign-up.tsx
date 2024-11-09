@@ -26,6 +26,7 @@ const SignUp: () => React.JSX.Element = () => {
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
   const [entryTime, setEntryTime] = useState<Date>(new Date());
+  console.log('Entry time: ', entryTime);
 
   const [form, setForm] = useState<SignUpForm>({
     name: '',
