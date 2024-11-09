@@ -18,12 +18,14 @@ interface SignUpForm {
   lastname: string;
   birthdate: string;
   repeatPassword: string;
+  registrationTime: number;
 }
 
 const SignUp: () => React.JSX.Element = () => {
   const [, setIsAuthenticated] = useAtom(authenticatedAtom);
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
+  const [entryTime, setEntryTime] = useState<Date>(new Date());
 
   const [form, setForm] = useState<SignUpForm>({
     name: '',
@@ -32,8 +34,14 @@ const SignUp: () => React.JSX.Element = () => {
     username: '',
     birthdate: '',
     password: '',
-    repeatPassword: ''
+    repeatPassword: '',
+    registrationTime: 0
   });
+
+  const calculateEventTime = () => {
+    const now = new Date();
+    return now.getTime() - entryTime.getTime();
+  };
 
   const handleChange = (name: string, value: string) => {
     setForm({
@@ -47,11 +55,16 @@ const SignUp: () => React.JSX.Element = () => {
       alert('Error! Passwords do not match.');
       return;
     }
+    const timeSpent = calculateEventTime();
 
     try {
-      const response = await axiosUsers.post(`auth/register`, form, {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await axiosUsers.post(
+        `auth/register`,
+        { ...form, registrationTime: timeSpent },
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setIsAuthenticated(response.data);
@@ -77,6 +90,8 @@ const SignUp: () => React.JSX.Element = () => {
         console.error('error message: ', error.message);
         console.error('error config: ', error.config);
       }
+      console.log('Last registration time in error: ', entryTime);
+      setEntryTime(new Date());
     }
   };
 
