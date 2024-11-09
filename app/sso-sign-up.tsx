@@ -19,6 +19,7 @@ const SignUpScreen = () => {
   const [usernameInput, setUsernameInput] = useState(username);
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignUp = useCallback(async () => {
     const authData: UserSSORegisterDto = {
@@ -29,6 +30,7 @@ const SignUpScreen = () => {
       birthdate
     };
     try {
+      setIsLoading(true);
       const response = await axiosUsers.post(`auth/sso/register`, authData, {
         headers: { 'Content-Type': 'application/json' }
       });
@@ -52,8 +54,9 @@ const SignUpScreen = () => {
       } else {
         alert('An error occurred. Please try again later.');
       }
+      setIsLoading(false);
     }
-  }, [uid, providerId, token, usernameInput, birthdate, setAuthAtom]);
+  }, [uid, providerId, token, usernameInput, birthdate, axiosUsers, setAuthAtom, setBlocked]);
 
   return (
     <View style={styles.container}>
@@ -69,7 +72,7 @@ const SignUpScreen = () => {
         style={styles.input}
         placeholder="YYYY-MM-DD"
       />
-      <Button title="Sign Up" onPress={handleSignUp} />
+      <Button title="Sign Up" onPress={handleSignUp} disabled={isLoading} />
     </View>
   );
 };
