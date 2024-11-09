@@ -14,8 +14,10 @@ export interface TwitSnap {
   likesCount: number;
   userLiked: boolean;
   retwitCount: number;
-  commentCount: number;
   userRetwitted: boolean;
+  userBookmarked: boolean;
+  bookmarkCount: number;
+  commentCount: number;
   type: string;
   parent: TwitSnap;
   //entities: Entities;

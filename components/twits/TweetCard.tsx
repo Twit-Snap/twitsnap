@@ -1,17 +1,17 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
-import useAxiosInstance from '@/hooks/useAxios';
 
 import ParsedContent from '../common/parsedContent';
 
-import { Icon } from 'react-native-paper';
 import Interaction from './interaction';
+import Bookmark from './Interactions/bookmark';
 import Like from './Interactions/like';
 import Retwit from './Interactions/retwit';
 
@@ -137,6 +137,11 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
                 twitId={tweet.id}
               />
               <Like initState={item.userLiked} initCount={item.likesCount} twitId={tweet.id} />
+              <Bookmark
+                initState={item.userBookmarked}
+                initCount={item.bookmarkCount}
+                twitId={tweet.id}
+              />
             </View>
           </View>
         </View>
