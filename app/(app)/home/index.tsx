@@ -1,5 +1,4 @@
 import { useAtom, useAtomValue } from 'jotai';
-import debounce from 'lodash/debounce';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -26,7 +25,7 @@ import useAxiosInstance, { intervals } from '@/hooks/useAxios';
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
 const intervalMinutes = 10 * 60 * 1000;
-//const intervalMinutes = 10 * 1000;
+//const intervalMinutes = 30 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -132,7 +131,7 @@ export default function FeedScreen() {
     setDeletedTwits({ shouldDelete: false, twitId: [] });
   };
 
-  const refreshTweets = debounce(async (newerTwit: TwitSnap | null): Promise<void> => {
+  const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
     console.log(`refresh!`);
 
     const params = {
@@ -149,9 +148,9 @@ export default function FeedScreen() {
       // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profilePictureURL)],
       setNeedRefresh(true);
     }
-  }, 500);
+  };
 
-  const loadMoreTwits = debounce(async () => {
+  const loadMoreTwits = async () => {
     console.log('scroll refresh!');
     if (!tweets) {
       return;
@@ -183,7 +182,7 @@ export default function FeedScreen() {
     });
 
     loadMoreRef.current = true;
-  }, 500);
+  };
 
   const fetchTweets = async (queryParams: object | undefined = undefined): Promise<TwitSnap[]> => {
     let twits: TwitSnap[] = [];
@@ -211,17 +210,20 @@ export default function FeedScreen() {
       const response = await axiosTwits.post(
         `snaps`,
         {
-          authorId: userData?.id,
-          authorName: userData?.name,
-          authorUsername: userData?.username,
+          user: {
+            userId: userData?.id,
+            name: userData?.name,
+            username: userData?.username
+          },
           content: tweetContent.trim(),
-          privacy: privacySetting
+          privacy: privacySetting,
+          type: 'original',
+          parent: undefined
         },
         {
           headers: {
             'Content-Type': 'application/json'
-          },
-          timeout: 10000
+          }
         }
       );
       console.log('Twit sent: ', response.data);

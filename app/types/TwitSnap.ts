@@ -2,8 +2,8 @@ export interface TwitUser {
   userId: number;
   name: string;
   username: string;
-  //profilePictureUrl: string;
-  //verified: boolean;
+  profilePicture?: string;
+  // verified: boolean;
 }
 
 export interface TwitSnap {
@@ -15,6 +15,11 @@ export interface TwitSnap {
   userLiked: boolean;
   profilePicture: string;
   privacy: string;
+  retwitCount: number;
+  commentCount: number;
+  userRetwitted: boolean;
+  type: string;
+  parent: TwitSnap;
   //entities: Entities;
   //inReplyToTweetId: string | null;
   //inReplyToUserId: string | null;

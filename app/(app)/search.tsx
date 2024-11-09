@@ -1,19 +1,50 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Divider } from 'react-native-paper';
 
 import MenuSearchBar from '@/components/search/menuSearchBar';
+import TopicCard from '@/components/search/topicCard';
+import useAxiosInstance from '@/hooks/useAxios';
 
 export default function SearchScreen() {
+  const [trendingTopics, setTrendingTopics] = useState([]);
+  const axiosTwits = useAxiosInstance('twits');
+
+  useEffect(() => {
+    const fetchTrendingTopics = async () => {
+      try {
+        const response = await axiosTwits.get(`snaps/trending`, {});
+        const data = await response.data.data;
+        console.log('Trending topics:', data);
+        setTrendingTopics(data);
+      } catch (error) {
+        console.error('Error fetching trending topics:', error);
+      }
+    };
+
+    fetchTrendingTopics();
+  }, []);
+
   return (
-    <MenuSearchBar />
-    // <View style={styles.container}>
-    //   {/* <Text style={styles.trendingText}>Trending now</Text>
-    //   <View style={styles.chipsContainer}>
-    //     <TrendingHashtagChip trendingHashtag={'#Futbol'} />
-    //     <TrendingHashtagChip trendingHashtag={'#Messi'} />
-    //     <TrendingHashtagChip trendingHashtag={'#Test'} />
-    //   </View> */}
-    // </View>
+    <>
+      <MenuSearchBar />
+      <View style={styles.trendingContainer}>
+        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginLeft: 5 }}>
+          Now Trending
+        </Text>
+        <Divider />
+        <View style={{ flexDirection: 'column', marginVertical: 10 }}>
+          <FlatList<{ [key: string]: number }>
+            data={trendingTopics}
+            renderItem={({ item }) => {
+              const topicName = Object.keys(item)[0];
+              const count = item[topicName];
+              return <TopicCard topic={{ topicName, count }} />;
+            }}
+          />
+        </View>
+      </View>
+    </>
   );
 }
 
@@ -26,15 +57,8 @@ const styles = StyleSheet.create({
   searchbar: {
     backgroundColor: '#2e2e2e'
   },
-  trendingText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    color: 'rgb(255 255 255)'
-  },
-  chipsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginVertical: 10
+  trendingContainer: {
+    marginTop: 20,
+    padding: 10
   }
 });
