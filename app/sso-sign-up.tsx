@@ -3,7 +3,8 @@ import axios from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSetAtom } from 'jotai';
 import React, { useCallback, useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
@@ -71,17 +72,28 @@ const SignUpScreen = () => {
       <Text style={styles.instructionText}>
         Please enter your username and birthdate to complete the registration.
       </Text>
-      <Text>Username:</Text>
-      <TextInput value={usernameInput} onChangeText={setUsernameInput} style={styles.input} />
-      <Text>Birthdate:</Text>
+      <TextInput
+        label="Username"
+        value={usernameInput}
+        mode="outlined"
+        placeholder="Username"
+        onChangeText={setUsernameInput}
+        style={styles.input}
+        theme={inputTheme}
+      />
       <TextInput
         value={birthdate}
+        mode="outlined"
+        label="Birthdate"
         onChangeText={setBirthdate}
         style={styles.input}
         placeholder="YYYY-MM-DD"
+        theme={inputTheme}
       />
       <ImagePicker username={usernameInput} onImagePicked={handleImagePicked} />
-      <Button title="Sign Up" onPress={handleSignUp} disabled={isLoading} />
+      <Button mode="contained" style={styles.button} onPress={handleSignUp} disabled={isLoading}>
+        Sign Up
+      </Button>
     </View>
   );
 };
@@ -90,22 +102,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
-    marginTop: 40 // Agrega margen superior para evitar el notch
+    backgroundColor: 'rgb(5, 5, 5)',
+    paddingTop: 50 // Agrega margen superior para evitar el notch
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
     marginBottom: 12,
-    paddingHorizontal: 8
+    color: 'white'
   },
   instructionText: {
     fontSize: 16,
     marginBottom: 20,
     textAlign: 'center',
-    color: '#333'
+    color: 'white'
+  },
+  button: {
+    marginTop: 20,
+    backgroundColor: 'rgb(3, 165, 252)'
   }
 });
+
+const inputTheme = {
+  colors: {
+    primary: 'rgb(3, 165, 252)',
+    placeholder: 'rgb(113, 118, 123)',
+    onSurface: 'white',
+    background: 'rgb(5, 5, 5)'
+  }
+};
 
 export default SignUpScreen;
