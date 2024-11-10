@@ -84,54 +84,68 @@ const SignUp: () => React.JSX.Element = () => {
       <Text style={styles.title}>Create Account</Text>
       <TextInput
         style={styles.input}
+        label="First Name"
         value={form.name}
         mode="outlined"
         onChangeText={(value) => handleChange('name', value)}
         placeholder="First Name"
+        theme={inputTheme}
       />
       <TextInput
         style={styles.input}
+        label="Last Name"
         value={form.lastname}
         mode="outlined"
         onChangeText={(value) => handleChange('lastname', value)}
         placeholder="Last Name"
+        theme={inputTheme}
       />
       <TextInput
         style={styles.input}
+        label="Email"
         value={form.email}
         mode="outlined"
         onChangeText={(value) => handleChange('email', value)}
         placeholder="Email"
+        theme={inputTheme}
       />
       <TextInput
         style={styles.input}
+        label="Username"
         value={form.username}
         mode="outlined"
         onChangeText={(value) => handleChange('username', value)}
         placeholder="Username"
+        theme={inputTheme}
       />
       <TextInput
         style={styles.input}
+        label="Birthdate"
         value={form.birthdate}
         mode="outlined"
         onChangeText={(value) => handleChange('birthdate', value)}
         placeholder="YYYY-MM-DD"
+        theme={inputTheme}
       />
       <TextInput
         style={styles.input}
         value={form.password}
         mode="outlined"
+        label="Password"
         onChangeText={(value) => handleChange('password', value)}
         placeholder="Password"
         secureTextEntry
+        theme={inputTheme}
       />
       <TextInput
         style={styles.input}
         value={form.repeatPassword}
         mode="outlined"
+        label="Repeat Password"
         onChangeText={(value) => handleChange('repeatPassword', value)}
         placeholder="Repeat Password"
         secureTextEntry
+        theme={inputTheme}
       />
       <ImagePicker username={form.username} onImagePicked={handleImagePicked} />
       <Button mode="contained" onPress={handleSubmit} style={styles.button}>
@@ -156,12 +170,21 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   input: {
-    marginBottom: 12
+    marginBottom: 12,
+    color: 'white'
   },
   button: {
     marginTop: 20,
     backgroundColor: 'rgb(3, 165, 252)'
   }
 });
+const inputTheme = {
+  colors: {
+    primary: 'rgb(3, 165, 252)',
+    placeholder: 'rgb(113, 118, 123)',
+    onSurface: 'white',
+    background: 'rgb(5, 5, 5)'
+  }
+};
 
 export default SignUp;
