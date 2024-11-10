@@ -22,10 +22,10 @@ const SignUpScreen = () => {
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
   const [isLoading, setIsLoading] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(null); // Estado para la imagen de perfil
+  const [profilePicture, setprofilePicture] = useState<string | null>(null); // Estado para la imagen de perfil
 
   const handleImagePicked = (uri: string) => {
-    setProfileImage(uri); // Actualiza el estado con la URI de la imagen seleccionada
+    setprofilePicture(uri); // Actualiza el estado con la URI de la imagen seleccionada
   };
 
   const handleSignUp = useCallback(async () => {
@@ -35,7 +35,7 @@ const SignUpScreen = () => {
       token,
       username: usernameInput,
       birthdate,
-      profileImageUrl: profileImage ?? undefined
+      profilePicture: profilePicture ?? undefined
     };
     try {
       setIsLoading(true);
@@ -80,7 +80,7 @@ const SignUpScreen = () => {
         style={styles.input}
         placeholder="YYYY-MM-DD"
       />
-      <ImagePicker uid={uid} onImagePicked={handleImagePicked} />
+      <ImagePicker username={usernameInput} onImagePicked={handleImagePicked} />
       <Button title="Sign Up" onPress={handleSignUp} disabled={isLoading} />
     </View>
   );

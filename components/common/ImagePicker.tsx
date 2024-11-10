@@ -10,12 +10,12 @@ const default_images = {
 };
 
 interface ImagePickerProps {
-  uid: string; // User ID for storage reference
+  username: string; // User ID for storage reference
   onImagePicked: (uri: string) => void; // Callback to pass the selected image URI
 }
 
-const ImagePicker: React.FC<ImagePickerProps> = ({ uid, onImagePicked }) => {
-  const [profileImage, setProfileImage] = useState<string | null>(null); // Estado para la imagen de perfil
+const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked }) => {
+  const [profilePicture, setprofilePicture] = useState<string | null>(null); // Estado para la imagen de perfil
 
   const handleImagePick = async () => {
     // Solicitar permisos para acceder a la galería
@@ -35,11 +35,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ uid, onImagePicked }) => {
     });
 
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri); // Actualiza el estado con la URI de la imagen seleccionada
-      onImagePicked(result.assets[0].uri); // Llama al callback con la URI de la imagen
-
       // Subir la imagen a Firebase Storage
-      console.log(uid);
+      console.log(username);
       console.log(result.assets);
 
       try {
@@ -47,11 +44,14 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ uid, onImagePicked }) => {
         const response = await fetch(result.assets[0].uri);
         console.log(response);
         const blob = await response.blob();
-        const reference = firebase.storage().ref().child(`profileImages/${new Date().getTime()}`);
+        const fileName = `${username}_${new Date().getTime()}`;
+        const reference = firebase.storage().ref().child(`profilePictures/${fileName}`);
         console.log(reference);
 
         const uploadTask = await reference.put(blob); // Sube la imagens
         const url = await uploadTask.ref.getDownloadURL();
+        setprofilePicture(url); // Actualiza el estado con la URI de la imagen seleccionada
+        onImagePicked(url); // Llama al callback con la URI de la imagen
         console.log('Image uploaded to Firebase Storage', url);
       } catch (error) {
         console.error(
@@ -67,8 +67,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ uid, onImagePicked }) => {
     <View style={styles.container}>
       <TouchableOpacity onPress={handleImagePick}>
         <Image
-          source={profileImage ? { uri: profileImage } : default_images.default_profile_picture}
-          style={styles.profileImage}
+          source={profilePicture ? { uri: profilePicture } : default_images.default_profile_picture}
+          style={styles.profilePicture}
         />
         <View style={styles.iconContainer}>
           <MaterialCommunityIcons name="pencil" size={14} color="white" />
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 20
   },
-  profileImage: {
+  profilePicture: {
     width: 100,
     height: 100,
     borderRadius: 50, // Hace que la imagen sea circular

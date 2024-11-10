@@ -93,7 +93,7 @@ export default function FrontPage() {
       token,
       providerId: userCreds.additionalUserInfo?.providerId || '',
       username: userCreds.user.email?.split('@')[0] || '',
-      profileImageUrl: userCreds.user.photoURL || undefined
+      profilePicture: userCreds.user.photoURL || undefined
     };
     router.push({
       pathname: '/sso-sign-up',
