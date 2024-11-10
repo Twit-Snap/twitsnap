@@ -8,6 +8,8 @@ import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 
+import ImagePicker from '../components/common/ImagePicker';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
 
@@ -20,6 +22,11 @@ const SignUpScreen = () => {
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
   const [isLoading, setIsLoading] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null); // Estado para la imagen de perfil
+
+  const handleImagePicked = (uri: string) => {
+    setProfileImage(uri); // Actualiza el estado con la URI de la imagen seleccionada
+  };
 
   const handleSignUp = useCallback(async () => {
     const authData: UserSSORegisterDto = {
@@ -27,7 +34,8 @@ const SignUpScreen = () => {
       providerId,
       token,
       username: usernameInput,
-      birthdate
+      birthdate,
+      profileImageUrl: profileImage ?? undefined
     };
     try {
       setIsLoading(true);
@@ -72,6 +80,7 @@ const SignUpScreen = () => {
         style={styles.input}
         placeholder="YYYY-MM-DD"
       />
+      <ImagePicker uid={uid} onImagePicked={handleImagePicked} />
       <Button title="Sign Up" onPress={handleSignUp} disabled={isLoading} />
     </View>
   );

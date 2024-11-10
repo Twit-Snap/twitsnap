@@ -1,22 +1,18 @@
-// import { initializeApp } from 'firebase/app';
-// import { getAuth } from 'firebase/auth';
-// // TODO: Replace the following with your app's Firebase project configuration
-// // See: https://firebase.google.com/docs/web/learn-more#config-object
-// // const firebaseConfig: FirebaseOptions = {
-// //   apiKey: 'API_KEY',
-// //   authDomain: 'PROJECT_ID.firebaseapp.com',
-// //   // The value of `databaseURL` depends on the location of the database
-// //   databaseURL: 'https://DATABASE_NAME.firebaseio.com',
-// //   projectId: 'twit-snap',
-// //   storageBucket: 'PROJECT_ID.appspot.com',
-// //   messagingSenderId: 'SENDER_ID',
-// //   appId: 'APP_ID'
-// // };
+import { getApps, initializeApp } from 'firebase/app';
 
-// // Initialize Firebase
-// const app = initializeApp();
+const firebaseConfig = {
+  apiKey: 'AIzaSyAi70bL19-ZNS0OMOoxNS0kuoOtvflgrSA',
+  authDomain: 'twit-snap.firebaseapp.com',
+  projectId: 'twit-snap',
+  // storageBucket: 'twit-snap.firebasestorage.app',
+  storageBucket: 'twit-snap.appspot.com',
+  messagingSenderId: '224360780470',
+  appId: '1:224360780470:web:a5de3fa25a47ac94814c17'
+};
 
-// // Initialize Firebase Authentication and get a reference to the service
-// const auth = getAuth(app);
-
-// export { auth };
+export const initializeFirebase = () => {
+  if (!getApps().length) {
+    initializeApp(firebaseConfig);
+    console.log('Firebase initialized');
+  }
+};

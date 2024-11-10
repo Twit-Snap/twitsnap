@@ -8,6 +8,8 @@ import { Button, TextInput } from 'react-native-paper';
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 
+import ImagePicker from '../components/common/ImagePicker';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 interface SignUpForm {
@@ -18,6 +20,7 @@ interface SignUpForm {
   lastname: string;
   birthdate: string;
   repeatPassword: string;
+  profileImageUrl?: string;
 }
 
 const SignUp: () => React.JSX.Element = () => {
@@ -32,13 +35,21 @@ const SignUp: () => React.JSX.Element = () => {
     username: '',
     birthdate: '',
     password: '',
-    repeatPassword: ''
+    repeatPassword: '',
+    profileImageUrl: undefined
   });
 
   const handleChange = (name: string, value: string) => {
     setForm({
       ...form,
       [name]: value
+    });
+  };
+
+  const handleImagePicked = (uri: string) => {
+    setForm({
+      ...form,
+      profileImageUrl: uri
     });
   };
 
@@ -140,6 +151,7 @@ const SignUp: () => React.JSX.Element = () => {
         placeholder="Repeat Password"
         secureTextEntry
       />
+      <ImagePicker uid={form.username} onImagePicked={handleImagePicked} />
       <Button icon="form-select" mode="contained" buttonColor={'#000'} onPress={handleSubmit}>
         Sign Up
       </Button>

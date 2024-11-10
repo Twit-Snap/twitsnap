@@ -18,4 +18,5 @@ export type UserSSORegisterDto = {
   providerId: string;
   username: string;
   birthdate: string;
+  profileImageUrl?: string;
 };

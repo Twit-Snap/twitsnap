@@ -9,8 +9,7 @@ import {
 import { AxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
-import { useCallback, useEffect, useState } from 'react';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dimensions, Image, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Button, Divider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -36,8 +35,8 @@ export default function FrontPage() {
   useEffect(() => {
     const loadAuth = async () => {
       if (!authAtom) {
-        const session: string | null = await AsyncStorage.getItem('auth');
-        // const session: string | null = null; //To test sign in
+        // const session: string | null = await AsyncStorage.getItem('auth');
+        const session: string | null = null; //To test sign in
 
         if (!session) {
           setIsLoadingSession(false);
@@ -85,7 +84,7 @@ export default function FrontPage() {
         }
       }
     },
-    [setAuthAtom]
+    [axiosUsers, setAuthAtom, setBlocked]
   );
 
   const navigateToSsoSignUp = (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
@@ -93,7 +92,8 @@ export default function FrontPage() {
       uid: userCreds.user.uid,
       token,
       providerId: userCreds.additionalUserInfo?.providerId || '',
-      username: userCreds.user.email?.split('@')[0] || ''
+      username: userCreds.user.email?.split('@')[0] || '',
+      profileImageUrl: userCreds.user.photoURL || undefined
     };
     router.push({
       pathname: '/sso-sign-up',
