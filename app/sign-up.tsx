@@ -60,7 +60,6 @@ const SignUp: () => React.JSX.Element = () => {
     }
 
     try {
-      console.log(form);
       const response = await axiosUsers.post(`auth/register`, form, {
         headers: { 'Content-Type': 'application/json' }
       });
@@ -68,21 +67,13 @@ const SignUp: () => React.JSX.Element = () => {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setIsAuthenticated(response.data);
         setBlocked(false);
-        console.log('Register success: ', response.data);
         alert('Success Registering!');
         router.replace('/');
       }
     } catch (error: any) {
       if (error.response && error.response.status === 400) {
-        if (error.response.data.type === 'INVALID_EMAIL') {
-          console.log('invalid email: ', form.email);
-          alert('Error! Invalid email.');
-        } else {
-          console.log('Register failed: ', JSON.stringify(error.response.data, null, 2));
-          alert('Invalid username or password');
-        }
+        alert('Error! Invalid email or username.');
       } else {
-        console.error('Error:', JSON.stringify(error, null, 2));
         alert('Error! Some fields are missing or have incorrect format.');
       }
     }
@@ -90,66 +81,60 @@ const SignUp: () => React.JSX.Element = () => {
 
   return (
     <View style={styles.container}>
-      <Text>Name:</Text>
+      <Text style={styles.title}>Create Account</Text>
       <TextInput
         style={styles.input}
         value={form.name}
-        mode="flat"
+        mode="outlined"
         onChangeText={(value) => handleChange('name', value)}
-        placeholder="John"
+        placeholder="First Name"
       />
-      <Text>Last Name:</Text>
       <TextInput
         style={styles.input}
         value={form.lastname}
-        mode="flat"
+        mode="outlined"
         onChangeText={(value) => handleChange('lastname', value)}
-        placeholder="Doe"
+        placeholder="Last Name"
       />
-      <Text>Email:</Text>
       <TextInput
         style={styles.input}
         value={form.email}
-        mode="flat"
+        mode="outlined"
         onChangeText={(value) => handleChange('email', value)}
         placeholder="Email"
       />
-      <Text>Username:</Text>
       <TextInput
         style={styles.input}
         value={form.username}
-        mode="flat"
+        mode="outlined"
         onChangeText={(value) => handleChange('username', value)}
         placeholder="Username"
       />
-      <Text>Birth Date:</Text>
       <TextInput
         style={styles.input}
         value={form.birthdate}
-        mode="flat"
+        mode="outlined"
         onChangeText={(value) => handleChange('birthdate', value)}
         placeholder="YYYY-MM-DD"
       />
-      <Text>Password:</Text>
       <TextInput
         style={styles.input}
         value={form.password}
-        mode="flat"
+        mode="outlined"
         onChangeText={(value) => handleChange('password', value)}
         placeholder="Password"
         secureTextEntry
       />
-      <Text>Repeat Password:</Text>
       <TextInput
         style={styles.input}
         value={form.repeatPassword}
-        mode="flat"
+        mode="outlined"
         onChangeText={(value) => handleChange('repeatPassword', value)}
         placeholder="Repeat Password"
         secureTextEntry
       />
       <ImagePicker username={form.username} onImagePicked={handleImagePicked} />
-      <Button icon="form-select" mode="contained" buttonColor={'#000'} onPress={handleSubmit}>
+      <Button mode="contained" onPress={handleSubmit} style={styles.button}>
         Sign Up
       </Button>
     </View>
@@ -159,15 +144,23 @@ const SignUp: () => React.JSX.Element = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff'
+    backgroundColor: 'rgb(5, 5, 5)',
+    padding: 10,
+    paddingTop: 50
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: 'white'
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8
+    marginBottom: 12
+  },
+  button: {
+    marginTop: 20,
+    backgroundColor: 'rgb(3, 165, 252)'
   }
 });
 
