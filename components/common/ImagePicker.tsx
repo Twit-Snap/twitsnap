@@ -1,8 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'; // Importa el icono
-import storage from '@react-native-firebase/storage'; // Importa Firebase Storage
 import * as ImagePickerOS from 'expo-image-picker'; // Importa la librería para seleccionar imágenes
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { firebase } from '../../firebaseConfig';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -43,19 +44,15 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ uid, onImagePicked }) => {
 
       try {
         // option 1 with blob
-        // const response = await fetch(result.assets[0].uri);
-        // console.log(response);
-        // const blob = await response.blob();
-        // const reference = storage().ref('test.jpg');
-        // console.log(reference);
+        const response = await fetch(result.assets[0].uri);
+        console.log(response);
+        const blob = await response.blob();
+        const reference = firebase.storage().ref().child(`profileImages/${new Date().getTime()}`);
+        console.log(reference);
 
-        // await reference.put(blob); // Sube la imagens
-
-        // option 2 with uri
-        const reference = storage().ref('test.jpg');
-        await reference.putFile(result.assets[0].uri); // Sube la imagen
-
-        console.log('Image uploaded to Firebase Storage');
+        const uploadTask = await reference.put(blob); // Sube la imagens
+        const url = await uploadTask.ref.getDownloadURL();
+        console.log('Image uploaded to Firebase Storage', url);
       } catch (error) {
         console.error(
           'Error uploading image to Firebase Storage: ' +
@@ -65,24 +62,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ uid, onImagePicked }) => {
       }
     }
   };
-
-  useEffect(() => {
-    const testExistentFirebaseImage = async () => {
-      console.log('testExistentFirebaseImage');
-      try {
-        const defaultFirebaseImg = await storage().ref('image.png').getDownloadURL();
-        console.log(defaultFirebaseImg);
-      } catch (error) {
-        console.error(
-          'Error getting default image from Firebase Storage: ' +
-            JSON.stringify({ ...(error as object) }, null, 2),
-          error
-        );
-      }
-    };
-    console.log('useEffect');
-    testExistentFirebaseImage();
-  }, []);
 
   return (
     <View style={styles.container}>
