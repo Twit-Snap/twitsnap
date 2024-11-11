@@ -82,6 +82,27 @@ export default function RootLayout() {
               headerShown: false
             }}
           />
+          <Tabs.Screen
+            name="chat/index"
+            options={{
+              title: 'Chat',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="chatbox-outline" size={size} color={color} />
+              ),
+              tabBarHideOnKeyboard: true,
+              tabBarStyle: { display: showTabs ? 'flex' : 'none' },
+              headerShown: false
+            }}
+          />
+          <Tabs.Screen
+            name="chat/[id]/index"
+            options={{
+              tabBarButton: () => null, // Hide the tab
+              header: () => null,
+              tabBarStyle: { display: 'none' },
+              headerShown: false
+            }}
+          />
         </Tabs>
       </SafeAreaView>
     </>

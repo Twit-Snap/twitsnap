@@ -20,3 +20,15 @@
 // const auth = getAuth(app);
 
 // export { auth };
+
+import { initializeApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
+
+const firebaseConfig = {
+  projectId: 'twit-snap',
+  databaseURL: 'https://twit-snap-default-rtdb.firebaseio.com/',
+  appId: '1:224360780470:android:a5de3fa25a47ac94814c17'
+};
+
+const app = initializeApp(firebaseConfig);
+export const db = getDatabase(app);
