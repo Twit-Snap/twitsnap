@@ -23,4 +23,3 @@ export const initializeFirebase = () => {
 
 const db = getDatabase();
 export { db, firebase };
-// export { auth };
