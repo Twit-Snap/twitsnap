@@ -58,46 +58,6 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
       }
     >
       <>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: '../profile/[username]',
-              params: { username: item.user.username }
-            })
-          }
-        >
-          <Image
-            source={
-              item.profilePicture
-                ? { uri: item.profilePicture }
-                : default_images.default_profile_picture
-            }
-            style={styles.profilePicture}
-          />
-        </TouchableOpacity>
-        <View style={{ flex: 1, flexDirection: 'column' }}>
-          <View style={styles.contentContainer}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.name}>
-                {item.user.name}{' '}
-                <Text style={styles.username}>
-                  @{item.user.username}
-                  <Text style={styles.dot}>{' · '}</Text>
-                  <Text style={styles.date}>
-                    {formatDate(item.createdAt)}
-                    {'   '}
-                  </Text>
-                </Text>
-              </Text>
-              {item.privacy === 'Only Followers' && (
-                <Icon source={'lock'} size={22} color={'rgb(120, 120, 120)'} />
-              )}
-            </View>
-            <Text style={styles.content}>
-              <ParsedContent text={item.content} />
-            </Text>
-          </View>
-        </View>
         {item.type === 'retwit' && (
           <View style={{ flexDirection: 'row', marginLeft: 22, marginBottom: 5 }}>
             <Icon source="repeat" size={20} color="rgb(120 120 120)" />
@@ -147,16 +107,24 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
           </TouchableOpacity>
           <View style={{ flex: 1, flexDirection: 'column' }}>
             <View style={styles.contentContainer}>
-              <Text style={styles.name}>
-                {tweet.user.name}{' '}
-                <Text style={styles.username}>
-                  @{tweet.user.username}
-                  <Text style={styles.dot}>{' - '}</Text>
-                  <Text style={styles.date}>{formatDate(tweet.createdAt)}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.name}>
+                  {item.user.name}{' '}
+                  <Text style={styles.username}>
+                    @{item.user.username}
+                    <Text style={styles.dot}>{' · '}</Text>
+                    <Text style={styles.date}>
+                      {formatDate(item.createdAt)}
+                      {'   '}
+                    </Text>
+                  </Text>
                 </Text>
-              </Text>
+                {item.privacy === 'Only Followers' && (
+                  <Icon source={'lock'} size={22} color={'rgb(120, 120, 120)'} />
+                )}
+              </View>
               <Text style={styles.content}>
-                <ParsedContent text={tweet.content} />
+                <ParsedContent text={item.content} />
               </Text>
             </View>
             <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
