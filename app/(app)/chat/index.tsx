@@ -137,7 +137,9 @@ const ChatListScreen = () => {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const fetchUsers = async (query: string): Promise<void> => {
@@ -191,7 +193,7 @@ const ChatListScreen = () => {
     setSearchQuery('');
   };
 
-  const handleTweetContentChange = async (target: string) => {
+  const handleUsersSearchContentChange = async (target: string) => {
     if (timeout.current) {
       clearTimeout(timeout.current);
     }
@@ -295,7 +297,7 @@ const ChatListScreen = () => {
               <TextInput
                 placeholder={'Search TwitSnap'}
                 placeholderTextColor="rgb(150 150 150)"
-                onChangeText={handleTweetContentChange}
+                onChangeText={handleUsersSearchContentChange}
                 value={searchQuery}
                 style={styles.searchbar}
                 maxLength={80}
