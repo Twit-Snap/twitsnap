@@ -21,5 +21,6 @@ export const initializeFirebase = () => {
   }
 };
 
+initializeFirebase();
 const db = getDatabase();
 export { db, firebase };
