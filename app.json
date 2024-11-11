@@ -38,6 +38,12 @@
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "sounds": ["assets/sounds/notifications.mp3"]
+        }
       ]
     ],
     "experiments": {

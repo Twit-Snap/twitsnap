@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import { useAtom, useAtomValue } from 'jotai';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { showTabsAtom } from '@/atoms/showTabsAtom';
-
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
+import * as Notifications from 'expo-notifications';
 import { authenticatedAtom } from '../authAtoms/authAtom';
 
 export default function RootLayout() {
@@ -16,6 +17,25 @@ export default function RootLayout() {
   if (!isAuthenticated) {
     return <Redirect href="/front-page" />;
   }
+
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const responseListener = useRef<Notifications.Subscription>();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token: string | undefined) => {
+      token && setExpoPushToken(token);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+      console.log(response);
+      //QUE HACER CUANDO LA APRETAS
+    });
+
+    return () => {
+      responseListener.current &&
+        Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   return (
     <>
