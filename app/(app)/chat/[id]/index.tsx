@@ -39,7 +39,7 @@ const ChatScreen = () => {
 
   const handleSubmit = async () => {
     const promise = axiosMessages
-      .post(`chats/${chat_id}`, { content: newMessage })
+      .post(`chats/${chat_id}`, { content: newMessage.trim() })
       .catch((error) => {});
 
     setNewMessage('');
@@ -49,7 +49,7 @@ const ChatScreen = () => {
 
   const handleSubmitEdit = async () => {
     const promise = axiosMessages
-      .patch(`chats/${chat_id}/messages/${editRef.current}`, { content: newMessage })
+      .patch(`chats/${chat_id}/messages/${editRef.current}`, { content: newMessage.trim() })
       .catch((error) => {});
 
     editRef.current = '';
