@@ -42,6 +42,11 @@ export default function RootLayout() {
       <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
       <SafeAreaView style={{ flex: 1 }}>
         <Tabs
+          screenOptions={{
+            tabBarActiveBackgroundColor: 'rgb(5 5 5)',
+            tabBarInactiveBackgroundColor: 'rgb(5 5 5)',
+            tabBarInactiveTintColor: 'rgb(200 200 200)'
+          }}
           sceneContainerStyle={{
             backgroundColor: 'rgb(5 5 5)'
           }}
