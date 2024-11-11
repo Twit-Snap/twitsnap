@@ -1,17 +1,17 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
-import useAxiosInstance from '@/hooks/useAxios';
 
 import ParsedContent from '../common/parsedContent';
 
-import { Icon } from 'react-native-paper';
 import Interaction from './interaction';
+import Bookmark from './Interactions/bookmark';
 import Like from './Interactions/like';
 import Retwit from './Interactions/retwit';
 
@@ -58,6 +58,44 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
       }
     >
       <>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: '../profile/[username]',
+              params: { username: item.user.username }
+            })
+          }
+        >
+          <Image
+            source={
+              item.profilePicture
+                ? { uri: item.profilePicture }
+                : default_images.default_profile_picture
+            }
+            style={styles.profilePicture}
+          />
+        </TouchableOpacity>
+        <View style={{ flex: 1, flexDirection: 'column' }}>
+          <View style={styles.contentContainer}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.name}>
+                {item.user.name}{' '}
+                <Text style={styles.username}>
+                  @{item.user.username}
+                  <Text style={styles.dot}>{' · '}</Text>
+                  <Text style={styles.date}>
+                    {formatDate(item.createdAt)}
+                    {'   '}
+                  </Text>
+                </Text>
+              </Text>
+              {item.privacy === 'Only Followers' && (
+                <Icon source={'lock'} size={22} color={'rgb(120, 120, 120)'} />
+              )}
+            </View>
+            <Text style={styles.content}>
+              <ParsedContent text={item.content} />
+            </Text>
         {item.type === 'retwit' && (
           <View style={{ flexDirection: 'row', marginLeft: 22, marginBottom: 5 }}>
             <Icon source="repeat" size={20} color="rgb(120 120 120)" />
@@ -137,6 +175,11 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
                 twitId={tweet.id}
               />
               <Like initState={item.userLiked} initCount={item.likesCount} twitId={tweet.id} />
+              <Bookmark
+                initState={item.userBookmarked}
+                initCount={item.bookmarkCount}
+                twitId={tweet.id}
+              />
             </View>
           </View>
         </View>
@@ -177,7 +220,8 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 12,
-    color: 'rgb(120 120 120)'
+    color: 'rgb(120 120 120)',
+    marginEnd: 10
   },
   dot: {
     fontSize: 16,

@@ -205,7 +205,7 @@ export default function FeedScreen() {
     return twits;
   };
 
-  const sendTwit = async (tweetContent: string) => {
+  const sendTwit = async (tweetContent: string, privacySetting: string) => {
     try {
       const response = await axiosTwits.post(
         `snaps`,
@@ -216,6 +216,7 @@ export default function FeedScreen() {
             username: userData?.username
           },
           content: tweetContent.trim(),
+          privacy: privacySetting,
           type: 'original',
           parent: undefined
         },
@@ -350,8 +351,8 @@ export default function FeedScreen() {
       >
         <View style={{ height: window.height }}>
           <TweetBoxFeed
-            onTweetSend={(tweetContent) => {
-              sendTwit(tweetContent);
+            onTweetSend={(tweetContent, tweetPrivacy) => {
+              sendTwit(tweetContent, tweetPrivacy);
             }}
             onClose={handlePress}
           />
