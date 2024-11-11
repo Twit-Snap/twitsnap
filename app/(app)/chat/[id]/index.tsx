@@ -43,7 +43,7 @@ const ChatScreen = () => {
       .catch((error) => {});
 
     setNewMessage('');
-
+    setInputHeight(45);
     await promise;
   };
 
@@ -54,7 +54,7 @@ const ChatScreen = () => {
 
     editRef.current = '';
     setNewMessage('');
-
+    setInputHeight(45);
     await promise;
   };
 
