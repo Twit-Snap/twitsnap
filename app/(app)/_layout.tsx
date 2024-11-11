@@ -95,10 +95,11 @@ export default function RootLayout() {
             }}
           />
           <Tabs.Screen
-            name="chat/[username]/index"
+            name="chat/[id]/index"
             options={{
               tabBarButton: () => null, // Hide the tab
               header: () => null,
+              tabBarStyle: { display: 'none' },
               headerShown: false
             }}
           />
