@@ -96,6 +96,8 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
             <Text style={styles.content}>
               <ParsedContent text={item.content} />
             </Text>
+          </View>
+        </View>
         {item.type === 'retwit' && (
           <View style={{ flexDirection: 'row', marginLeft: 22, marginBottom: 5 }}>
             <Icon source="repeat" size={20} color="rgb(120 120 120)" />
