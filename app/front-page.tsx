@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
 
@@ -56,9 +57,13 @@ export default function FrontPage() {
   const handleDirectGoogleLogin = useCallback(
     async (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
       const { uid } = userCreds.user;
+
+      const expoToken = await registerForPushNotificationsAsync();
+
       const authData = {
         uid,
-        token
+        token,
+        expoToken
       };
       try {
         const response = await axiosUsers.post(`auth/sso/login`, authData, {
