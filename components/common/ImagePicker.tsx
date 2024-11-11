@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'; // Importa el icono
 import * as ImagePickerOS from 'expo-image-picker'; // Importa la librería para seleccionar imágenes
 import React, { useCallback, useState } from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { firebase } from '../../firebaseConfig';
 
@@ -12,10 +12,12 @@ const default_images = {
 interface ImagePickerProps {
   username: string; // User ID for storage reference
   onImagePicked: (uri: string) => void; // Callback to pass the selected image URI
+  onLoadingChange?: (isLoading: boolean) => void; // Callback to pass the loading state
 }
 
-const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked }) => {
-  const [profilePicture, setprofilePicture] = useState<string | null>(null); // Estado para la imagen de perfil
+const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked, onLoadingChange }) => {
+  const [profilePicture, setprofilePicture] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const pickImage = useCallback(async () => {
     const permissionResult = await ImagePickerOS.requestMediaLibraryPermissionsAsync();
@@ -45,6 +47,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked }) =>
       console.log(result.assets);
 
       try {
+        setIsLoading(true);
+        onLoadingChange?.(true);
         // option 1 with blob
         const response = await fetch(result.assets[0].uri);
         console.log(response);
@@ -58,6 +62,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked }) =>
         setprofilePicture(url); // Actualiza el estado con la URI de la imagen seleccionada
         onImagePicked(url); // Llama al callback con la URI de la imagen
         console.log('Image uploaded to Firebase Storage', url);
+        setIsLoading(false);
+        onLoadingChange?.(false);
       } catch (error) {
         console.error(
           'Error uploading image to Firebase Storage: ' +
@@ -66,15 +72,21 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked }) =>
         );
       }
     }
-  }, [username, onImagePicked, pickImage]);
+  }, [username, onImagePicked, pickImage, onLoadingChange]);
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={handleImagePick}>
-        <Image
-          source={profilePicture ? { uri: profilePicture } : default_images.default_profile_picture}
-          style={styles.profilePicture}
-        />
+        {isLoading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Image
+            source={
+              profilePicture ? { uri: profilePicture } : default_images.default_profile_picture
+            }
+            style={styles.profilePicture}
+          />
+        )}
         <View style={styles.iconContainer}>
           <MaterialCommunityIcons name="pencil" size={14} color="white" />
         </View>

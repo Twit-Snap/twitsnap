@@ -96,6 +96,8 @@ const SignUp: () => React.JSX.Element = () => {
   const [, setIsAuthenticated] = useAtom(authenticatedAtom);
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const [isFormTouched, setIsFormTouched] = useState(false);
 
   const [form, setForm] = useState<SignUpForm>({
     name: { value: '' },
@@ -113,6 +115,7 @@ const SignUp: () => React.JSX.Element = () => {
       ...prevForm,
       [name]: { value }
     }));
+    setIsFormTouched(true);
   }, []);
 
   const onBlurValidate = useCallback(
@@ -204,8 +207,10 @@ const SignUp: () => React.JSX.Element = () => {
   const isFormValid = useMemo(() => {
     const formProps = getFormProps(form, 'errorMessage');
     console.log('formProps', formProps);
-    return Object.values(formProps).every((value) => !value);
-  }, [form]);
+    return (
+      isFormTouched && Object.values(formProps).every((value) => !value) && !isUploadingPicture
+    );
+  }, [form, isUploadingPicture, isFormTouched]);
 
   return (
     <View style={styles.container}>
@@ -331,7 +336,11 @@ const SignUp: () => React.JSX.Element = () => {
           </HelperText>
         )}
       </View>
-      <ImagePicker username={form.username.value} onImagePicked={handleImagePicked} />
+      <ImagePicker
+        username={form.username.value}
+        onImagePicked={handleImagePicked}
+        onLoadingChange={setIsUploadingPicture}
+      />
       <Button mode="contained" onPress={handleSubmit} style={styles.button} disabled={!isFormValid}>
         Sign Up
       </Button>
