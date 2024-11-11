@@ -108,6 +108,18 @@ export default function RootLayout() {
             }}
           />
           <Tabs.Screen
+            name="notifications"
+            options={{
+              title: 'Notifications',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="notifications-outline" size={size} color={color} />
+              ),
+              tabBarHideOnKeyboard: true,
+              tabBarStyle: { display: showTabs ? 'flex' : 'none' },
+              headerShown: false
+            }}
+          />
+          <Tabs.Screen
             name="chat/index"
             options={{
               title: 'Chat',
