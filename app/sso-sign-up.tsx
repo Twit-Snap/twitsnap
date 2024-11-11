@@ -3,22 +3,32 @@ import axios from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSetAtom } from 'jotai';
 import React, { useCallback, useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
+
+import ImagePicker from '../components/common/ImagePicker';
 
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
 
 const SignUpScreen = () => {
-  const { token, uid, providerId, username } =
+  const { token, uid, providerId, username, profilePicture } =
     useLocalSearchParams<Omit<UserSSORegisterDto, 'birthdate'>>();
   const setAuthAtom = useSetAtom(authenticatedAtom);
   const [birthdate, setBirthdate] = useState('');
   const [usernameInput, setUsernameInput] = useState(username);
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const [profilePictureState, setprofilePictureState] = useState(profilePicture);
+
+  const handleImagePicked = useCallback((uri: string) => {
+    setprofilePictureState(uri); // Actualiza el estado con la URI de la imagen seleccionada
+  }, []);
 
   const handleSignUp = useCallback(async () => {
     const authData: UserSSORegisterDto = {
@@ -26,9 +36,11 @@ const SignUpScreen = () => {
       providerId,
       token,
       username: usernameInput,
-      birthdate
+      birthdate,
+      profilePicture: profilePictureState ?? undefined
     };
     try {
+      setIsLoading(true);
       const response = await axiosUsers.post(`auth/sso/register`, authData, {
         headers: { 'Content-Type': 'application/json' }
       });
@@ -52,24 +64,57 @@ const SignUpScreen = () => {
       } else {
         alert('An error occurred. Please try again later.');
       }
+      setIsLoading(false);
     }
-  }, [uid, providerId, token, usernameInput, birthdate, setAuthAtom]);
+  }, [
+    uid,
+    providerId,
+    token,
+    usernameInput,
+    birthdate,
+    profilePictureState,
+    axiosUsers,
+    setAuthAtom,
+    setBlocked
+  ]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.instructionText}>
         Please enter your username and birthdate to complete the registration.
       </Text>
-      <Text>Username:</Text>
-      <TextInput value={usernameInput} onChangeText={setUsernameInput} style={styles.input} />
-      <Text>Birthdate:</Text>
+      <TextInput
+        label="Username"
+        value={usernameInput}
+        mode="outlined"
+        placeholder="Username"
+        onChangeText={setUsernameInput}
+        style={styles.input}
+        theme={inputTheme}
+      />
       <TextInput
         value={birthdate}
+        mode="outlined"
+        label="Birthdate"
         onChangeText={setBirthdate}
         style={styles.input}
         placeholder="YYYY-MM-DD"
+        theme={inputTheme}
       />
-      <Button title="Sign Up" onPress={handleSignUp} />
+      <ImagePicker
+        imageUri={profilePictureState}
+        username={usernameInput}
+        onImagePicked={handleImagePicked}
+        onLoadingChange={setIsUploadingPicture}
+      />
+      <Button
+        mode="contained"
+        style={styles.button}
+        onPress={handleSignUp}
+        disabled={isLoading || isUploadingPicture}
+      >
+        Sign Up
+      </Button>
     </View>
   );
 };
@@ -78,22 +123,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
-    marginTop: 40 // Agrega margen superior para evitar el notch
+    backgroundColor: 'rgb(5, 5, 5)',
+    paddingTop: 50 // Agrega margen superior para evitar el notch
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
     marginBottom: 12,
-    paddingHorizontal: 8
+    color: 'white'
   },
   instructionText: {
-    fontSize: 16,
+    fontSize: 24,
+    fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#333'
+    color: 'white'
+  },
+  button: {
+    marginTop: 20,
+    backgroundColor: 'rgb(3, 165, 252)'
   }
 });
+
+const inputTheme = {
+  colors: {
+    primary: 'rgb(3, 165, 252)',
+    placeholder: 'rgb(113, 118, 123)',
+    onSurface: 'white',
+    background: 'rgb(5, 5, 5)'
+  }
+};
 
 export default SignUpScreen;
