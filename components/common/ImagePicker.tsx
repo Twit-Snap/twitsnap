@@ -10,13 +10,19 @@ const default_images = {
 };
 
 interface ImagePickerProps {
+  imageUri?: string;
   username: string; // User ID for storage reference
   onImagePicked: (uri: string) => void; // Callback to pass the selected image URI
   onLoadingChange?: (isLoading: boolean) => void; // Callback to pass the loading state
 }
 
-const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked, onLoadingChange }) => {
-  const [profilePicture, setprofilePicture] = useState<string | null>(null);
+const ImagePicker: React.FC<ImagePickerProps> = ({
+  imageUri,
+  username,
+  onImagePicked,
+  onLoadingChange
+}) => {
+  const [profilePicture, setprofilePicture] = useState<string | undefined>(imageUri);
   const [isLoading, setIsLoading] = useState(false);
 
   const pickImage = useCallback(async () => {

@@ -15,7 +15,7 @@ import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
 
 const SignUpScreen = () => {
-  const { token, uid, providerId, username } =
+  const { token, uid, providerId, username, profilePicture } =
     useLocalSearchParams<Omit<UserSSORegisterDto, 'birthdate'>>();
   const setAuthAtom = useSetAtom(authenticatedAtom);
   const [birthdate, setBirthdate] = useState('');
@@ -23,10 +23,11 @@ const SignUpScreen = () => {
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
   const [isLoading, setIsLoading] = useState(false);
-  const [profilePicture, setprofilePicture] = useState<string | null>(null); // Estado para la imagen de perfil
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const [profilePictureState, setprofilePictureState] = useState(profilePicture);
 
   const handleImagePicked = useCallback((uri: string) => {
-    setprofilePicture(uri); // Actualiza el estado con la URI de la imagen seleccionada
+    setprofilePictureState(uri); // Actualiza el estado con la URI de la imagen seleccionada
   }, []);
 
   const handleSignUp = useCallback(async () => {
@@ -36,7 +37,7 @@ const SignUpScreen = () => {
       token,
       username: usernameInput,
       birthdate,
-      profilePicture: profilePicture ?? undefined
+      profilePicture: profilePictureState ?? undefined
     };
     try {
       setIsLoading(true);
@@ -71,7 +72,7 @@ const SignUpScreen = () => {
     token,
     usernameInput,
     birthdate,
-    profilePicture,
+    profilePictureState,
     axiosUsers,
     setAuthAtom,
     setBlocked
@@ -100,8 +101,18 @@ const SignUpScreen = () => {
         placeholder="YYYY-MM-DD"
         theme={inputTheme}
       />
-      <ImagePicker username={usernameInput} onImagePicked={handleImagePicked} />
-      <Button mode="contained" style={styles.button} onPress={handleSignUp} disabled={isLoading}>
+      <ImagePicker
+        imageUri={profilePictureState}
+        username={usernameInput}
+        onImagePicked={handleImagePicked}
+        onLoadingChange={setIsUploadingPicture}
+      />
+      <Button
+        mode="contained"
+        style={styles.button}
+        onPress={handleSignUp}
+        disabled={isLoading || isUploadingPicture}
+      >
         Sign Up
       </Button>
     </View>
