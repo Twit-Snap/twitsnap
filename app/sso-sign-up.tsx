@@ -25,9 +25,9 @@ const SignUpScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [profilePicture, setprofilePicture] = useState<string | null>(null); // Estado para la imagen de perfil
 
-  const handleImagePicked = (uri: string) => {
+  const handleImagePicked = useCallback((uri: string) => {
     setprofilePicture(uri); // Actualiza el estado con la URI de la imagen seleccionada
-  };
+  }, []);
 
   const handleSignUp = useCallback(async () => {
     const authData: UserSSORegisterDto = {
@@ -65,7 +65,17 @@ const SignUpScreen = () => {
       }
       setIsLoading(false);
     }
-  }, [uid, providerId, token, usernameInput, birthdate, axiosUsers, setAuthAtom, setBlocked]);
+  }, [
+    uid,
+    providerId,
+    token,
+    usernameInput,
+    birthdate,
+    profilePicture,
+    axiosUsers,
+    setAuthAtom,
+    setBlocked
+  ]);
 
   return (
     <View style={styles.container}>
@@ -110,7 +120,8 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   instructionText: {
-    fontSize: 16,
+    fontSize: 24,
+    fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
     color: 'white'

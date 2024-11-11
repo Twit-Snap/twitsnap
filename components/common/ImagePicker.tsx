@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'; // Importa el icono
 import * as ImagePickerOS from 'expo-image-picker'; // Importa la librería para seleccionar imágenes
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { firebase } from '../../firebaseConfig';
@@ -17,8 +17,7 @@ interface ImagePickerProps {
 const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked }) => {
   const [profilePicture, setprofilePicture] = useState<string | null>(null); // Estado para la imagen de perfil
 
-  const handleImagePick = async () => {
-    // Solicitar permisos para acceder a la galería
+  const pickImage = useCallback(async () => {
     const permissionResult = await ImagePickerOS.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.granted === false) {
@@ -33,8 +32,14 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked }) =>
       aspect: [4, 3],
       quality: 1
     });
+    return result;
+  }, []);
 
-    if (!result.canceled) {
+  const handleImagePick = useCallback(async () => {
+    // Solicitar permisos para acceder a la galería
+    const result = await pickImage();
+
+    if (result && !result.canceled) {
       // Subir la imagen a Firebase Storage
       console.log(username);
       console.log(result.assets);
@@ -61,7 +66,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ username, onImagePicked }) =>
         );
       }
     }
-  };
+  }, [username, onImagePicked, pickImage]);
 
   return (
     <View style={styles.container}>
