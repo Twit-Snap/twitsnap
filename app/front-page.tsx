@@ -35,8 +35,8 @@ export default function FrontPage() {
   useEffect(() => {
     const loadAuth = async () => {
       if (!authAtom) {
-        // const session: string | null = await AsyncStorage.getItem('auth');
-        const session: string | null = null; //To test sign in
+        const session: string | null = await AsyncStorage.getItem('auth');
+        // const session: string | null = null; //To test sign in
 
         if (!session) {
           setIsLoadingSession(false);
