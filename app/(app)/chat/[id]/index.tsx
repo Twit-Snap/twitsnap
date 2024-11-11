@@ -3,7 +3,7 @@ import { db } from '@/firebaseConfig';
 import useAxiosInstance from '@/hooks/useAxios';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { onValue, ref } from 'firebase/database';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -68,51 +68,46 @@ const ChatScreen = () => {
     await axiosMessages.delete(`chats/${chat_id}/messages/${message_id}`).catch((error) => {});
   };
 
-  useEffect(() => {
-    if (!chat_id) {
-      return;
-    }
-
-    const messagesRef = ref(db, `messages/` + chat_id);
-
-    const unsubscribe = onValue(messagesRef, (snapshot) => {
-      const values = snapshot.val();
-
-      if (!values) {
-        setMessages([]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!chat_id) {
         return;
       }
 
-      const data = Object.entries(values).map(([k, v]) => ({
-        id: k,
-        ...(v as Object)
-      }));
+      const messagesRef = ref(db, `messages/` + chat_id);
 
-      console.log(`[${chat_id}] Firebase #messages: `, data.length);
+      const unsubscribe = onValue(messagesRef, (snapshot) => {
+        const values = snapshot.val();
 
-      setMessages(
-        (data as IMessage[]).sort((a, b) => {
-          // Parse the ISO 8601 strings into Date objects
-          const dateA = new Date(a.created_at);
-          const dateB = new Date(b.created_at);
+        if (!values) {
+          setMessages([]);
+          return;
+        }
 
-          // Compare the Date objects
-          return dateB.getTime() - dateA.getTime();
-        })
-      );
-    });
+        const data = Object.entries(values).map(([k, v]) => ({
+          id: k,
+          ...(v as Object)
+        }));
 
-    return () => {
-      unsubscribe();
-    };
-  }, [chat_id]);
+        console.log(`[${chat_id}] Firebase #messages: `, data.length);
 
-  useFocusEffect(
-    useCallback(() => {
+        setMessages(
+          (data as IMessage[]).sort((a, b) => {
+            // Parse the ISO 8601 strings into Date objects
+            const dateA = new Date(a.created_at);
+            const dateB = new Date(b.created_at);
+
+            // Compare the Date objects
+            return dateB.getTime() - dateA.getTime();
+          })
+        );
+      });
+
       return () => {
+        unsubscribe();
         setMessages(null);
       };
-    }, [])
+    }, [chat_id])
   );
 
   return (
