@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 20,
     marginBottom: 10,
+    marginLeft: 5,
     color: 'rgb(255 255 255)',
     fontSize: 16,
     lineHeight: 16

@@ -110,31 +110,34 @@ const ChatListScreen = () => {
     const unsubscribe = onValue(chatsRef, (snapshot: any) => {
       const data = snapshot.val();
 
-      if (data) {
-        const chatList = Object.entries(data)
-          .filter(([, val]) => {
-            const participants = (val as IChatBase).participants;
-
-            return (
-              participants.user1.id === currentUser?.id || participants.user2.id === currentUser?.id
-            );
-          })
-          .map(([id, val]) => {
-            const participants = (val as IChatBase).participants;
-            return {
-              id,
-              user:
-                participants.user1.id === currentUser?.id ? participants.user2 : participants.user1,
-              created_at: (val as IChatBase).created_at,
-              updated_at: (val as IChatBase).updated_at
-            };
-          });
-
-        const newChats = removeDuplicates(chatList);
-
-        joinUsers(newChats);
-        console.log('updated');
+      if (!data) {
+        setChats([]);
+        return;
       }
+
+      const chatList = Object.entries(data)
+        .filter(([, val]) => {
+          const participants = (val as IChatBase).participants;
+
+          return (
+            participants.user1.id === currentUser?.id || participants.user2.id === currentUser?.id
+          );
+        })
+        .map(([id, val]) => {
+          const participants = (val as IChatBase).participants;
+          return {
+            id,
+            user:
+              participants.user1.id === currentUser?.id ? participants.user2 : participants.user1,
+            created_at: (val as IChatBase).created_at,
+            updated_at: (val as IChatBase).updated_at
+          };
+        });
+
+      const newChats = removeDuplicates(chatList);
+
+      joinUsers(newChats);
+      console.log('updated');
     });
 
     return () => {
