@@ -62,7 +62,8 @@ export default function RootLayout() {
               header: () => <></>,
               tabBarHideOnKeyboard: true,
               tabBarStyle: { display: showTabs ? 'flex' : 'none' },
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
@@ -72,7 +73,8 @@ export default function RootLayout() {
               tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
               tabBarHideOnKeyboard: true,
               tabBarStyle: { display: showTabs ? 'flex' : 'none' },
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
@@ -116,7 +118,8 @@ export default function RootLayout() {
               ),
               tabBarHideOnKeyboard: true,
               tabBarStyle: { display: showTabs ? 'flex' : 'none' },
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
@@ -128,7 +131,8 @@ export default function RootLayout() {
               ),
               tabBarHideOnKeyboard: true,
               tabBarStyle: { display: showTabs ? 'flex' : 'none' },
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
