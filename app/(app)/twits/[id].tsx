@@ -1,13 +1,21 @@
 import { parseISO } from 'date-fns';
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useSegments } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useSegments } from 'expo-router';
 import { useExpoRouter } from 'expo-router/build/global-state/router-store';
 import { useAtomValue } from 'jotai';
 import { useAtom } from 'jotai/index';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useRef } from 'react';
-import { ActivityIndicator, FlatList, Text, View } from 'react-native';
-import { Animated, Dimensions, Image, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  FlatList,
+  Image,
+  Keyboard,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { Divider, IconButton } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
@@ -281,7 +289,9 @@ const TwitView: React.FC = () => {
           </View>
           <View style={{ flexDirection: 'column' }}>
             <View style={styles.contentContainer}>
-              <Text style={styles.content}>{<ParsedContent text={tweet.content} />}</Text>
+              <Text style={styles.content}>
+                {<ParsedContent text={tweet.content} entities={tweet.entities} />}
+              </Text>
             </View>
 
             <Text style={[styles.date]}>{formatDate(tweet.createdAt)}</Text>

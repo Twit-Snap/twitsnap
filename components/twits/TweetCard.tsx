@@ -82,7 +82,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
                   text={`Replying to @${tweet.user.username}`}
                   color={'rgb(120 120 120)'}
                   fontSize={13}
-
+                  entities={{ hashtags: [], userMentions: [{ username: tweet.user.username }] }}
                 />
               }
             </Text>
@@ -125,7 +125,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
                 )}
               </View>
               <Text style={styles.content}>
-                <ParsedContent text={tweet.content}  />
+                <ParsedContent text={tweet.content} entities={tweet.entities} />
               </Text>
             </View>
             <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
