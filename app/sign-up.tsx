@@ -11,6 +11,7 @@ import { validatePreviousDate } from '@/utils/date';
 
 import ImagePicker from '../components/common/ImagePicker';
 
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 type SignUpFormField = {
@@ -184,10 +185,17 @@ const SignUp: () => React.JSX.Element = () => {
 
     const formData = getFormProps(form, 'value');
     console.log('formData', formData);
+
+    const expoToken = await registerForPushNotificationsAsync();
+
     try {
-      const response = await axiosUsers.post(`auth/register`, formData, {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await axiosUsers.post(
+        `auth/register`,
+        { ...formData, expoToken },
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setIsAuthenticated(response.data);

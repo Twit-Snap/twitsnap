@@ -11,6 +11,7 @@ import useAxiosInstance from '@/hooks/useAxios';
 
 import ImagePicker from '../components/common/ImagePicker';
 
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
 
@@ -31,6 +32,8 @@ const SignUpScreen = () => {
   }, []);
 
   const handleSignUp = useCallback(async () => {
+    const expoToken = await registerForPushNotificationsAsync();
+
     const authData: UserSSORegisterDto = {
       uid,
       providerId,
@@ -41,9 +44,13 @@ const SignUpScreen = () => {
     };
     try {
       setIsLoading(true);
-      const response = await axiosUsers.post(`auth/sso/register`, authData, {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await axiosUsers.post(
+        `auth/sso/register`,
+        { ...authData, expoToken },
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setAuthAtom(response.data);

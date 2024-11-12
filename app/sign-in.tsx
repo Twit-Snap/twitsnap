@@ -6,19 +6,20 @@ import {
   Dimensions,
   Image,
   Keyboard,
+  TextInput as RNTextInput,
   StatusBar,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View
 } from 'react-native';
-import { TextInput as RNTextInput } from 'react-native';
 import { Button, IconButton, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 const window = Dimensions.get('window');
@@ -88,10 +89,16 @@ const SignIn: () => React.JSX.Element = () => {
       return;
     }
 
+    const expoToken = await registerForPushNotificationsAsync();
+
     try {
-      const response = await axiosUsers.post(`auth/login`, form, {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await axiosUsers.post(
+        `auth/login`,
+        { ...form, expoToken },
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
 
       if (response.status === 200) {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));

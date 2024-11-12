@@ -10,6 +10,7 @@ export type UserAuth = {
   providerId: string;
   profilePicture: string;
   token: string;
+  expoToken: string;
 };
 
 export type UserSSORegisterDto = {
