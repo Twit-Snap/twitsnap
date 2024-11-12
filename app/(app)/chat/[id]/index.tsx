@@ -1,4 +1,3 @@
-import { IReducedUser } from '@/app/types/publicUser';
 import MessageCard, { IMessage } from '@/components/chat/messageCard';
 import { db } from '@/firebaseConfig';
 import useAxiosInstance from '@/hooks/useAxios';
@@ -27,20 +26,27 @@ const default_images = {
 
 const ChatScreen = () => {
   const chat_id = useLocalSearchParams<{ id: string; user: string }>().id;
-  const user: IReducedUser = JSON.parse(useLocalSearchParams<{ id: string; user: string }>().user);
+  const [user, setUser] = useState(
+    JSON.parse(useLocalSearchParams<{ id: string; user: string }>().user)
+  );
+
   const [messages, setMessages] = useState<IMessage[] | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const flatListRef = useRef<FlatList>(null);
   const router = useRouter();
   const [inputHeight, setInputHeight] = useState<number>(45);
   const axiosMessages = useAxiosInstance('messages');
+  const axiosUsers = useAxiosInstance('users');
 
   const editRef = useRef<string>('');
   const inputRef = useRef<TextInput | null>(null);
 
   const handleSubmit = async () => {
     const promise = axiosMessages
-      .post(`chats/${chat_id}`, { content: newMessage.trim(), receiver_expo_token: user.expoToken })
+      .post(`chats/${chat_id}`, {
+        content: newMessage.trim(),
+        receiver_expo_token: user?.expoToken
+      })
       .catch((error) => {});
 
     setNewMessage('');
@@ -69,10 +75,21 @@ const ChatScreen = () => {
     await axiosMessages.delete(`chats/${chat_id}/messages/${message_id}`).catch((error) => {});
   };
 
+  const getUser = async () => {
+    await axiosUsers
+      .get(`users/${user}`, { params: { reduce: true } })
+      .then(({ data }) => setUser(data.data))
+      .catch(() => setUser({}));
+  };
+
   useFocusEffect(
     useCallback(() => {
       if (!chat_id) {
         return;
+      }
+
+      if (typeof user !== 'object') {
+        getUser();
       }
 
       const messagesRef = ref(db, `messages/` + chat_id);
