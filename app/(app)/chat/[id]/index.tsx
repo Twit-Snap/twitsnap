@@ -1,3 +1,4 @@
+import { IReducedUser } from '@/app/types/publicUser';
 import MessageCard, { IMessage } from '@/components/chat/messageCard';
 import { db } from '@/firebaseConfig';
 import useAxiosInstance from '@/hooks/useAxios';
@@ -26,7 +27,7 @@ const default_images = {
 
 const ChatScreen = () => {
   const chat_id = useLocalSearchParams<{ id: string; user: string }>().id;
-  const user = JSON.parse(useLocalSearchParams<{ id: string; user: string }>().user);
+  const user: IReducedUser = JSON.parse(useLocalSearchParams<{ id: string; user: string }>().user);
   const [messages, setMessages] = useState<IMessage[] | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const flatListRef = useRef<FlatList>(null);
@@ -39,7 +40,7 @@ const ChatScreen = () => {
 
   const handleSubmit = async () => {
     const promise = axiosMessages
-      .post(`chats/${chat_id}`, { content: newMessage.trim() })
+      .post(`chats/${chat_id}`, { content: newMessage.trim(), receiver_expo_token: user.expoToken })
       .catch((error) => {});
 
     setNewMessage('');
