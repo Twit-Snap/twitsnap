@@ -82,6 +82,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
                   text={`Replying to @${tweet.user.username}`}
                   color={'rgb(120 120 120)'}
                   fontSize={13}
+
                 />
               }
             </Text>
@@ -109,22 +110,22 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
             <View style={styles.contentContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={styles.name}>
-                  {item.user.name}{' '}
+                  {tweet.user.name}{' '}
                   <Text style={styles.username}>
-                    @{item.user.username}
+                    @{tweet.user.username}
                     <Text style={styles.dot}>{' · '}</Text>
                     <Text style={styles.date}>
-                      {formatDate(item.createdAt)}
+                      {formatDate(tweet.createdAt)}
                       {'   '}
                     </Text>
                   </Text>
                 </Text>
-                {item.privacy === 'Only Followers' && (
+                {tweet.privacy === 'Only Followers' && (
                   <Icon source={'lock'} size={22} color={'rgb(120, 120, 120)'} />
                 )}
               </View>
               <Text style={styles.content}>
-                <ParsedContent text={item.content} />
+                <ParsedContent text={tweet.content}  />
               </Text>
             </View>
             <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
