@@ -51,9 +51,7 @@ export function pushByNotificationType(content: INotificationExpectedContent) {
 export default function NotificationCard({ content, date, id, onPress }: INotificationCardProps) {
   return (
     <TouchableOpacity
-      style={[
-        styles.notificationItem
-      ]}
+      style={[styles.notificationItem]}
       onPress={() => {
         onPress(id);
         pushByNotificationType(content);
