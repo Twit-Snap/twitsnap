@@ -28,6 +28,8 @@ export function pushByNotificationType(content: INotificationExpectedContent) {
     return;
   }
 
+  console.log(content.data);
+
   switch (content.data.type) {
     case 'message':
       router.push({
@@ -35,6 +37,15 @@ export function pushByNotificationType(content: INotificationExpectedContent) {
         params: {
           id: `${content.data.params.id}`,
           user: `${content.data.params.user}`
+        }
+      });
+      break;
+
+    case 'twit-mention':
+      router.push({
+        pathname: '/(app)/twits/[id]',
+        params: {
+          id: `${content.data.params.id}`
         }
       });
       break;

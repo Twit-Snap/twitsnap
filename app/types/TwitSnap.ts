@@ -22,9 +22,14 @@ export interface TwitSnap {
   commentCount: number;
   type: string;
   parent: TwitSnap;
-  //entities: Entities;
+  entities: Entities;
   //inReplyToTweetId: string | null;
   //inReplyToUserId: string | null;
   //lang: string;
   //retweetCount: number;
+}
+
+export interface Entities {
+  hashtags: { text: string }[];
+  userMentions: { username: string }[];
 }
