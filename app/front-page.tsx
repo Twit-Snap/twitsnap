@@ -34,15 +34,15 @@ export default function FrontPage() {
   const axiosUsers = useAxiosInstance('users');
 
   useEffect(() => {
-    const handleLocation = async (userSession: UserAuth) => {
-      if (!userSession.location) {
-        router.push('./finish-sign-up');
-      }
-    };
+    // const handleLocation = async (userSession: UserAuth) => {
+    //   if (!userSession.location) {
+    //     router.push('./finish-sign-up');
+    //   }
+    // };
     const loadAuth = async () => {
       if (!authAtom) {
-        // const session: string | null = await AsyncStorage.getItem('auth');
-        const session: string | null = null; //To test sign in
+        const session: string | null = await AsyncStorage.getItem('auth');
+        // const session: string | null = null; //To test sign in
 
         if (!session) {
           setIsLoadingSession(false);
@@ -51,11 +51,11 @@ export default function FrontPage() {
 
         const userSession = JSON.parse(session) as UserAuth;
         setAuthAtom(userSession);
-        handleLocation(userSession);
+        // handleLocation(userSession);
         router.replace('/');
       } else {
         setIsLoadingSession(false);
-        handleLocation(authAtom);
+        // handleLocation(authAtom);
       }
     };
 
@@ -280,7 +280,7 @@ export default function FrontPage() {
               labelStyle={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}
               style={styles.buttonContent}
               onPress={() => {
-                router.push('./finish-sign-up');
+                router.push('./sign-up');
               }}
             >
               Create account
