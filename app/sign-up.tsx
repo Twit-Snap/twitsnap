@@ -8,14 +8,14 @@ import { Button, HelperText, TextInput } from 'react-native-paper';
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 import { validatePreviousDate } from '@/utils/date';
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
 
-import { registerForPushNotificationsAsync } from '@/utils/notifications';
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 type SignUpFormField = {
-  value: string | number;
+  value: string;
   errorMessage?: string;
 };
 
@@ -53,7 +53,10 @@ type FormRules = {
   errorMessage: string;
 };
 
-const validationRules: Record<keyof Omit<SignUpForm, 'profilePicture'>, FormRules> = {
+const validationRules: Record<
+  keyof Omit<SignUpForm, 'profilePicture' | 'registrationTime'>,
+  FormRules
+> = {
   name: {
     required: true,
     minLength: 3,
@@ -102,7 +105,6 @@ const SignUp: () => React.JSX.Element = () => {
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const [isFormTouched, setIsFormTouched] = useState(false);
 
-
   const [form, setForm] = useState<SignUpForm>({
     name: { value: '' },
     lastname: { value: '' },
@@ -112,12 +114,13 @@ const SignUp: () => React.JSX.Element = () => {
     password: { value: '' },
     repeatPassword: { value: '' },
     profilePicture: undefined,
-    registrationTime: { value: 0 }
+    registrationTime: { value: '' }
   });
 
   const calculateEventTime = () => {
     const now = new Date();
-    return now.getTime() - entryTime.getTime();
+    const elapseTime = now.getTime() - entryTime.getTime();
+    return elapseTime.toString();
   };
 
   const handleChange = useCallback((name: keyof SignUpForm, value: string) => {
@@ -129,7 +132,7 @@ const SignUp: () => React.JSX.Element = () => {
   }, []);
 
   const onBlurValidate = useCallback(
-    (field: keyof Omit<SignUpForm, 'profilePicture'>) => {
+    (field: keyof Omit<SignUpForm, 'profilePicture' | 'registrationTime'>) => {
       const rules: FormRules = validationRules[field];
       const value = form[field].value;
 
