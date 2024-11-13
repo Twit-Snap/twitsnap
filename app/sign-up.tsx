@@ -8,10 +8,10 @@ import { Button, HelperText, TextInput } from 'react-native-paper';
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 import { validatePreviousDate } from '@/utils/date';
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
 
-import { registerForPushNotificationsAsync } from '@/utils/notifications';
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 type SignUpFormField = {
@@ -39,7 +39,7 @@ const getFormProps = (form: SignUpForm, prop: keyof SignUpFormField) => {
     birthdate: form.birthdate[prop],
     password: form.password[prop],
     repeatPassword: form.repeatPassword[prop],
-    profilePicture: form.profilePicture?.[prop]
+    profilePicture: form.profilePicture?.[prop],
   };
 };
 
@@ -52,7 +52,10 @@ type FormRules = {
   errorMessage: string;
 };
 
-const validationRules: Record<keyof Omit<SignUpForm, 'profilePicture'>, FormRules> = {
+const validationRules: Record<
+  keyof Omit<SignUpForm, 'profilePicture' | 'registrationTime'>,
+  FormRules
+> = {
   name: {
     required: true,
     minLength: 3,
@@ -97,6 +100,7 @@ const SignUp: () => React.JSX.Element = () => {
   const [, setIsAuthenticated] = useAtom(authenticatedAtom);
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
+  const [entryTime, setEntryTime] = useState<Date>(new Date());
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const [isFormTouched, setIsFormTouched] = useState(false);
 
@@ -108,8 +112,14 @@ const SignUp: () => React.JSX.Element = () => {
     birthdate: { value: '' },
     password: { value: '' },
     repeatPassword: { value: '' },
-    profilePicture: undefined
+    profilePicture: undefined,
   });
+
+  const calculateEventTime = () => {
+    const now = new Date();
+    const elapseTime = now.getTime() - entryTime.getTime();
+    return elapseTime.toString();
+  };
 
   const handleChange = useCallback((name: keyof SignUpForm, value: string) => {
     setForm((prevForm) => ({
@@ -120,7 +130,7 @@ const SignUp: () => React.JSX.Element = () => {
   }, []);
 
   const onBlurValidate = useCallback(
-    (field: keyof Omit<SignUpForm, 'profilePicture'>) => {
+    (field: keyof Omit<SignUpForm, 'profilePicture' | 'registrationTime'>) => {
       const rules: FormRules = validationRules[field];
       const value = form[field].value;
 
@@ -173,7 +183,7 @@ const SignUp: () => React.JSX.Element = () => {
       profilePicture: { value: uri }
     });
   };
-
+  
   const handleSubmit = async () => {
     if (form.password.value !== form.repeatPassword.value) {
       setForm({
@@ -182,6 +192,7 @@ const SignUp: () => React.JSX.Element = () => {
       });
       return;
     }
+    const timeSpent = calculateEventTime();
 
     const formData = getFormProps(form, 'value');
     console.log('formData', formData);
@@ -191,7 +202,7 @@ const SignUp: () => React.JSX.Element = () => {
     try {
       const response = await axiosUsers.post(
         `auth/register`,
-        { ...formData, expoToken },
+        { ...formData, expoToken, registrationTime: timeSpent },
         {
           headers: { 'Content-Type': 'application/json' }
         }
@@ -209,6 +220,8 @@ const SignUp: () => React.JSX.Element = () => {
       } else {
         alert('Error! Some fields are missing or have incorrect format.');
       }
+      console.log('Last registration time in error: ', entryTime);
+      setEntryTime(new Date());
     }
   };
 
