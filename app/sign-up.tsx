@@ -8,10 +8,10 @@ import { Button, HelperText, TextInput } from 'react-native-paper';
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 import { validatePreviousDate } from '@/utils/date';
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
 
-import { registerForPushNotificationsAsync } from '@/utils/notifications';
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 type SignUpFormField = {
@@ -201,7 +201,7 @@ const SignUp: () => React.JSX.Element = () => {
         setIsAuthenticated(response.data);
         setBlocked(false);
         alert('Success Registering!');
-        router.replace('/');
+        router.push('./finish-sign-up');
       }
     } catch (error: any) {
       if (error.response && error.response.status === 400) {

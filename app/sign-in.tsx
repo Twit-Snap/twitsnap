@@ -18,8 +18,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
-
 import { registerForPushNotificationsAsync } from '@/utils/notifications';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 const window = Dimensions.get('window');

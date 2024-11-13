@@ -8,10 +8,10 @@ import { Button, TextInput } from 'react-native-paper';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
 
-import { registerForPushNotificationsAsync } from '@/utils/notifications';
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
 
@@ -55,7 +55,7 @@ const SignUpScreen = () => {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setAuthAtom(response.data);
         setBlocked(false);
-        router.replace('/'); // Redirige a la página principal
+        router.push('./finish-sign-up'); // Redirige a la nueva pantalla
       }
     } catch (error) {
       console.error('Error en el registro:', JSON.stringify(error, null, 2));

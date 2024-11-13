@@ -11,6 +11,10 @@ export type UserAuth = {
   profilePicture: string;
   token: string;
   expoToken: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
 };
 
 export type UserSSORegisterDto = {
