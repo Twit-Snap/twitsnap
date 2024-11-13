@@ -6,19 +6,20 @@ import {
   Dimensions,
   Image,
   Keyboard,
+  TextInput as RNTextInput,
   StatusBar,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View
 } from 'react-native';
-import { TextInput as RNTextInput } from 'react-native';
 import { Button, IconButton, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 
+import { registerForPushNotificationsAsync } from '@/utils/notifications';
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 const window = Dimensions.get('window');
@@ -98,10 +99,12 @@ const SignIn: () => React.JSX.Element = () => {
 
     const timeSpent = calculateEventTime();
 
+    const expoToken = await registerForPushNotificationsAsync();
+
     try {
       const response = await axiosUsers.post(
         `auth/login`,
-        { ...form, loginTime: timeSpent },
+        { ...form, expoToken, loginTime: timeSpent },
         {
           headers: { 'Content-Type': 'application/json' }
         }

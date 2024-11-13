@@ -32,5 +32,6 @@ export interface IReducedUser {
   username: string;
   description: string;
   profilePicture: string;
+  expoToken?: string;
   followCreatedAt?: string;
 }

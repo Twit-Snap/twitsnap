@@ -15,11 +15,10 @@ import {
 import { ErrorUser, SearchedUser } from '@/app/types/publicUser';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
+import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance from '@/hooks/useAxios';
-
-import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 
 export default function PublicProfileScreen() {
   const [fetchDeletedTwits, setDeletedTwits] = useAtom(tweetDeleteAtom);
@@ -33,6 +32,7 @@ export default function PublicProfileScreen() {
   const axiosUsers = useAxiosInstance('users');
   const axiosTwits = useAxiosInstance('twits');
   const isActualFeedTypeTwit = useRef<boolean>(true);
+  const isBookmarksSection = useRef<boolean>(false);
 
   const resetState = () => {
     setLoadingMore(false);
@@ -47,6 +47,7 @@ export default function PublicProfileScreen() {
         handler: async () => {
           resetState();
           isActualFeedTypeTwit.current = true;
+          isBookmarksSection.current = false;
           fetchTweets();
         },
         state: true
@@ -56,6 +57,16 @@ export default function PublicProfileScreen() {
         handler: async () => {
           resetState();
           isActualFeedTypeTwit.current = false;
+          isBookmarksSection.current = false;
+          fetchTweets();
+        },
+        state: false
+      },
+      {
+        text: 'Bookmarks',
+        handler: async () => {
+          resetState();
+          isBookmarksSection.current = true;
           fetchTweets();
         },
         state: false
@@ -98,12 +109,14 @@ export default function PublicProfileScreen() {
             older: true,
             limit: 20,
             username: username,
-            type: isActualFeedTypeTwit.current ? '["comment","original"]' : '["retwit"]'
+            type: isActualFeedTypeTwit.current ? '["comment","original"]' : '["retwit"]',
+            bookmarks: isBookmarksSection.current
           }
         : {
             limit: 20,
             username: username,
-            type: isActualFeedTypeTwit.current ? '["comment","original"]' : '["retwit"]'
+            type: isActualFeedTypeTwit.current ? '["comment","original"]' : '["retwit"]',
+            bookmarks: isBookmarksSection.current
           };
 
       try {

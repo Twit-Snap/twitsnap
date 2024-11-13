@@ -1,3 +1,4 @@
+import { Entities } from '@/app/types/TwitSnap';
 import { router } from 'expo-router';
 import React from 'react';
 import { Linking, StyleSheet } from 'react-native';
@@ -8,9 +9,16 @@ interface IParsedContentProps {
   color?: string;
   fontSize?: number;
   fontWeight?: 'bold' | 'normal';
+  entities?: Entities;
 }
 
-export default function ParsedContent({ text, color, fontSize, fontWeight }: IParsedContentProps) {
+export default function ParsedContent({
+  text,
+  color,
+  fontSize,
+  fontWeight,
+  entities
+}: IParsedContentProps) {
   if (!text) {
     return <Text>{''}</Text>;
   }
@@ -38,25 +46,41 @@ export default function ParsedContent({ text, color, fontSize, fontWeight }: IPa
           );
         } else if (word.startsWith('@')) {
           return (
-            <Text key={index}>
-              <Text
-                onPress={() =>
-                  router.push({
-                    pathname: `/(app)/profile/[username]`,
-                    params: { username: word.slice(1) }
-                  })
-                }
-                style={[
-                  styles.special,
-                  {
+            <>
+              {entities == undefined ||
+              entities?.userMentions.map(({ username }) => username).includes(word.slice(1)) ? (
+                <Text key={index}>
+                  <Text
+                    onPress={() =>
+                      router.push({
+                        pathname: `/(app)/profile/[username]`,
+                        params: { username: word.slice(1) }
+                      })
+                    }
+                    style={[
+                      styles.special,
+                      {
+                        fontSize: fontSize,
+                        fontWeight: fontWeight
+                      }
+                    ]}
+                  >
+                    {word}
+                  </Text>{' '}
+                </Text>
+              ) : (
+                <Text
+                  key={index}
+                  style={{
+                    color: color || 'white',
                     fontSize: fontSize,
                     fontWeight: fontWeight
-                  }
-                ]}
-              >
-                {word}
-              </Text>{' '}
-            </Text>
+                  }}
+                >
+                  {word}{' '}
+                </Text>
+              )}
+            </>
           );
         } else if (word.startsWith('https://')) {
           return (
