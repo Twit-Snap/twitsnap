@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as Notifications from 'expo-notifications';
 import { Redirect, Tabs } from 'expo-router';
 import { useAtom, useAtomValue } from 'jotai';
 import React, { useEffect, useRef } from 'react';
@@ -10,16 +11,12 @@ import {
   INotificationExpectedContent,
   pushByNotificationType
 } from '@/components/notifications/notificationCard';
-import * as Notifications from 'expo-notifications';
+
 import { authenticatedAtom } from '../authAtoms/authAtom';
 
 export default function RootLayout() {
   const [isAuthenticated] = useAtom(authenticatedAtom);
   const showTabs = useAtomValue(showTabsAtom);
-
-  if (!isAuthenticated) {
-    return <Redirect href="/front-page" />;
-  }
 
   const responseListener = useRef<Notifications.Subscription>();
 
@@ -37,6 +34,9 @@ export default function RootLayout() {
     };
   }, []);
 
+  if (!isAuthenticated) {
+    return <Redirect href="/front-page" />;
+  }
   return (
     <>
       <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
