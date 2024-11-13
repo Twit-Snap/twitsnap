@@ -44,6 +44,12 @@
         {
           "sounds": ["assets/sounds/notifications.mp3"]
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
       ]
     ],
     "experiments": {
