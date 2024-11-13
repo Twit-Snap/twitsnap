@@ -1,17 +1,17 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
-import useAxiosInstance from '@/hooks/useAxios';
 
 import ParsedContent from '../common/parsedContent';
 
-import { Icon } from 'react-native-paper';
 import Interaction from './interaction';
+import Bookmark from './Interactions/bookmark';
 import Like from './Interactions/like';
 import Retwit from './Interactions/retwit';
 
@@ -82,6 +82,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
                   text={`Replying to @${tweet.user.username}`}
                   color={'rgb(120 120 120)'}
                   fontSize={13}
+                  entities={{ hashtags: [], userMentions: [{ username: tweet.user.username }] }}
                 />
               }
             </Text>
@@ -107,16 +108,24 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
           </TouchableOpacity>
           <View style={{ flex: 1, flexDirection: 'column' }}>
             <View style={styles.contentContainer}>
-              <Text style={styles.name}>
-                {tweet.user.name}{' '}
-                <Text style={styles.username}>
-                  @{tweet.user.username}
-                  <Text style={styles.dot}>{' - '}</Text>
-                  <Text style={styles.date}>{formatDate(tweet.createdAt)}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.name}>
+                  {tweet.user.name}{' '}
+                  <Text style={styles.username}>
+                    @{tweet.user.username}
+                    <Text style={styles.dot}>{' · '}</Text>
+                    <Text style={styles.date}>
+                      {formatDate(tweet.createdAt)}
+                      {'   '}
+                    </Text>
+                  </Text>
                 </Text>
-              </Text>
+                {tweet.privacy === 'Only Followers' && (
+                  <Icon source={'lock'} size={22} color={'rgb(120, 120, 120)'} />
+                )}
+              </View>
               <Text style={styles.content}>
-                <ParsedContent text={tweet.content} />
+                <ParsedContent text={tweet.content} entities={tweet.entities} />
               </Text>
             </View>
             <View style={{ flex: 1, flexDirection: 'row', maxHeight: 25 }}>
@@ -137,6 +146,11 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
                 twitId={tweet.id}
               />
               <Like initState={item.userLiked} initCount={item.likesCount} twitId={tweet.id} />
+              <Bookmark
+                initState={item.userBookmarked}
+                initCount={item.bookmarkCount}
+                twitId={tweet.id}
+              />
             </View>
           </View>
         </View>
@@ -177,7 +191,8 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 12,
-    color: 'rgb(120 120 120)'
+    color: 'rgb(120 120 120)',
+    marginEnd: 10
   },
   dot: {
     fontSize: 16,

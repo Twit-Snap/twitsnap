@@ -1,29 +1,36 @@
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, View } from 'react-native';
-
-import { TwitSnap } from '@/app/types/TwitSnap';
-import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
-import TweetCard from '@/components/twits/TweetCard';
-import useAxiosInstance from '@/hooks/useAxios';
-
 import { parseISO } from 'date-fns';
-import { useSegments } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useSegments } from 'expo-router';
+import { useExpoRouter } from 'expo-router/build/global-state/router-store';
 import { useAtomValue } from 'jotai';
 import { useAtom } from 'jotai/index';
-import { useRef } from 'react';
-import { Animated, Dimensions, Image, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  FlatList,
+  Image,
+  Keyboard,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { Divider, IconButton } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { TwitSnap } from '@/app/types/TwitSnap';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import ParsedContent from '@/components/common/parsedContent';
 import Interaction from '@/components/twits/interaction';
+import Bookmark from '@/components/twits/Interactions/bookmark';
 import Like from '@/components/twits/Interactions/like';
 import Retwit from '@/components/twits/Interactions/retwit';
+import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
-import { useExpoRouter } from 'expo-router/build/global-state/router-store';
+import TweetCard from '@/components/twits/TweetCard';
+import useAxiosInstance from '@/hooks/useAxios';
 
 const default_images = {
   default_profile_picture: require('../../../assets/images/no-profile-picture.png')
@@ -282,14 +289,22 @@ const TwitView: React.FC = () => {
           </View>
           <View style={{ flexDirection: 'column' }}>
             <View style={styles.contentContainer}>
-              <Text style={styles.content}>{<ParsedContent text={tweet.content} />}</Text>
+              <Text style={styles.content}>
+                {<ParsedContent text={tweet.content} entities={tweet.entities} />}
+              </Text>
             </View>
 
             <Text style={[styles.date]}>{formatDate(tweet.createdAt)}</Text>
 
-            <View style={{ flexDirection: 'row', marginVertical: 10 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                marginVertical: 10
+              }}
+            >
               <InteractionLabel count={tweet.retwitCount} label={'Retwits'} />
               <InteractionLabel count={tweet.likesCount} label={'Likes'} />
+              <InteractionLabel count={tweet.bookmarkCount} label={'Bookmarks'} />
             </View>
 
             <View style={{ flexDirection: 'row', paddingHorizontal: 10 }}>
@@ -303,6 +318,7 @@ const TwitView: React.FC = () => {
               />
               <Retwit initState={tweet.userRetwitted} initCount={undefined} twitId={tweet.id} />
               <Like initState={tweet.userLiked} initCount={undefined} twitId={tweet.id} />
+              <Bookmark initState={tweet.userBookmarked} initCount={undefined} twitId={tweet.id} />
             </View>
             <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(60 60 60)' }} />
             <>
