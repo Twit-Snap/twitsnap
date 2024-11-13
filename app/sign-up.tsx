@@ -40,7 +40,8 @@ const getFormProps = (form: SignUpForm, prop: keyof SignUpFormField) => {
     birthdate: form.birthdate[prop],
     password: form.password[prop],
     repeatPassword: form.repeatPassword[prop],
-    profilePicture: form.profilePicture?.[prop]
+    profilePicture: form.profilePicture?.[prop],
+    registrationTime: form.registrationTime[prop]
   };
 };
 
@@ -186,6 +187,12 @@ const SignUp: () => React.JSX.Element = () => {
     });
   };
 
+  const handleTimerChange = () => {
+    setForm({
+      ...form,
+      registrationTime: { value: calculateEventTime() }
+    });
+  };
   const handleSubmit = async () => {
     if (form.password.value !== form.repeatPassword.value) {
       setForm({
@@ -194,7 +201,8 @@ const SignUp: () => React.JSX.Element = () => {
       });
       return;
     }
-    const timeSpent = calculateEventTime();
+    //const timeSpent = calculateEventTime();
+    handleTimerChange();
 
     const formData = getFormProps(form, 'value');
     console.log('formData', formData);
@@ -204,7 +212,7 @@ const SignUp: () => React.JSX.Element = () => {
     try {
       const response = await axiosUsers.post(
         `auth/register`,
-        { ...form, expoToken, registrationTime: timeSpent },
+        { ...form, expoToken },
         {
           headers: { 'Content-Type': 'application/json' }
         }
