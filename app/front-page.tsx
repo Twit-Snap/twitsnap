@@ -16,10 +16,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
-
 import { registerForPushNotificationsAsync } from '@/utils/notifications';
+
 import { authenticatedAtom } from './authAtoms/authAtom';
-import { UserSSORegisterDto } from './types/authTypes';
+import { UserAuth, UserSSORegisterDto } from './types/authTypes';
 
 GoogleSignin.configure({
   webClientId: '224360780470-maj4ma0cdjlm1o2376lv28m45rvm2e8e.apps.googleusercontent.com'
@@ -34,6 +34,11 @@ export default function FrontPage() {
   const axiosUsers = useAxiosInstance('users');
 
   useEffect(() => {
+    // const handleLocation = async (userSession: UserAuth) => {
+    //   if (!userSession.location) {
+    //     router.push('./finish-sign-up');
+    //   }
+    // };
     const loadAuth = async () => {
       if (!authAtom) {
         const session: string | null = await AsyncStorage.getItem('auth');
@@ -44,10 +49,13 @@ export default function FrontPage() {
           return;
         }
 
-        setAuthAtom(JSON.parse(session));
+        const userSession = JSON.parse(session) as UserAuth;
+        setAuthAtom(userSession);
+        // handleLocation(userSession);
         router.replace('/');
       } else {
         setIsLoadingSession(false);
+        // handleLocation(authAtom);
       }
     };
 
@@ -272,7 +280,7 @@ export default function FrontPage() {
               labelStyle={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}
               style={styles.buttonContent}
               onPress={() => {
-                router.push('/sign-up');
+                router.push('./sign-up');
               }}
             >
               Create account

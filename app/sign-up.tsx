@@ -212,7 +212,7 @@ const SignUp: () => React.JSX.Element = () => {
         setIsAuthenticated(response.data);
         setBlocked(false);
         alert('Success Registering!');
-        router.replace('/');
+        router.push('./finish-sign-up');
       }
     } catch (error: any) {
       if (error.response && error.response.status === 400) {
