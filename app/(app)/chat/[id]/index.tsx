@@ -1,3 +1,4 @@
+import { IReducedUser } from '@/app/types/publicUser';
 import MessageCard, { IMessage } from '@/components/chat/messageCard';
 import { db } from '@/firebaseConfig';
 import useAxiosInstance from '@/hooks/useAxios';
@@ -26,9 +27,18 @@ const default_images = {
 
 const ChatScreen = () => {
   const chat_id = useLocalSearchParams<{ id: string; user: string }>().id;
-  const [user, setUser] = useState(
-    JSON.parse(useLocalSearchParams<{ id: string; user: string }>().user)
-  );
+
+  const getUserParam = (): IReducedUser | string => {
+    const userParam = useLocalSearchParams<{ id: string; user: string }>().user;
+    try {
+      return JSON.parse(userParam);
+    } catch {
+      return userParam;
+    }
+  };
+
+  const user = getUserParam();
+  const userRef = useRef<IReducedUser>({} as IReducedUser);
 
   const [messages, setMessages] = useState<IMessage[] | null>(null);
   const [newMessage, setNewMessage] = useState('');
@@ -45,7 +55,7 @@ const ChatScreen = () => {
     const promise = axiosMessages
       .post(`chats/${chat_id}`, {
         content: newMessage.trim(),
-        receiver_expo_token: user?.expoToken
+        receiver_expo_token: userRef.current?.expoToken
       })
       .catch((error) => {});
 
@@ -75,11 +85,11 @@ const ChatScreen = () => {
     await axiosMessages.delete(`chats/${chat_id}/messages/${message_id}`).catch((error) => {});
   };
 
-  const getUser = async () => {
+  const getUser = async (username: string) => {
     await axiosUsers
-      .get(`users/${user}`, { params: { reduce: true } })
-      .then(({ data }) => setUser(data.data))
-      .catch(() => setUser({}));
+      .get(`users/${username}`, { params: { reduce: true } })
+      .then(({ data }) => (userRef.current = data.data))
+      .catch(() => (userRef.current = {} as IReducedUser));
   };
 
   useFocusEffect(
@@ -88,8 +98,15 @@ const ChatScreen = () => {
         return;
       }
 
-      if (typeof user !== 'object') {
-        getUser();
+      if (typeof user === 'string') {
+        console.log('User is a string');
+        getUser(user);
+      } else if (user.followCreatedAt != undefined) {
+        console.log('User from follow');
+        getUser(user.username);
+      } else {
+        console.log('is an IReducedUser');
+        userRef.current = user;
       }
 
       const messagesRef = ref(db, `messages/` + chat_id);
@@ -150,8 +167,8 @@ const ChatScreen = () => {
           >
             <Image
               source={
-                user.profilePicture
-                  ? { uri: user.profilePicture }
+                userRef.current.profilePicture
+                  ? { uri: userRef.current.profilePicture }
                   : default_images.default_profile_picture
               }
               style={styles.profilePicture}
@@ -166,7 +183,7 @@ const ChatScreen = () => {
                 textAlignVertical: 'center'
               }}
             >
-              {user.name}
+              {userRef.current.name}
             </Text>
           </View>
         </View>
