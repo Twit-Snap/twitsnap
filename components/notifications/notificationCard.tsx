@@ -41,7 +41,7 @@ export function pushByNotificationType(content: INotificationExpectedContent) {
       });
       break;
 
-    case 'twit-mention':
+    case 'twit':
       router.push({
         pathname: '/(app)/twits/[id]',
         params: {
