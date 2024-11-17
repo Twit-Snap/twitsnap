@@ -1,29 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Divider } from 'react-native-paper';
 
 import MenuSearchBar from '@/components/search/menuSearchBar';
 import TopicCard from '@/components/search/topicCard';
 import useAxiosInstance from '@/hooks/useAxios';
+import { useFocusEffect } from 'expo-router';
 
 export default function SearchScreen() {
   const [trendingTopics, setTrendingTopics] = useState([]);
   const axiosTwits = useAxiosInstance('twits');
 
-  useEffect(() => {
-    const fetchTrendingTopics = async () => {
-      try {
-        const response = await axiosTwits.get(`snaps/trending`, {});
-        const data = await response.data.data;
-        console.log('Trending topics:', data);
-        setTrendingTopics(data);
-      } catch (error) {
-        console.error('Error fetching trending topics:', error);
-      }
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchTrendingTopics = async () => {
+        try {
+          const response = await axiosTwits.get(`snaps/trending`, {});
+          const data = await response.data.data;
+          console.log('Trending topics:', data);
+          setTrendingTopics(data);
+        } catch (error) {
+          console.error('Error fetching trending topics:', error);
+        }
+      };
 
-    fetchTrendingTopics();
-  }, []);
+      fetchTrendingTopics();
+    }, [])
+  );
 
   return (
     <>
