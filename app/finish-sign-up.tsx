@@ -53,7 +53,7 @@ const RequestLocationPermissions = () => {
     );
 
     // Aquí puedes redirigir a otra pantalla o realizar alguna acción con la ubicación
-    router.replace('/'); // Cambia '/next-screen' a la pantalla que desees
+    router.replace('/verification'); // Cambia '/next-screen' a la pantalla que desees
   };
 
   return (

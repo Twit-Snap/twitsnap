@@ -144,6 +144,15 @@ export default function RootLayout() {
               headerShown: false
             }}
           />
+          <Tabs.Screen
+            name="verification"
+            options={{
+              tabBarButton: () => null, // Hide the tab
+              header: () => null,
+              tabBarStyle: { display: 'none' },
+              headerShown: false
+            }}
+          />
         </Tabs>
       </SafeAreaView>
     </>
