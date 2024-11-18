@@ -3,8 +3,8 @@ import axios from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSetAtom } from 'jotai';
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import { StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Button, HelperText, TextInput } from 'react-native-paper';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
@@ -12,8 +12,14 @@ import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authenticatedAtom } from './authAtoms/authAtom';
 import { UserSSORegisterDto } from './types/authTypes';
+
+type SignUpFormField = {
+  value: string;
+  errorMessage?: string;
+};
 
 const SignUpScreen = () => {
   const { token, uid, providerId, username, profilePicture } =
@@ -21,6 +27,7 @@ const SignUpScreen = () => {
   const setAuthAtom = useSetAtom(authenticatedAtom);
   const [birthdate, setBirthdate] = useState('');
   const [usernameInput, setUsernameInput] = useState(username);
+  const [phoneNumber, setPhoneNumber] = useState<SignUpFormField>({ value: '' });
   const setBlocked = useSetAtom(blockedAtom);
   const axiosUsers = useAxiosInstance('users');
   const [isLoading, setIsLoading] = useState(false);
@@ -40,7 +47,8 @@ const SignUpScreen = () => {
       token,
       username: usernameInput,
       birthdate,
-      profilePicture: profilePictureState ?? undefined
+      profilePicture: profilePictureState ?? undefined,
+      phoneNumber: phoneNumber.value
     };
     try {
       setIsLoading(true);
@@ -85,44 +93,88 @@ const SignUpScreen = () => {
     setBlocked
   ]);
 
+  const validatePhoneNumber = (): boolean => {
+    const pattern = /^\+\d{10,12}$/;
+
+    if (!pattern.test(phoneNumber.value)) {
+      setPhoneNumber((current) => ({
+        ...current,
+        errorMessage: 'Please enter a valid phone number'
+      }));
+      return false;
+    }
+    return true;
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.instructionText}>
-        Please enter your username and birthdate to complete the registration.
-      </Text>
-      <TextInput
-        label="Username"
-        value={usernameInput}
-        mode="outlined"
-        placeholder="Username"
-        onChangeText={setUsernameInput}
-        style={styles.input}
-        theme={inputTheme}
-      />
-      <TextInput
-        value={birthdate}
-        mode="outlined"
-        label="Birthdate"
-        onChangeText={setBirthdate}
-        style={styles.input}
-        placeholder="YYYY-MM-DD"
-        theme={inputTheme}
-      />
-      <ImagePicker
-        imageUri={profilePictureState}
-        username={usernameInput}
-        onImagePicked={handleImagePicked}
-        onLoadingChange={setIsUploadingPicture}
-      />
-      <Button
-        mode="contained"
-        style={styles.button}
-        onPress={handleSignUp}
-        disabled={isLoading || isUploadingPicture}
-      >
-        Sign Up
-      </Button>
-    </View>
+    <>
+      <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
+      <SafeAreaView style={{ flex: 1, flexDirection: 'column', backgroundColor: 'rgb(5 5 5)' }}>
+        <View style={styles.container}>
+          <Text style={styles.instructionText}>
+            Please enter your username and birthdate to complete the registration.
+          </Text>
+          <TextInput
+            label="Username"
+            value={usernameInput}
+            mode="outlined"
+            placeholder="Username"
+            onChangeText={setUsernameInput}
+            style={styles.input}
+            theme={inputTheme}
+          />
+          <TextInput
+            value={birthdate}
+            mode="outlined"
+            label="Birthdate"
+            onChangeText={setBirthdate}
+            style={styles.input}
+            placeholder="YYYY-MM-DD"
+            theme={inputTheme}
+          />
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Phone number"
+              value={phoneNumber.value}
+              mode="outlined"
+              onChangeText={(value) => setPhoneNumber({ value })}
+              onBlur={validatePhoneNumber}
+              error={!!phoneNumber.errorMessage}
+              placeholder="Phone number"
+              theme={inputTheme}
+            />
+            {phoneNumber.errorMessage && (
+              <HelperText padding="none" type="error">
+                {phoneNumber.errorMessage}
+              </HelperText>
+            )}
+          </View>
+          <ImagePicker
+            imageUri={profilePictureState}
+            username={usernameInput}
+            onImagePicked={handleImagePicked}
+            onLoadingChange={setIsUploadingPicture}
+          />
+          <Button
+            mode="contained"
+            style={styles.button}
+            onPress={() => {
+              if (validatePhoneNumber()) {
+                handleSignUp();
+              }
+            }}
+            disabled={
+              isLoading ||
+              isUploadingPicture ||
+              birthdate.length === 0 ||
+              phoneNumber.value.length === 0
+            }
+          >
+            Sign Up
+          </Button>
+        </View>
+      </SafeAreaView>
+    </>
   );
 };
 
@@ -130,8 +182,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: 'rgb(5, 5, 5)',
-    paddingTop: 50 // Agrega margen superior para evitar el notch
+    backgroundColor: 'rgb(5, 5, 5)'
   },
   input: {
     marginBottom: 12,
@@ -147,6 +198,9 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
     backgroundColor: 'rgb(3, 165, 252)'
+  },
+  inputContainer: {
+    marginBottom: 12
   }
 });
 
