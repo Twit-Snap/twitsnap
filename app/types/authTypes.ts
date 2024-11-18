@@ -15,6 +15,7 @@ export type UserAuth = {
     latitude: number;
     longitude: number;
   };
+  phoneNumber: string;
 };
 
 export type UserSSORegisterDto = {
@@ -24,4 +25,5 @@ export type UserSSORegisterDto = {
   username: string;
   birthdate: string;
   profilePicture?: string;
+  phoneNumber: string;
 };

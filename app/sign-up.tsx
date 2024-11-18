@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useAtom, useSetAtom } from 'jotai';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
@@ -12,6 +12,7 @@ import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 type SignUpFormField = {
@@ -21,6 +22,7 @@ type SignUpFormField = {
 
 type SignUpForm = {
   email: SignUpFormField;
+  phoneNumber: SignUpFormField;
   username: SignUpFormField;
   password: SignUpFormField;
   name: SignUpFormField;
@@ -40,6 +42,7 @@ const getFormProps = (form: SignUpForm, prop: keyof SignUpFormField) => {
     password: form.password[prop],
     repeatPassword: form.repeatPassword[prop],
     profilePicture: form.profilePicture?.[prop],
+    phoneNumber: form.phoneNumber[prop]
   };
 };
 
@@ -72,6 +75,11 @@ const validationRules: Record<
     required: true,
     pattern: /^\S+@\S+\.\S+$/,
     errorMessage: 'Please enter a valid email address.'
+  },
+  phoneNumber: {
+    required: true,
+    pattern: /^\+\d{10,12}$/,
+    errorMessage: 'Please enter a valid phone number'
   },
   username: {
     required: true,
@@ -108,11 +116,12 @@ const SignUp: () => React.JSX.Element = () => {
     name: { value: '' },
     lastname: { value: '' },
     email: { value: '' },
+    phoneNumber: { value: '' },
     username: { value: '' },
     birthdate: { value: '' },
     password: { value: '' },
     repeatPassword: { value: '' },
-    profilePicture: undefined,
+    profilePicture: undefined
   });
 
   const calculateEventTime = () => {
@@ -183,7 +192,7 @@ const SignUp: () => React.JSX.Element = () => {
       profilePicture: { value: uri }
     });
   };
-  
+
   const handleSubmit = async () => {
     if (form.password.value !== form.repeatPassword.value) {
       setForm({
@@ -234,138 +243,165 @@ const SignUp: () => React.JSX.Element = () => {
   }, [form, isUploadingPicture, isFormTouched]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
-      <View style={styles.inputContainer}>
-        <TextInput
-          label="First Name"
-          value={form.name.value}
-          mode="outlined"
-          onChangeText={(value) => handleChange('name', value)}
-          onBlur={() => onBlurValidate('name')}
-          error={!!form.name.errorMessage}
-          placeholder="First Name"
-          theme={inputTheme}
-        />
-        {form.name.errorMessage && (
-          <HelperText padding="none" type="error">
-            {form.name.errorMessage}
-          </HelperText>
-        )}
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          label="Last Name"
-          value={form.lastname.value}
-          mode="outlined"
-          onChangeText={(value) => handleChange('lastname', value)}
-          onBlur={() => onBlurValidate('lastname')}
-          error={!!form.lastname.errorMessage}
-          placeholder="Last Name"
-          theme={inputTheme}
-        />
-        {form.lastname.errorMessage && (
-          <HelperText padding="none" type="error">
-            {form.lastname.errorMessage}
-          </HelperText>
-        )}
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          label="Email"
-          value={form.email.value}
-          mode="outlined"
-          onChangeText={(value) => handleChange('email', value)}
-          onBlur={() => onBlurValidate('email')}
-          error={!!form.email.errorMessage}
-          placeholder="Email"
-          theme={inputTheme}
-        />
-        {form.email.errorMessage && (
-          <HelperText padding="none" type="error">
-            {form.email.errorMessage}
-          </HelperText>
-        )}
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          label="Username"
-          value={form.username.value}
-          mode="outlined"
-          onChangeText={(value) => handleChange('username', value)}
-          onBlur={() => onBlurValidate('username')}
-          error={!!form.username.errorMessage}
-          placeholder="Username"
-          theme={inputTheme}
-        />
-        {form.username.errorMessage && (
-          <HelperText padding="none" type="error">
-            {form.username.errorMessage}
-          </HelperText>
-        )}
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          label="Birthdate"
-          value={form.birthdate.value}
-          mode="outlined"
-          onChangeText={(value) => handleChange('birthdate', value)}
-          placeholder="YYYY-MM-DD"
-          onBlur={() => onBlurValidate('birthdate')}
-          error={!!form.birthdate.errorMessage}
-          theme={inputTheme}
-        />
-        {form.birthdate.errorMessage && (
-          <HelperText padding="none" type="error">
-            {form.birthdate.errorMessage}
-          </HelperText>
-        )}
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={form.password.value}
-          mode="outlined"
-          label="Password"
-          onChangeText={(value) => handleChange('password', value)}
-          onBlur={() => onBlurValidate('password')}
-          error={!!form.password.errorMessage}
-          placeholder="Password"
-          secureTextEntry
-          theme={inputTheme}
-        />
-        {form.password.errorMessage && (
-          <HelperText padding="none" type="error">
-            {form.password.errorMessage}
-          </HelperText>
-        )}
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={form.repeatPassword.value}
-          mode="outlined"
-          label="Repeat Password"
-          onChangeText={(value) => handleChange('repeatPassword', value)}
-          onBlur={() => onBlurValidate('repeatPassword')}
-          error={!!form.repeatPassword.errorMessage}
-          placeholder="Repeat Password"
-          secureTextEntry
-          theme={inputTheme}
-        />
-        {form.repeatPassword.errorMessage && (
-          <HelperText padding="none" type="error">
-            {form.repeatPassword.errorMessage}
-          </HelperText>
-        )}
-      </View>
-      <ImagePicker
-        username={form.username.value}
-        onImagePicked={handleImagePicked}
-        onLoadingChange={setIsUploadingPicture}
-      />
-      <Button mode="contained" onPress={handleSubmit} style={styles.button} disabled={!isFormValid}>
-        Sign Up
-      </Button>
-    </View>
+    <>
+      <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
+      <SafeAreaView style={{ flex: 1, flexDirection: 'column', backgroundColor: 'rgb(5 5 5)' }}>
+        <ScrollView style={styles.container}>
+          <Text style={styles.title}>Create Account</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="First Name"
+              value={form.name.value}
+              mode="outlined"
+              onChangeText={(value) => handleChange('name', value)}
+              onBlur={() => onBlurValidate('name')}
+              error={!!form.name.errorMessage}
+              placeholder="First Name"
+              theme={inputTheme}
+            />
+            {form.name.errorMessage && (
+              <HelperText padding="none" type="error">
+                {form.name.errorMessage}
+              </HelperText>
+            )}
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Last Name"
+              value={form.lastname.value}
+              mode="outlined"
+              onChangeText={(value) => handleChange('lastname', value)}
+              onBlur={() => onBlurValidate('lastname')}
+              error={!!form.lastname.errorMessage}
+              placeholder="Last Name"
+              theme={inputTheme}
+            />
+            {form.lastname.errorMessage && (
+              <HelperText padding="none" type="error">
+                {form.lastname.errorMessage}
+              </HelperText>
+            )}
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Email"
+              value={form.email.value}
+              mode="outlined"
+              onChangeText={(value) => handleChange('email', value)}
+              onBlur={() => onBlurValidate('email')}
+              error={!!form.email.errorMessage}
+              placeholder="Email"
+              theme={inputTheme}
+            />
+            {form.email.errorMessage && (
+              <HelperText padding="none" type="error">
+                {form.email.errorMessage}
+              </HelperText>
+            )}
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Phone number"
+              value={form.phoneNumber.value}
+              mode="outlined"
+              onChangeText={(value) => handleChange('phoneNumber', value)}
+              onBlur={() => onBlurValidate('phoneNumber')}
+              error={!!form.phoneNumber.errorMessage}
+              placeholder="Phone number"
+              theme={inputTheme}
+            />
+            {form.phoneNumber.errorMessage && (
+              <HelperText padding="none" type="error">
+                {form.phoneNumber.errorMessage}
+              </HelperText>
+            )}
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Username"
+              value={form.username.value}
+              mode="outlined"
+              onChangeText={(value) => handleChange('username', value)}
+              onBlur={() => onBlurValidate('username')}
+              error={!!form.username.errorMessage}
+              placeholder="Username"
+              theme={inputTheme}
+            />
+            {form.username.errorMessage && (
+              <HelperText padding="none" type="error">
+                {form.username.errorMessage}
+              </HelperText>
+            )}
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Birthdate"
+              value={form.birthdate.value}
+              mode="outlined"
+              onChangeText={(value) => handleChange('birthdate', value)}
+              placeholder="YYYY-MM-DD"
+              onBlur={() => onBlurValidate('birthdate')}
+              error={!!form.birthdate.errorMessage}
+              theme={inputTheme}
+            />
+            {form.birthdate.errorMessage && (
+              <HelperText padding="none" type="error">
+                {form.birthdate.errorMessage}
+              </HelperText>
+            )}
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              value={form.password.value}
+              mode="outlined"
+              label="Password"
+              onChangeText={(value) => handleChange('password', value)}
+              onBlur={() => onBlurValidate('password')}
+              error={!!form.password.errorMessage}
+              placeholder="Password"
+              secureTextEntry
+              theme={inputTheme}
+            />
+            {form.password.errorMessage && (
+              <HelperText padding="none" type="error">
+                {form.password.errorMessage}
+              </HelperText>
+            )}
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              value={form.repeatPassword.value}
+              mode="outlined"
+              label="Repeat Password"
+              onChangeText={(value) => handleChange('repeatPassword', value)}
+              onBlur={() => onBlurValidate('repeatPassword')}
+              error={!!form.repeatPassword.errorMessage}
+              placeholder="Repeat Password"
+              secureTextEntry
+              theme={inputTheme}
+            />
+            {form.repeatPassword.errorMessage && (
+              <HelperText padding="none" type="error">
+                {form.repeatPassword.errorMessage}
+              </HelperText>
+            )}
+          </View>
+          <ImagePicker
+            username={form.username.value}
+            onImagePicked={handleImagePicked}
+            onLoadingChange={setIsUploadingPicture}
+          />
+          <Button
+            mode="contained"
+            onPress={handleSubmit}
+            style={styles.button}
+            disabled={!isFormValid}
+          >
+            Sign Up
+          </Button>
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 };
 
@@ -373,8 +409,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'rgb(5, 5, 5)',
-    padding: 16,
-    paddingTop: 50
+    paddingHorizontal: 16
   },
   title: {
     fontSize: 24,
