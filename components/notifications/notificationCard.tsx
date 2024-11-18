@@ -10,6 +10,7 @@ export interface INotificationExpectedContent {
     params: {
       id?: string;
       user?: string;
+      username?: string;
     };
     pathname: string;
     type: string;
@@ -46,6 +47,15 @@ export function pushByNotificationType(content: INotificationExpectedContent) {
         pathname: '/(app)/twits/[id]',
         params: {
           id: `${content.data.params.id}`
+        }
+      });
+      break;
+
+    case 'user':
+      router.push({
+        pathname: '/(app)/profile/[username]',
+        params: {
+          username: `${content.data.params.username}`
         }
       });
       break;
