@@ -16,6 +16,7 @@ export type UserAuth = {
     longitude: number;
   };
   phoneNumber: string;
+  verified: boolean;
 };
 
 export type UserSSORegisterDto = {

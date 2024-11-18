@@ -4,6 +4,7 @@ import React from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import VerifyButton from '../common/verifyButton';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center'
   },
   fake_container: {
-    width: 40,
+    width: 80,
     height: 40
   }
 });
@@ -56,7 +57,7 @@ export default function HomeHeader() {
           }
         >
           <Image
-            style={StyleSheet.compose(styles.logo, styles.profile_logo)}
+            style={[styles.logo, styles.profile_logo]}
             source={
               userData?.profilePicture
                 ? { uri: userData?.profilePicture }
@@ -65,10 +66,12 @@ export default function HomeHeader() {
           />
         </TouchableOpacity>
         <Image
-          style={StyleSheet.compose(styles.logo, { marginTop: 5 })}
+          style={[styles.logo, { marginTop: 5, marginLeft: 20 }]}
           source={require('@/assets/images/logo.png')}
         />
-        <View style={styles.fake_container} />
+        <View style={styles.fake_container}>
+          <VerifyButton />
+        </View>
       </View>
     </>
   );
