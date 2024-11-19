@@ -1,17 +1,17 @@
 import { useAtom } from 'jotai';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
+  Dimensions,
   FlatList,
   Image,
   Keyboard,
   KeyboardAvoidingView,
-  StyleSheet,
-  View,
   Pressable,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  Animated,
-  Dimensions
+  View
 } from 'react-native';
 import { Button, Divider, IconButton, TextInput } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Entypo';
@@ -53,6 +53,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
   const lastWordRef = useRef<string | undefined>(undefined);
   const axiosUsers = useAxiosInstance('users');
   const [animatedPrivacy] = useState(new Animated.Value(window.height));
+  const [inputHeight, setInputHeight] = useState<number>(45);
 
   const fetchUsers = async (query: string): Promise<SearchedUser[]> => {
     if (query === undefined) {
@@ -140,37 +141,37 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
 
   return (
     <>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <View style={styles.header}>
-          <IconButton
-            icon="close"
-            size={25}
-            style={{ margin: 0 }}
-            onPress={onClose}
-            iconColor="rgb(255 255 255)"
-          />
-          {reply != undefined && reply?.length > 0 && (
-            <ParsedContent text={reply} color={'rgb(120 120 120)'} fontSize={16} />
-          )}
-          <Button
-            mode="contained"
-            compact={true}
-            buttonColor={'#1494df'}
-            onPress={() => handleSendTweet()}
-            style={[styles.post_button, { opacity: tweetContent.trim().length > 0 ? 1 : 0.5 }]}
-            aria-disabled={true}
-            labelStyle={{
-              fontWeight: 'bold',
-              textAlign: 'center',
-              textAlignVertical: 'center',
-              margin: 0
-            }}
-            contentStyle={{ height: 35, marginBottom: 2 }}
-          >
-            Post
-          </Button>
-        </View>
+      <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
         <>
+          <View style={styles.header}>
+            <IconButton
+              icon="close"
+              size={25}
+              style={{ margin: 0 }}
+              onPress={onClose}
+              iconColor="rgb(255 255 255)"
+            />
+            {reply != undefined && reply?.length > 0 && (
+              <ParsedContent text={reply} color={'rgb(120 120 120)'} fontSize={16} />
+            )}
+            <Button
+              mode="contained"
+              compact={true}
+              buttonColor={'#1494df'}
+              onPress={() => handleSendTweet()}
+              style={[styles.post_button, { opacity: tweetContent.trim().length > 0 ? 1 : 0.5 }]}
+              aria-disabled={true}
+              labelStyle={{
+                fontWeight: 'bold',
+                textAlign: 'center',
+                textAlignVertical: 'center',
+                margin: 0
+              }}
+              contentStyle={{ height: 35, marginBottom: 2 }}
+            >
+              Post
+            </Button>
+          </View>
           <View style={{ backgroundColor: 'rgb(5 5 5)', padding: 10 }}>
             <View style={styles.textContainer}>
               <Image
@@ -182,16 +183,16 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
                 }
               />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { height: Math.max(45, inputHeight) }]}
                 cursorColor="rgb(255 255 255)"
                 textColor="rgb(255 255 255)"
                 outlineStyle={{
                   borderWidth: 0,
                   backgroundColor: 'rgb(5 5 5)'
                 }}
-                contentStyle={{ padding: 10 }}
                 mode="outlined"
                 placeholder={placeholder || "What's happening?"}
+                onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
                 value={tweetContent}
                 onPress={() => {
                   if (!tweetContent) {
@@ -214,48 +215,52 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
                 maxLength={280} // Limit to 280 characters like Twitter
               />
             </View>
-            <View style={{ position: 'absolute', right: 0, left: 0, marginVertical: 45 }}>
-              <Pressable onPress={handlePrivacyMenu} style={styles.visibilityButton}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <IconButton
-                    icon={visibility === 'Everyone can reply' ? 'earth' : 'lock'}
-                    size={20}
-                    iconColor="#1DA1F2"
-                  />
-                  <Text style={styles.visibilityText}>{visibility}</Text>
-                </View>
-              </Pressable>
-            </View>
           </View>
-        </>
-        {matchingUsers && matchingUsers.length > 0 ? (
-          <View
-            style={{
-              height: 64 * 4,
-              borderTopWidth: 1,
-              bottom: 64,
-              borderTopColor: 'rgb(50 50 50)'
-            }}
-          >
-            <FlatList
-              style={{ marginBottom: 11 }}
-              keyboardShouldPersistTaps="always"
-              data={matchingUsers}
-              renderItem={({ item }) => (
-                <UserCard
-                  item={item}
-                  handler={(username: string) => {
-                    setLastWordToUsername(username);
-                    setMatchingUsers(null);
-                  }}
+          <View style={{ position: 'relative', right: 0, left: 0, marginVertical: 0 }}>
+            <Pressable onPress={handlePrivacyMenu} style={styles.visibilityButton}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <IconButton
+                  icon={visibility === 'Everyone can reply' ? 'earth' : 'lock'}
+                  size={20}
+                  iconColor="#1DA1F2"
                 />
-              )}
-              keyExtractor={(item) => item.id.toString()}
-            />
+                <Text style={styles.visibilityText}>{visibility}</Text>
+              </View>
+            </Pressable>
           </View>
-        ) : (
-          <></>
-        )}
+          {matchingUsers && matchingUsers.length > 0 ? (
+            <View
+              style={{
+                maxHeight: 64 * 3,
+                zIndex: 50,
+                borderTopWidth: 1,
+                bottom: 0,
+                width: '100%',
+                left: 0,
+                borderTopColor: 'rgb(50 50 50)',
+                position: 'relative'
+              }}
+            >
+              <FlatList
+                style={{ marginBottom: 11 }}
+                keyboardShouldPersistTaps="always"
+                data={matchingUsers}
+                renderItem={({ item }) => (
+                  <UserCard
+                    item={item}
+                    handler={(username: string) => {
+                      setLastWordToUsername(username);
+                      setMatchingUsers(null);
+                    }}
+                  />
+                )}
+                keyExtractor={(item) => item.id.toString()}
+              />
+            </View>
+          ) : (
+            <></>
+          )}
+        </>
       </KeyboardAvoidingView>
       <Animated.View
         style={[
@@ -335,6 +340,7 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 10,
     maxHeight: 45,
+    zIndex: 50,
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -349,16 +355,14 @@ const styles = StyleSheet.create({
     width: '90%',
     borderWidth: 0,
     borderRadius: 10,
-    padding: 0,
-    margin: 0,
-    paddingTop: 8,
-    textAlignVertical: 'center'
+    // paddingTop: 8,
+    textAlignVertical: 'top'
   },
   visibilityButton: {
     padding: 10,
     backgroundColor: '#333',
     alignItems: 'center',
-    marginVertical: 120,
+    marginTop: 200,
     width: '100%'
   },
   visibilityText: {
