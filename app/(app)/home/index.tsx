@@ -24,14 +24,13 @@ import { RefreshControl } from 'react-native';
 import { twitsAtom } from './twitsAtom';
 
 const window = Dimensions.get('screen');
-// const intervalMinutes = 10 * 60 * 1000;
-const intervalMinutes = 10 * 1000;
+const intervalMinutes = 10 * 60 * 1000;
+// const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
   const newTwits = useRef<TwitSnap[] | null>(null);
   const [userData] = useAtom(authenticatedAtom);
   const [tweets, setTweets] = useAtom<TwitSnap[] | null>(twitsAtom);
-  const newerTwitRef = useRef<TwitSnap | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const axiosTwits = useAxiosInstance('twits');
@@ -54,7 +53,6 @@ export default function FeedScreen() {
       setTweets((prev_twits) => {
         if (prev_twits && newTwits.current) {
           prev_twits.unshift(...newTwits.current);
-          newerTwitRef.current = prev_twits[0];
           newTwits.current = null;
         }
         return prev_twits;
@@ -77,7 +75,6 @@ export default function FeedScreen() {
   const resetState = () => {
     newTwits.current = null;
     setTweets(null);
-    newerTwitRef.current = null;
     setNeedRefresh(false);
   };
 
@@ -118,15 +115,13 @@ export default function FeedScreen() {
     };
 
     const fetchedTweets = await fetchTweets(params);
-    newerTwitRef.current = fetchedTweets[0];
     setTweets(fetchedTweets);
   };
 
-  const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
+  const refreshTweets = async (): Promise<void> => {
     console.log(`refresh!`);
 
     const params = {
-      createdAt: newerTwit ? newerTwit.createdAt : undefined,
       older: false,
       byFollowed: isActualFeedTypeFollowing.current,
       rank: true,
@@ -151,11 +146,12 @@ export default function FeedScreen() {
     }
   };
 
-  const forceRefresh = async (newerTwit: TwitSnap | null): Promise<void> => {
+  const forceRefresh = async (): Promise<void> => {
     console.log(`force refresh!`);
     setRefreshing(true);
+    setNeedRefresh(false);
+
     const params = {
-      createdAt: newerTwit ? newerTwit.createdAt : undefined,
       older: false,
       byFollowed: isActualFeedTypeFollowing.current,
       rank: true,
@@ -167,7 +163,6 @@ export default function FeedScreen() {
     setTweets((prev_twits) => {
       if (prev_twits && newTwits.current) {
         prev_twits.unshift(...newTwits.current);
-        newerTwitRef.current = prev_twits[0];
         newTwits.current = null;
       }
 
@@ -272,7 +267,7 @@ export default function FeedScreen() {
     if (!isBlocked) {
       intervals.set(
         'fetchInterval',
-        setInterval(() => refreshTweets(newerTwitRef.current), intervalMinutes)
+        setInterval(() => refreshTweets(), intervalMinutes)
       );
     }
   }
@@ -288,7 +283,7 @@ export default function FeedScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={async () => {
-                await forceRefresh(newerTwitRef.current);
+                await forceRefresh();
               }}
               colors={['#2196F3']} // Android
               tintColor="#2196F3" // iOS
