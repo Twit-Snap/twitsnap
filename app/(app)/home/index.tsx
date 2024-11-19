@@ -14,7 +14,6 @@ import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import { blockedAtom } from '@/atoms/blockedAtom';
-import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import FeedRefresh, { IFeedRefreshProps } from '@/components/feed/feed_refresh';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
@@ -22,15 +21,16 @@ import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance, { intervals } from '@/hooks/useAxios';
 import { RefreshControl } from 'react-native';
+import { twitsAtom } from './twitsAtom';
 
 const window = Dimensions.get('screen');
-let newTwits: TwitSnap[] | null = null;
 // const intervalMinutes = 10 * 60 * 1000;
-const intervalMinutes = 30 * 1000;
+const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
+  const newTwits = useRef<TwitSnap[] | null>(null);
   const [userData] = useAtom(authenticatedAtom);
-  const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
+  const [tweets, setTweets] = useAtom<TwitSnap[] | null>(twitsAtom);
   const newerTwitRef = useRef<TwitSnap | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -43,8 +43,6 @@ export default function FeedScreen() {
   const [showTabs, setShowTabs] = useAtom(showTabsAtom);
   const [needRefresh, setNeedRefresh] = useState(false);
 
-  const [fetchDeletedTwits, setDeletedTwits] = useAtom(tweetDeleteAtom);
-
   const isActualFeedTypeFollowing = useRef<boolean>(false);
 
   const loadMoreRef = useRef<boolean>(true);
@@ -53,21 +51,13 @@ export default function FeedScreen() {
     profileURLs: [],
     handler: () => {
       setNeedRefresh(false);
-
       setTweets((prev_twits) => {
-        let new_twits: TwitSnap[] = [];
-
-        if (prev_twits && newTwits) {
-          new_twits = [
-            ...newTwits.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id)),
-            ...prev_twits
-          ];
-          setDeletedTwits({ shouldDelete: false, twitId: [] });
-          newerTwitRef.current = new_twits[0];
-          newTwits = null;
+        if (prev_twits && newTwits.current) {
+          prev_twits.unshift(...newTwits.current);
+          newerTwitRef.current = prev_twits[0];
+          newTwits.current = null;
         }
-
-        return new_twits;
+        return prev_twits;
       });
     }
   });
@@ -85,7 +75,7 @@ export default function FeedScreen() {
   };
 
   const resetState = () => {
-    newTwits = null;
+    newTwits.current = null;
     setTweets(null);
     newerTwitRef.current = null;
     setNeedRefresh(false);
@@ -129,8 +119,7 @@ export default function FeedScreen() {
 
     const fetchedTweets = await fetchTweets(params);
     newerTwitRef.current = fetchedTweets[0];
-    setTweets(fetchedTweets.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id)));
-    setDeletedTwits({ shouldDelete: false, twitId: [] });
+    setTweets(fetchedTweets);
   };
 
   const refreshTweets = async (newerTwit: TwitSnap | null): Promise<void> => {
@@ -144,13 +133,13 @@ export default function FeedScreen() {
       limit: 100
     };
 
-    newTwits = await fetchTweets(params);
+    newTwits.current = await fetchTweets(params);
 
-    if (newTwits.length > 0) {
+    if (newTwits.current.length > 0) {
       const pictures = new Set<string | undefined>();
 
-      for (let index = 0; index < newTwits.length; index++) {
-        pictures.add(newTwits[index].user.profilePicture);
+      for (let index = 0; index < newTwits.current.length; index++) {
+        pictures.add(newTwits.current[index].user.profilePicture);
 
         if (pictures.size == 3) {
           break;
@@ -173,22 +162,16 @@ export default function FeedScreen() {
       limit: 100
     };
 
-    newTwits = await fetchTweets(params);
+    newTwits.current = await fetchTweets(params);
 
     setTweets((prev_twits) => {
-      let new_twits: TwitSnap[] = [];
-
-      if (prev_twits && newTwits) {
-        new_twits = [
-          ...newTwits.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id)),
-          ...prev_twits
-        ];
-        setDeletedTwits({ shouldDelete: false, twitId: [] });
-        newerTwitRef.current = new_twits[0];
-        newTwits = null;
+      if (prev_twits && newTwits.current) {
+        prev_twits.unshift(...newTwits.current);
+        newerTwitRef.current = prev_twits[0];
+        newTwits.current = null;
       }
 
-      return new_twits;
+      return prev_twits;
     });
     setRefreshing(false);
   };
@@ -216,12 +199,8 @@ export default function FeedScreen() {
       if (!prev_twits) {
         return olderTwits;
       }
-      const twits = [
-        ...prev_twits,
-        ...olderTwits.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id))
-      ];
-      setDeletedTwits({ shouldDelete: false, twitId: [] });
-      return twits;
+      prev_twits.push(...olderTwits);
+      return prev_twits;
     });
 
     loadMoreRef.current = true;
