@@ -21,6 +21,7 @@ import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance, { intervals } from '@/hooks/useAxios';
+import { RefreshControl } from 'react-native';
 
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
@@ -31,6 +32,7 @@ export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
   const [tweets, setTweets] = useState<TwitSnap[] | null>(null);
   const newerTwitRef = useRef<TwitSnap | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const axiosTwits = useAxiosInstance('twits');
   const isBlocked = useAtomValue(blockedAtom);
@@ -150,6 +152,37 @@ export default function FeedScreen() {
     }
   };
 
+  const forceRefresh = async (newerTwit: TwitSnap | null): Promise<void> => {
+    console.log(`force refresh!`);
+    setRefreshing(true);
+    const params = {
+      createdAt: newerTwit ? newerTwit.createdAt : undefined,
+      older: false,
+      byFollowed: isActualFeedTypeFollowing.current,
+      rank: true,
+      limit: 100
+    };
+
+    newTwits = await fetchTweets(params);
+
+    setTweets((prev_twits) => {
+      let new_twits: TwitSnap[] = [];
+
+      if (prev_twits && newTwits) {
+        new_twits = [
+          ...newTwits.filter((twit) => !fetchDeletedTwits.twitId.includes(twit.id)),
+          ...prev_twits
+        ];
+        setDeletedTwits({ shouldDelete: false, twitId: [] });
+        newerTwitRef.current = new_twits[0];
+        newTwits = null;
+      }
+
+      return new_twits;
+    });
+    setRefreshing(false);
+  };
+
   const loadMoreTwits = async () => {
     console.log('scroll refresh!');
     if (!tweets) {
@@ -257,6 +290,16 @@ export default function FeedScreen() {
       <View style={styles.container}>
         <ScrollView
           scrollEventThrottle={250}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={async () => {
+                await forceRefresh(newerTwitRef.current);
+              }}
+              colors={['#2196F3']} // Android
+              tintColor="#2196F3" // iOS
+            />
+          }
           onScroll={({ nativeEvent }) => {
             if (!loadMoreRef.current) {
               return;
