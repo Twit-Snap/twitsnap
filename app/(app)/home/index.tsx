@@ -49,7 +49,7 @@ export default function FeedScreen() {
 
   const loadMoreRef = useRef<boolean>(true);
 
-  const refreshProps: IFeedRefreshProps = {
+  const [refreshProps, setRefreshProps] = useState<IFeedRefreshProps>({
     profileURLs: [],
     handler: () => {
       setNeedRefresh(false);
@@ -70,7 +70,7 @@ export default function FeedScreen() {
         return new_twits;
       });
     }
-  };
+  });
 
   const handlePress = () => {
     setShowTabs(!showTabs);
@@ -147,7 +147,17 @@ export default function FeedScreen() {
     newTwits = await fetchTweets(params);
 
     if (newTwits.length > 0) {
-      // refreshProps.profileURLs = [...newTwits.slice(0, 2).map((twit: TwitSnap) => twit.user.profilePictureURL)],
+      const pictures = new Set<string | undefined>();
+
+      for (let index = 0; index < newTwits.length; index++) {
+        pictures.add(newTwits[index].user.profilePicture);
+
+        if (pictures.size == 3) {
+          break;
+        }
+      }
+
+      setRefreshProps((current) => ({ ...current, profileURLs: [...pictures] }));
       setNeedRefresh(true);
     }
   };
