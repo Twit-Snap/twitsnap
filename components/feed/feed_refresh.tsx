@@ -5,9 +5,13 @@ import { Avatar, Button, Text } from 'react-native-paper';
 const window = Dimensions.get('window');
 
 export interface IFeedRefreshProps {
-  profileURLs: string[];
+  profileURLs: (string | undefined)[];
   handler: () => void;
 }
+
+const default_images = {
+  default_profile_picture: require('../../assets/images/no-profile-picture.png')
+};
 
 export default function FeedRefresh(props: IFeedRefreshProps) {
   return (
@@ -39,9 +43,9 @@ export default function FeedRefresh(props: IFeedRefreshProps) {
         >
           <Text style={styles.label}>↑</Text>
           <View style={styles.container}>
-            {props.profileURLs.map((uri: string) => (
+            {props.profileURLs.map((uri: string | undefined) => (
               <Avatar.Image
-                source={{ uri: uri }}
+                source={uri ? { uri: uri } : default_images.default_profile_picture}
                 key={uri}
                 size={30}
                 style={{ alignSelf: 'center' }}

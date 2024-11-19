@@ -1,7 +1,7 @@
 import { parseISO } from 'date-fns';
 import { useFocusEffect, useLocalSearchParams, useSegments } from 'expo-router';
 import { useExpoRouter } from 'expo-router/build/global-state/router-store';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useAtom } from 'jotai/index';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -20,7 +20,6 @@ import { Divider, IconButton } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
-import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import { showTabsAtom } from '@/atoms/showTabsAtom';
 import ParsedContent from '@/components/common/parsedContent';
 import Interaction from '@/components/twits/interaction';
@@ -31,6 +30,7 @@ import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance from '@/hooks/useAxios';
+import { twitsAtom } from '../home/twitsAtom';
 
 const default_images = {
   default_profile_picture: require('../../../assets/images/no-profile-picture.png')
@@ -59,6 +59,7 @@ const InteractionLabel = ({ count, label }: { count: number | undefined; label: 
 
 const TwitView: React.FC = () => {
   const [tweet, setTweet] = useState<TwitSnap | null>(null);
+  const setTweets = useSetAtom(twitsAtom);
   const [error, setError] = useState<string>('');
   const { id, comm, openComment } = useLocalSearchParams<{
     id: string;
@@ -81,7 +82,6 @@ const TwitView: React.FC = () => {
   const isExpandedRefThreeDot = useRef(false);
 
   const [showTabs, setShowTabs] = useAtom(showTabsAtom);
-  const [tweetDelete, setTweetDelete] = useAtom(tweetDeleteAtom);
 
   const [comments, setComments] = useState<TwitSnap[] | null>(null);
 
@@ -152,7 +152,7 @@ const TwitView: React.FC = () => {
         }
       })
       .then(() => {
-        setTweetDelete({ shouldDelete: true, twitId: [...tweetDelete?.twitId, `${tweet?.id}`] });
+        setTweets((current) => current && current?.filter(({ id }) => !(id === tweet?.id)));
         router.goBack();
       })
       .catch((error) => {
@@ -173,9 +173,16 @@ const TwitView: React.FC = () => {
           }
         }
       )
-      .then(() => {
+      .then(({ data }: { data: { data: TwitSnap } }) => {
         console.log('Successfully edited the tweet with id: ', tweet?.id);
-        router.goBack();
+
+        setTweet((current) => current && { ...current, content: data.data.content });
+
+        setTweets(
+          (current) =>
+            current &&
+            current.map((t) => (t.id === tweet?.id ? { ...t, content: data.data.content } : t))
+        );
       })
       .catch((error) => {
         setError(error.response.data.detail);
