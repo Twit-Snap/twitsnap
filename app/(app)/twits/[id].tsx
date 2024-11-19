@@ -145,24 +145,24 @@ const TwitView: React.FC = () => {
   };
 
   const onTwitDelete = async () => {
-    try {
-      const response = await axiosTwits.delete(`snaps/${tweet?.id}`, {
+    await axiosTwits
+      .delete(`snaps/${tweet?.id}`, {
         headers: {
           'Content-Type': 'application/json'
         }
-      });
-      if (response.status === 204) {
+      })
+      .then(() => {
         setTweetDelete({ shouldDelete: true, twitId: [...tweetDelete?.twitId, `${tweet?.id}`] });
         router.goBack();
-      }
-    } catch (error) {
-      console.error('Error deleting tweet:', error);
-    }
+      })
+      .catch((error) => {
+        setError(error.response.data.detail);
+      });
   };
 
   const onTwitEdit = async (tweetContent: string) => {
-    try {
-      const response = await axiosTwits.patch(
+    await axiosTwits
+      .patch(
         `snaps/${tweet?.id}`,
         {
           content: tweetContent
@@ -172,27 +172,29 @@ const TwitView: React.FC = () => {
             'Content-Type': 'application/json'
           }
         }
-      );
-      if (response.status === 204) {
+      )
+      .then(() => {
         console.log('Successfully edited the tweet with id: ', tweet?.id);
         router.goBack();
-      }
-    } catch (error) {
-      console.error('Error editing tweet:', error);
-    }
+      })
+      .catch((error) => {
+        setError(error.response.data.detail);
+      });
   };
 
   useFocusEffect(
     useCallback(() => {
       const fetchTweet = async () => {
-        try {
-          const response = await axiosTwits.get(`snaps/${id}`);
-          console.log(`Fetched twit with id ${id}`);
-          console.log(response.data.data);
-          setTweet(response.data.data as TwitSnap);
-        } catch (error) {
-          console.error('Error fetching tweet:', error);
-        }
+        await axiosTwits
+          .get(`snaps/${id}`)
+          .then(({ data }) => {
+            console.log(`Fetched twit with id ${id}`);
+            console.log(data.data);
+            setTweet(data.data as TwitSnap);
+          })
+          .catch((error) => {
+            setError(error.response.data.detail);
+          });
       };
 
       const fetchComments = async (queryParams: object | undefined = undefined): Promise<void> => {
@@ -403,7 +405,8 @@ const TwitView: React.FC = () => {
             alignSelf: 'center',
             fontSize: 20,
             height: '100%',
-            textAlignVertical: 'center'
+            textAlignVertical: 'center',
+            textAlign: 'center'
           }}
         >
           {error}
