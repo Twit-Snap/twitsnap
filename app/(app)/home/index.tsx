@@ -372,7 +372,6 @@ export default function FeedScreen() {
             position: 'absolute',
             bottom: 0,
             top: 0,
-            paddingTop: 35,
             width: window.width
           },
           {
