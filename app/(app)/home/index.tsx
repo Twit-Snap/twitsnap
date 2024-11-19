@@ -25,8 +25,8 @@ import { RefreshControl } from 'react-native';
 
 const window = Dimensions.get('screen');
 let newTwits: TwitSnap[] | null = null;
-const intervalMinutes = 10 * 60 * 1000;
-//const intervalMinutes = 30 * 1000;
+// const intervalMinutes = 10 * 60 * 1000;
+const intervalMinutes = 30 * 1000;
 
 export default function FeedScreen() {
   const [userData] = useAtom(authenticatedAtom);
@@ -227,6 +227,11 @@ export default function FeedScreen() {
       .then((response) => {
         console.log('Fetched: ', response.data.data.length, ' twits');
         twits = response.data.data;
+
+        if (twits.length > 0) {
+          const currentTwitsIds = tweets?.map(({ id }) => id);
+          twits = twits.filter(({ id }) => !currentTwitsIds?.includes(id));
+        }
       })
       .catch((error) => {
         // console.error('Error response: ', error.response);
