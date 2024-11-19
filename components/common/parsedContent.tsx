@@ -46,27 +46,25 @@ export default function ParsedContent({
           );
         } else if (word.startsWith('@')) {
           return (
-            <>
+            <Text key={index}>
               {entities == undefined ||
               entities?.userMentions.map(({ username }) => username).includes(word.slice(1)) ? (
-                <Text key={index}>
-                  <Text
-                    onPress={() =>
-                      router.push({
-                        pathname: `/(app)/profile/[username]`,
-                        params: { username: word.slice(1) }
-                      })
+                <Text
+                  onPress={() =>
+                    router.push({
+                      pathname: `/(app)/profile/[username]`,
+                      params: { username: word.slice(1) }
+                    })
+                  }
+                  style={[
+                    styles.special,
+                    {
+                      fontSize: fontSize,
+                      fontWeight: fontWeight
                     }
-                    style={[
-                      styles.special,
-                      {
-                        fontSize: fontSize,
-                        fontWeight: fontWeight
-                      }
-                    ]}
-                  >
-                    {word}
-                  </Text>{' '}
+                  ]}
+                >
+                  {word}{' '}
                 </Text>
               ) : (
                 <Text
@@ -80,7 +78,7 @@ export default function ParsedContent({
                   {word}{' '}
                 </Text>
               )}
-            </>
+            </Text>
           );
         } else if (word.startsWith('https://')) {
           return (
