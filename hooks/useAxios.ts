@@ -6,7 +6,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { blockedAtom } from '@/atoms/blockedAtom';
 
-type AxiosTypes = 'users' | 'twits' | 'messages';
+type AxiosTypes = 'users' | 'twits' | 'messages' | 'statistics';
 
 export const intervals: Map<string, NodeJS.Timeout> = new Map<string, NodeJS.Timeout>();
 
@@ -18,6 +18,8 @@ const getURL = (type: AxiosTypes): string => {
       return `${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}`;
     case 'messages':
       return `${process.env.EXPO_PUBLIC_MESSAGES_SERVICE_URL}`;
+    case 'statistics':
+      return `${process.env.EXPO_PUBLIC_STATISTICS_SERVICE_URL}`;
     default:
       return '';
   }

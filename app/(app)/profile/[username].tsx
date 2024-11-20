@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 
 import { ErrorUser, SearchedUser } from '@/app/types/publicUser';
+import {InteractionAmountData, StatisticsParams} from '@/app/types/statisticType';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
@@ -31,8 +32,13 @@ export default function PublicProfileScreen() {
   const [hasMoreTwits, setHasMoreTwits] = useState(true);
   const axiosUsers = useAxiosInstance('users');
   const axiosTwits = useAxiosInstance('twits');
+  const axiosStatistics = useAxiosInstance('statistics');
   const isActualFeedTypeTwit = useRef<boolean>(true);
   const isBookmarksSection = useRef<boolean>(false);
+  const [TwitAmountData, setTwitAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [RetwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [LikeAmountData, setLikeAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [CommentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(null);
 
   const resetState = () => {
     setLoadingMore(false);
@@ -70,9 +76,89 @@ export default function PublicProfileScreen() {
           fetchTweets();
         },
         state: false
+      },
+      {
+        text: 'Statistics',
+        handler: async () => {
+          resetState();
+          isActualFeedTypeTwit.current = false;
+          isBookmarksSection.current = false;
+          fetchStatisticsData();
+        },
+        state: false
       }
     ]
   };
+
+  const fetchStatistics = useCallback(
+    async ({
+      queryParams,
+      setData,
+      errorMessage
+    }: {
+      queryParams: StatisticsParams;
+      setData: React.Dispatch<React.SetStateAction<InteractionAmountData[] | null>>;
+      errorMessage: string;
+    }) => {
+      try {
+        setLoadingMore(true);
+        const response = await axiosStatistics.get('metrics/', {
+          params: queryParams
+        });
+        setData(response.data.data);
+        console.log(response.data.data);
+      } catch (error) {
+        console.error(errorMessage, error);
+      } finally {
+        setLoadingMore(false);
+      }
+    },
+    [axiosStatistics]
+  );
+
+  const fetchLikesAmountStatistics = useCallback(() => {
+    fetchStatistics({
+      queryParams: { type: 'like', username },
+      setData: setLikeAmountData,
+      errorMessage: 'Error fetching likes statistics:'
+    });
+  }, [fetchStatistics, username]);
+
+  const fetchTwitsAmountStatistics = useCallback(() => {
+    fetchStatistics({
+      queryParams: { type: 'twit', username },
+      setData: setTwitAmountData,
+      errorMessage: 'Error fetching twits statistics:'
+    });
+  }, [fetchStatistics, username]);
+
+  const fetchRetwitsAmountStatistics = useCallback(() => {
+    fetchStatistics({
+      queryParams: { type: 'retwit', username },
+      setData: setRetwitAmountData,
+      errorMessage: 'Error fetching retwits statistics:'
+    });
+  }, [fetchStatistics, username]);
+
+  const fetchCommentsAmountStatistics = useCallback(() => {
+    fetchStatistics({
+      queryParams: { type: 'comment', username },
+      setData: setCommentAmountData,
+      errorMessage: 'Error fetching comments statistics:'
+    });
+  }, [fetchStatistics, username]);
+
+  const fetchStatisticsData = useCallback(() => {
+    fetchLikesAmountStatistics();
+    fetchTwitsAmountStatistics();
+    fetchRetwitsAmountStatistics();
+    fetchCommentsAmountStatistics();
+  }, [
+    fetchCommentsAmountStatistics,
+    fetchLikesAmountStatistics,
+    fetchRetwitsAmountStatistics,
+    fetchTwitsAmountStatistics
+  ]);
 
   // Cargar la información del usuario una sola vez
   const fetchUserData = useCallback(async () => {
