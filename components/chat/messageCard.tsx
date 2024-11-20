@@ -1,8 +1,9 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { useAtomValue } from 'jotai';
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 
 export interface IMessage {
   content: string;

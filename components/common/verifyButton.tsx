@@ -1,8 +1,9 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { useRouter } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Button } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 
 export default function VerifyButton() {
   const user = useAtomValue(authenticatedAtom);

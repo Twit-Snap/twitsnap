@@ -1,8 +1,8 @@
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { IReducedUser } from '@/app/types/publicUser';
-import { StyleSheet } from 'react-native';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')

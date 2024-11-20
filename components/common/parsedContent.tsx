@@ -1,8 +1,9 @@
-import { Entities } from '@/app/types/TwitSnap';
 import { router } from 'expo-router';
 import React from 'react';
 import { Linking, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
+
+import { Entities } from '@/app/types/TwitSnap';
 
 interface IParsedContentProps {
   text: string | undefined;

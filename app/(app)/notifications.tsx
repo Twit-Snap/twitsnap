@@ -1,12 +1,13 @@
-import HomeHeader from '@/components/feed/header';
-import NotificationCard, {
-  INotificationExpectedContent
-} from '@/components/notifications/notificationCard';
 import * as Notifications from 'expo-notifications';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useRef, useState } from 'react';
 import { FlatList, ScrollView } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
+
+import HomeHeader from '@/components/feed/header';
+import NotificationCard, {
+  INotificationExpectedContent
+} from '@/components/notifications/notificationCard';
 
 export default function NotificationsList() {
   const [notifications, setNotifications] = useState<Notifications.Notification[] | null>(null);
