@@ -1,5 +1,7 @@
-import useAxiosInstance from '@/hooks/useAxios';
 import React from 'react';
+
+import useAxiosInstance from '@/hooks/useAxios';
+
 import Interaction, { handlerReturn } from '../interaction';
 
 export default function Like({
@@ -23,40 +25,42 @@ export default function Like({
       handler={async (state?: boolean, count?: number): Promise<handlerReturn> => {
         return state
           ? {
-              state: await axiosTwits
-                .delete(`likes`, {
-                  data: {
-                    twitId: twitId
-                  },
-                  headers: {
-                    'Content-Type': 'application/json'
-                  }
-                })
-                .then(() => !state)
-                .catch((error) => {
-                  console.error(error);
-                  return state;
-                }) === true,
-              count: count != undefined ? count - 1 : undefined
-            }
-          : {
-              state: await axiosTwits
-                .post(
-                  `likes`,
-                  {
-                    twitId: twitId
-                  },
-                  {
+              state:
+                (await axiosTwits
+                  .delete(`likes`, {
+                    data: {
+                      twitId: twitId
+                    },
                     headers: {
                       'Content-Type': 'application/json'
                     }
-                  }
-                )
-                .then(() => !state)
-                .catch((error) => {
-                  console.error(error);
-                  return state;
-                }) === true,
+                  })
+                  .then(() => !state)
+                  .catch((error) => {
+                    console.error(error);
+                    return state;
+                  })) === true,
+              count: count != undefined ? count - 1 : undefined
+            }
+          : {
+              state:
+                (await axiosTwits
+                  .post(
+                    `likes`,
+                    {
+                      twitId: twitId
+                    },
+                    {
+                      headers: {
+                        'Content-Type': 'application/json'
+                      }
+                    }
+                  )
+                  .then(() => !state)
+                  .catch((error) => {
+                    console.error(error);
+                    return state;
+                  })) === true,
               count: count != undefined ? count + 1 : undefined
             };
       }}

@@ -1,3 +1,4 @@
+import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Divider } from 'react-native-paper';
@@ -5,7 +6,6 @@ import { Divider } from 'react-native-paper';
 import MenuSearchBar from '@/components/search/menuSearchBar';
 import TopicCard from '@/components/search/topicCard';
 import useAxiosInstance from '@/hooks/useAxios';
-import { useFocusEffect } from 'expo-router';
 
 export default function SearchScreen() {
   const [trendingTopics, setTrendingTopics] = useState([]);

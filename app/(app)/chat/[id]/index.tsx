@@ -1,7 +1,3 @@
-import { IReducedUser } from '@/app/types/publicUser';
-import MessageCard, { IMessage } from '@/components/chat/messageCard';
-import { db } from '@/firebaseConfig';
-import useAxiosInstance from '@/hooks/useAxios';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { onValue, ref } from 'firebase/database';
 import React, { useCallback, useRef, useState } from 'react';
@@ -18,6 +14,11 @@ import {
   View
 } from 'react-native';
 import { ActivityIndicator, IconButton } from 'react-native-paper';
+
+import { IReducedUser } from '@/app/types/publicUser';
+import MessageCard, { IMessage } from '@/components/chat/messageCard';
+import { db } from '@/firebaseConfig';
+import useAxiosInstance from '@/hooks/useAxios';
 
 const window = Dimensions.get('screen');
 
@@ -121,7 +122,7 @@ const ChatScreen = () => {
 
         const data = Object.entries(values).map(([k, v]) => ({
           id: k,
-          ...(v as Object)
+          ...(v as object)
         }));
 
         console.log(`[${chat_id}] Firebase #messages: `, data.length);

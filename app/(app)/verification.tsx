@@ -1,11 +1,13 @@
 // screens/VerificationScreen.tsx
-import useAxiosInstance from '@/hooks/useAxios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useSetAtom } from 'jotai';
 import React, { useState } from 'react';
 import { Alert, Dimensions, StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
+
+import useAxiosInstance from '@/hooks/useAxios';
+
 import { VerificationCodeInput } from '../../components/verification/input';
 import { authenticatedAtom } from '../authAtoms/authAtom';
 

@@ -9,6 +9,7 @@ import {
   StyleSheet,
   View
 } from 'react-native';
+import { RefreshControl } from 'react-native';
 import { ActivityIndicator, IconButton, Text } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
@@ -20,7 +21,7 @@ import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance, { intervals } from '@/hooks/useAxios';
-import { RefreshControl } from 'react-native';
+
 import { twitsAtom } from './twitsAtom';
 
 const window = Dimensions.get('screen');
