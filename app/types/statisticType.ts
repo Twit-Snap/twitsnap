@@ -6,4 +6,5 @@ export interface InteractionAmountData {
 export type StatisticsParams = {
   type: string;
   username: string;
+  dateRange: string;
 };
