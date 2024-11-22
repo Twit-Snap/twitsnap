@@ -28,16 +28,22 @@ const StatisticsChart = ({
     }
   };
 
-
   if (!data || data.length === 0) {
-    return <Text style={styles.chartTitle}>No data</Text>;
-  } 
+    return (
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>{title}</Text>
+        <Text style={styles.noDataText}>Not data available </Text>
+      </View>
+    );
+  }
+
+  //const chartData = data && data.length > 0 ? data : [0]; // Gráfico vacío si no hay datos
+  //const chartLabels = labels && labels.length > 0 ? labels : ['']; // Etiquetas vacías
   const labels = data.map((item) => item.date); // Extrae las fechas como etiquetas
   const chartData = data.map((item) => item.amount);
 
   return (
     <View style={styles.chartContainer}>
-      <Text style={styles.chartTitle}>{title}</Text>
       {chartType === 'bar' ? (
         <BarChart
           data={{
@@ -80,7 +86,13 @@ const styles = StyleSheet.create({
   },
   chart: {
     borderRadius: 16
-  }
+  },
+  noDataText: {
+    color: 'gray',
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: 'center'
+  },
 });
 
 export default StatisticsChart;
