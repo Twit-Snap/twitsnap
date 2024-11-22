@@ -13,13 +13,15 @@ import {
 } from 'react-native';
 
 import { ErrorUser, SearchedUser } from '@/app/types/publicUser';
-import {InteractionAmountData, StatisticsParams} from '@/app/types/statisticType';
+import { InteractionAmountData, StatisticsParams } from '@/app/types/statisticType';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance from '@/hooks/useAxios';
+
+import StatisticsChart from './components/statisticsChart';
 
 export default function PublicProfileScreen() {
   const [fetchDeletedTwits, setDeletedTwits] = useAtom(tweetDeleteAtom);
@@ -35,10 +37,11 @@ export default function PublicProfileScreen() {
   const axiosStatistics = useAxiosInstance('statistics');
   const isActualFeedTypeTwit = useRef<boolean>(true);
   const isBookmarksSection = useRef<boolean>(false);
-  const [TwitAmountData, setTwitAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [RetwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [LikeAmountData, setLikeAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [CommentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [twitAmountData, setTwitAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [retwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [likeAmountData, setLikeAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [commentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [isStatisticsSection, setIsStatisticsSection] = useState(false);
 
   const resetState = () => {
     setLoadingMore(false);
@@ -54,6 +57,7 @@ export default function PublicProfileScreen() {
           resetState();
           isActualFeedTypeTwit.current = true;
           isBookmarksSection.current = false;
+          setIsStatisticsSection(false);
           fetchTweets();
         },
         state: true
@@ -64,6 +68,7 @@ export default function PublicProfileScreen() {
           resetState();
           isActualFeedTypeTwit.current = false;
           isBookmarksSection.current = false;
+          setIsStatisticsSection(false);
           fetchTweets();
         },
         state: false
@@ -73,6 +78,7 @@ export default function PublicProfileScreen() {
         handler: async () => {
           resetState();
           isBookmarksSection.current = true;
+          setIsStatisticsSection(false);
           fetchTweets();
         },
         state: false
@@ -83,6 +89,7 @@ export default function PublicProfileScreen() {
           resetState();
           isActualFeedTypeTwit.current = false;
           isBookmarksSection.current = false;
+          setIsStatisticsSection(true);
           fetchStatisticsData();
         },
         state: false
@@ -106,7 +113,6 @@ export default function PublicProfileScreen() {
           params: queryParams
         });
         setData(response.data.data);
-        console.log(response.data.data);
       } catch (error) {
         console.error(errorMessage, error);
       } finally {
@@ -159,8 +165,6 @@ export default function PublicProfileScreen() {
     fetchRetwitsAmountStatistics,
     fetchTwitsAmountStatistics
   ]);
-
-  // Cargar la información del usuario una sola vez
   const fetchUserData = useCallback(async () => {
     try {
       console.log('fetchUserData', username);
@@ -292,16 +296,23 @@ export default function PublicProfileScreen() {
           <View style={styles.divider} />
         </>
 
+        {/* Renderiza el componente FeedType con los datos de las pestañas */}
         <FeedType {...twitTypes} />
 
-        {twits ? (
+        {isStatisticsSection ? (
+          <View style={styles.statisticsContainer}>
+            <Text style={styles.statisticTitle}>Statistics</Text>
+            <StatisticsChart title="Amount of Twits" data={twitAmountData ?? []} chartType="bar" />
+            <StatisticsChart title="Amount of Retwits" data={retwitAmountData ?? []} chartType="line" />
+            <StatisticsChart title="Amount of Comments" data={commentAmountData ?? []} chartType="line" />
+            <StatisticsChart title="Amount of Likes" data={likeAmountData ?? []} chartType="line" />
+          </View>
+        ) : twits ? (
           twits.length > 0 ? (
             <FlatList<TwitSnap>
               style={{ marginTop: 5 }}
               data={twits}
-              renderItem={({ item }) => {
-                return <TweetCard item={item} />;
-              }}
+              renderItem={({ item }) => <TweetCard item={item} />}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
             />
@@ -311,6 +322,7 @@ export default function PublicProfileScreen() {
         ) : (
           <></>
         )}
+
         {loadingMore && <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} />}
       </ScrollView>
     </View>
@@ -347,5 +359,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginTop: 40
+  },
+  statisticsContainer: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: 'rgb(15 15 15)', // Fondo ligeramente más claro para las estadísticas
+    borderRadius: 10
+  },
+  statisticTitle: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15
+  },
+  chart: {
+    marginTop: 20,
+    borderRadius: 16
+  },
+  chartTitle: {
+    color: 'white',
+    fontSize: 18,
+    marginBottom: 10
   }
 });
