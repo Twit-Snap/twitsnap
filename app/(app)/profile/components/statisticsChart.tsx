@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Dimensions, StyleSheet, View, Text } from 'react-native';
-import { BarChart, LineChart } from 'react-native-chart-kit';
+  import { BarChart, LineChart } from 'react-native-chart-kit';
 
 import { InteractionAmountData } from '@/app/types/statisticType';
 
@@ -14,6 +14,7 @@ const StatisticsChart = ({
   chartType: 'bar' | 'line';
 }) => {
   const screenWidth = Dimensions.get('window').width;
+  //const [tooltipData, setTooltipData] = useState<string>;
 
   const chartConfig = {
     backgroundGradientFrom: '#1E2923',
@@ -32,45 +33,62 @@ const StatisticsChart = ({
     return (
       <View style={styles.chartContainer}>
         <Text style={styles.chartTitle}>{title}</Text>
-        <Text style={styles.noDataText}>Not data available </Text>
+        <Text style={styles.noDataText}>No data available</Text>
       </View>
     );
   }
 
-  //const chartData = data && data.length > 0 ? data : [0]; // Gráfico vacío si no hay datos
-  //const chartLabels = labels && labels.length > 0 ? labels : ['']; // Etiquetas vacías
-  const labels = data.map((item) => item.date); // Extrae las fechas como etiquetas
+  const labels = data.map((item) => {
+    const dateParts = item.date.split('T')[0].split('-');
+    return `${dateParts[2]}-${dateParts[1]}`;
+  });
   const chartData = data.map((item) => item.amount);
 
+  //const handleDataPointClick = (data) => {
+    //setTooltipData(`Date: ${labels[data.index]} | Value: ${data.value}`);
+  //};
+
   return (
-    <View style={styles.chartContainer}>
-      {chartType === 'bar' ? (
-        <BarChart
-          data={{
-            labels,
-            datasets: [{ data: chartData }]
-          }}
-          width={screenWidth - 40}
-          height={220}
-          chartConfig={chartConfig}
-          style={styles.chart}
-          yAxisLabel="" // Cambia esto según lo que necesites, por ejemplo "USD ", "kg ", etc.
-          yAxisSuffix="" // Puedes dejarlo vacío si no necesitas un sufijo
-        />
-      ) : (
-        <LineChart
-          data={{
-            labels,
-            datasets: [{ data: chartData }]
-          }}
-          width={screenWidth - 40}
-          height={220}
-          chartConfig={chartConfig}
-          bezier
-          style={styles.chart}
-        />
-      )}
-    </View>
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>{title}</Text>
+        <View style={styles.axisLabelsContainer}>
+          {/* Eje Y con nombre fijo */}
+
+          <View style={{ flex: 1 }}>
+            {chartType === 'bar' ? (
+                <BarChart
+                    data={{
+                      labels,
+                      datasets: [{ data: chartData }]
+                    }}
+                    width={screenWidth - 40}
+                    height={220}
+                    chartConfig={chartConfig}
+                    style={styles.chart}
+                    fromZero
+                    yAxisInterval={1} // Asegura intervalos enteros en Y
+              yAxisSuffix={''} // Sufijo en Y
+                 yAxisLabel={''}/>
+          ) : (
+                <LineChart
+                    data={{
+                      labels,
+                      datasets: [{ data: chartData }]
+                    }}
+                    width={screenWidth - 40}
+                    height={220}
+                    chartConfig={chartConfig}
+                    bezier
+                    fromZero
+                    yAxisInterval={1} // Asegura intervalos enteros en Y
+                    style={styles.chart}
+                />
+            )}
+          </View>
+        </View>
+        {/* Eje X con nombre fijo */}
+        <Text style={styles.xAxisLabel}>Date</Text>
+      </View>
   );
 };
 
@@ -82,7 +100,7 @@ const styles = StyleSheet.create({
   chartTitle: {
     color: 'white',
     fontSize: 18,
-    marginBottom: 10
+    marginBottom: 10, // Espacio debajo del título
   },
   chart: {
     borderRadius: 16
@@ -93,6 +111,24 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center'
   },
+  axisLabelsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  yAxisLabel: {
+    color: 'white',
+    fontSize: 14,
+    marginRight: 0,
+    writingDirection: 'rtl', // Para rotar texto si es necesario
+    transform: [{ rotate: '-90deg' }]
+  },
+  xAxisLabel: {
+    color: 'white',
+    fontSize: 14,
+    marginTop: 5,
+    textAlign: 'center'
+  }
 });
 
 export default StatisticsChart;
