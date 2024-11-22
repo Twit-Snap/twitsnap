@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { Dimensions, StyleSheet, View, Text } from 'react-native';
-  import { BarChart, LineChart } from 'react-native-chart-kit';
+import { BarChart, LineChart } from 'react-native-chart-kit';
 
 import { InteractionAmountData } from '@/app/types/statisticType';
 
@@ -14,7 +14,6 @@ const StatisticsChart = ({
   chartType: 'bar' | 'line';
 }) => {
   const screenWidth = Dimensions.get('window').width;
-  //const [tooltipData, setTooltipData] = useState<string>;
 
   const chartConfig = {
     backgroundGradientFrom: '#1E2923',
@@ -26,7 +25,18 @@ const StatisticsChart = ({
       r: '6',
       strokeWidth: '2',
       stroke: '#ffa726'
-    }
+    },
+    propsForLabels: {
+      dy: 3,
+      dx: -10,
+      fill: 'white',
+      fontSize: 10,
+      fontWeight: 'bold'
+    },
+    paddingRight: 30,
+    paddingLeft: 30,
+    paddingTop: 100,
+    paddingBottom: 50
   };
 
   if (!data || data.length === 0) {
@@ -44,51 +54,51 @@ const StatisticsChart = ({
   });
   const chartData = data.map((item) => item.amount);
 
-  //const handleDataPointClick = (data) => {
-    //setTooltipData(`Date: ${labels[data.index]} | Value: ${data.value}`);
-  //};
-
   return (
-      <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>{title}</Text>
-        <View style={styles.axisLabelsContainer}>
-          {/* Eje Y con nombre fijo */}
+    <View style={styles.chartContainer}>
+      <Text style={styles.chartTitle}>{title}</Text>
+      <View style={styles.axisLabelsContainer}>
+        {/* Eje Y con nombre fijo */}
 
-          <View style={{ flex: 1 }}>
-            {chartType === 'bar' ? (
-                <BarChart
-                    data={{
-                      labels,
-                      datasets: [{ data: chartData }]
-                    }}
-                    width={screenWidth - 40}
-                    height={220}
-                    chartConfig={chartConfig}
-                    style={styles.chart}
-                    fromZero
-                    yAxisInterval={1} // Asegura intervalos enteros en Y
-              yAxisSuffix={''} // Sufijo en Y
-                 yAxisLabel={''}/>
+        <View style={{ flex: 1 }}>
+          {chartType === 'bar' ? (
+            <BarChart
+              data={{
+                labels,
+                datasets: [{ data: chartData }]
+              }}
+              width={screenWidth - 40}
+              height={220}
+              chartConfig={chartConfig}
+              style={styles.chart}
+              fromZero
+              yAxisInterval={1}
+              yAxisSuffix={''}
+              yAxisLabel={''}
+              withHorizontalLabels={false}
+            />
           ) : (
-                <LineChart
-                    data={{
-                      labels,
-                      datasets: [{ data: chartData }]
-                    }}
-                    width={screenWidth - 40}
-                    height={220}
-                    chartConfig={chartConfig}
-                    bezier
-                    fromZero
-                    yAxisInterval={1} // Asegura intervalos enteros en Y
-                    style={styles.chart}
-                />
-            )}
-          </View>
+            <LineChart
+              data={{
+                labels,
+                datasets: [{ data: chartData }]
+              }}
+              width={screenWidth - 40}
+              height={220}
+              chartConfig={chartConfig}
+              bezier
+              fromZero
+              yAxisInterval={1}
+              formatXLabel={(value) => (parseInt(value) % 2 === 0 ? value : '')}
+              formatYLabel={(value) => parseInt(value).toString()}
+              verticalLabelRotation={270}
+              style={styles.chart}
+            />
+          )}
         </View>
-        {/* Eje X con nombre fijo */}
-        <Text style={styles.xAxisLabel}>Date</Text>
       </View>
+      <Text style={styles.xAxisLabel}>Date</Text>
+    </View>
   );
 };
 
@@ -100,7 +110,7 @@ const styles = StyleSheet.create({
   chartTitle: {
     color: 'white',
     fontSize: 18,
-    marginBottom: 10, // Espacio debajo del título
+    marginBottom: 10
   },
   chart: {
     borderRadius: 16

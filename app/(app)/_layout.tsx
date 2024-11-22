@@ -153,6 +153,14 @@ export default function RootLayout() {
               headerShown: false
             }}
           />
+          <Tabs.Screen
+            name="profile/components/statisticsChart"
+            options={{
+              tabBarButton: () => null, // Hide the tab
+              header: () => null,
+              headerShown: false
+            }}
+          />
         </Tabs>
       </SafeAreaView>
     </>
