@@ -9,20 +9,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View,
-  TouchableOpacity
+  View
 } from 'react-native';
 
 import { ErrorUser, SearchedUser } from '@/app/types/publicUser';
-import { InteractionAmountData, StatisticsParams } from '@/app/types/statisticType';
 import { TwitSnap } from '@/app/types/TwitSnap';
 import { tweetDeleteAtom } from '@/atoms/deleteTweetAtom';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance from '@/hooks/useAxios';
-
-import StatisticsChart from './components/statisticsChart';
 
 export default function PublicProfileScreen() {
   const [fetchDeletedTwits, setDeletedTwits] = useAtom(tweetDeleteAtom);
@@ -35,23 +31,13 @@ export default function PublicProfileScreen() {
   const [hasMoreTwits, setHasMoreTwits] = useState(true);
   const axiosUsers = useAxiosInstance('users');
   const axiosTwits = useAxiosInstance('twits');
-  const axiosStatistics = useAxiosInstance('statistics');
   const isActualFeedTypeTwit = useRef<boolean>(true);
   const isBookmarksSection = useRef<boolean>(false);
-  const [twitAmountData, setTwitAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [retwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [likeAmountData, setLikeAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [commentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [isStatisticsSection, setIsStatisticsSection] = useState(false);
-  const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(false);
-  const timeRangeRef = useRef<'week' | 'month' | 'year'>('week');
 
   const resetState = () => {
     setLoadingMore(false);
-    setLoadingMoreStatistics(false);
     setHasMoreTwits(true);
     setTwits(null);
-    setIsStatisticsSection(false);
   };
 
   const twitTypes: IFeedTypeProps = {
@@ -62,7 +48,6 @@ export default function PublicProfileScreen() {
           resetState();
           isActualFeedTypeTwit.current = true;
           isBookmarksSection.current = false;
-          setIsStatisticsSection(false);
           fetchTweets();
         },
         state: true
@@ -73,7 +58,6 @@ export default function PublicProfileScreen() {
           resetState();
           isActualFeedTypeTwit.current = false;
           isBookmarksSection.current = false;
-          setIsStatisticsSection(false);
           fetchTweets();
         },
         state: false
@@ -83,109 +67,14 @@ export default function PublicProfileScreen() {
         handler: async () => {
           resetState();
           isBookmarksSection.current = true;
-          setIsStatisticsSection(false);
           fetchTweets();
-        },
-        state: false
-      },
-      {
-        text: 'Statistics',
-        handler: async () => {
-          resetState();
-          isActualFeedTypeTwit.current = false;
-          isBookmarksSection.current = false;
-          setIsStatisticsSection(true);
-          fetchStatisticsData();
         },
         state: false
       }
     ]
   };
 
-  const fetchStatistics = useCallback(
-    async ({
-      queryParams,
-      setData,
-      errorMessage
-    }: {
-      queryParams: StatisticsParams;
-      setData: React.Dispatch<React.SetStateAction<InteractionAmountData[] | null>>;
-      errorMessage: string;
-    }) => {
-      try {
-        setLoadingMore(true);
-        const response = await axiosStatistics.get('metrics/', {
-          params: queryParams
-        });
-        setData(response.data.data);
-      } catch (error) {
-        console.error(errorMessage, error);
-      } finally {
-        setLoadingMore(false);
-      }
-    },
-    [axiosStatistics]
-  );
-
-  const fetchLikesAmountStatistics = useCallback(() => {
-    const queryParams = { username, dateRange: timeRangeRef.current };
-
-    fetchStatistics({
-      queryParams: { ...queryParams, type: 'like' },
-      setData: setLikeAmountData,
-      errorMessage: 'Error fetching likes statistics:'
-    });
-  }, [fetchStatistics, username]);
-
-  const fetchTwitsAmountStatistics = useCallback(() => {
-    const queryParams = { username, dateRange: timeRangeRef.current };
-
-    fetchStatistics({
-      queryParams: { ...queryParams, type: 'twit' },
-      setData: setTwitAmountData,
-      errorMessage: 'Error fetching twits statistics:'
-    });
-  }, [fetchStatistics, username]);
-
-  const fetchRetwitsAmountStatistics = useCallback(() => {
-    const queryParams = { username, dateRange: timeRangeRef.current };
-
-    fetchStatistics({
-      queryParams: { ...queryParams, type: 'retwit' },
-      setData: setRetwitAmountData,
-      errorMessage: 'Error fetching retwits statistics:'
-    });
-  }, [fetchStatistics, username]);
-
-  const fetchCommentsAmountStatistics = useCallback(() => {
-    const queryParams = { username, dateRange: timeRangeRef.current };
-
-    fetchStatistics({
-      queryParams: { ...queryParams, type: 'comment' },
-      setData: setCommentAmountData,
-      errorMessage: 'Error fetching comments statistics:'
-    });
-  }, [fetchStatistics, username]);
-
-  const fetchStatisticsData = useCallback(() => {
-    setLoadingMoreStatistics(false);
-    fetchLikesAmountStatistics();
-    fetchTwitsAmountStatistics();
-    fetchRetwitsAmountStatistics();
-    fetchCommentsAmountStatistics();
-    setLoadingMoreStatistics(true);
-  }, [
-    fetchCommentsAmountStatistics,
-    fetchLikesAmountStatistics,
-    fetchRetwitsAmountStatistics,
-    fetchTwitsAmountStatistics
-  ]);
-
-  const handleTimeRangeChange = (range: 'week' | 'month' | 'year') => {
-    timeRangeRef.current = range;
-    fetchStatisticsData();
-  };
-
+  // Cargar la información del usuario una sola vez
   const fetchUserData = useCallback(async () => {
     try {
       console.log('fetchUserData', username);
@@ -208,6 +97,7 @@ export default function PublicProfileScreen() {
     }
   }, [username]);
 
+  // Cargar tweets, con soporte de paginación
   const fetchTweets = useCallback(
     async (olderTwits = false) => {
       if (!hasMoreTwits || !username) return;
@@ -315,62 +205,17 @@ export default function PublicProfileScreen() {
           <ProfileHeader user={searchUserData as SearchedUser} />
           <View style={styles.divider} />
         </>
+
         <FeedType {...twitTypes} />
 
-        {isStatisticsSection ? (
-          <>
-            {/* Barra de selección de rango */}
-            <View style={styles.rangeBar}>
-              {['week', 'month', 'year'].map((range) => (
-                <TouchableOpacity
-                  key={range}
-                  style={[
-                    styles.rangeButton,
-                    timeRangeRef.current === range && styles.selectedRangeButton
-                  ]}
-                  onPress={() => handleTimeRangeChange(range as 'week' | 'month' | 'year')}
-                >
-                  <Text
-                    style={[
-                      styles.rangeButtonText,
-                      timeRangeRef.current === range && styles.selectedRangeButtonText
-                    ]}
-                  >
-                    {range.charAt(0).toUpperCase() + range.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <View style={styles.statisticsContainer}>
-              <StatisticsChart
-                title="Amount of Twits"
-                data={twitAmountData ?? []}
-                chartType="bar"
-              />
-              <StatisticsChart
-                title="Amount of Retwits"
-                data={retwitAmountData ?? []}
-                chartType="line"
-              />
-              <StatisticsChart
-                title="Amount of Comments"
-                data={commentAmountData ?? []}
-                chartType="line"
-              />
-              <StatisticsChart
-                title="Amount of Likes"
-                data={likeAmountData ?? []}
-                chartType="line"
-              />
-            </View>
-          </>
-        ) : twits ? (
+        {twits ? (
           twits.length > 0 ? (
             <FlatList<TwitSnap>
               style={{ marginTop: 5 }}
               data={twits}
-              renderItem={({ item }) => <TweetCard item={item} />}
+              renderItem={({ item }) => {
+                return <TweetCard item={item} />;
+              }}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
             />
@@ -380,7 +225,6 @@ export default function PublicProfileScreen() {
         ) : (
           <></>
         )}
-
         {loadingMore && <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} />}
       </ScrollView>
     </View>
@@ -417,49 +261,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginTop: 40
-  },
-  statisticsContainer: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: 'rgb(15 15 15)',
-    borderRadius: 10
-  },
-  statisticTitle: {
-    color: 'white',
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 15
-  },
-  chart: {
-    marginTop: 20,
-    borderRadius: 16
-  },
-  chartTitle: {
-    color: 'white',
-    fontSize: 18,
-    marginBottom: 10
-  },
-  // Nueva barra de selección
-  rangeBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginVertical: 20,
-    paddingHorizontal: 20
-  },
-  rangeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    backgroundColor: 'rgb(20 20 20)'
-  },
-  selectedRangeButton: {
-    backgroundColor: 'rgb(3, 165, 252)'
-  },
-  rangeButtonText: {
-    color: 'white',
-    fontSize: 14
-  },
-  selectedRangeButtonText: {
-    fontWeight: 'bold'
   }
 });
