@@ -14,8 +14,7 @@ const StatisticsChart = ({
   chartType: 'bar' | 'line';
 }) => {
   const screenWidth = Dimensions.get('window').width;
-  const threshold = Math.floor(screenWidth / 50); // Ajusta según el ancho
-  console.log('limite', threshold);
+  const threshold = Math.floor(screenWidth / 50);
 
   const chartConfig = {
     backgroundGradientFrom: '#121212',
@@ -57,10 +56,7 @@ const StatisticsChart = ({
 
   const formattedLabels = labels.map((label, index) => {
     const skipRate = Math.max(1, Math.floor(labels.length / threshold));
-    console.log('skipRate', skipRate);
-    console.log('index', index);
-    console.log('alterar etiquetas', index % skipRate === 0 ? label : '');
-    return index % skipRate === 0 ? label : ''; // Alternar etiquetas dinámicamente
+    return index % skipRate === 0 ? label : '';
   });
 
   const chartData = data.map((item) => item.amount);
