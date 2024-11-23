@@ -95,7 +95,7 @@ export default function Statistics() {
 
   const fetchStatisticsData = async () => {
     setLoadingMoreStatistics(true);
-    console.log('Loading statistics...');
+
     await fetchAll()
       .catch((error) => {
         console.error('Error fetching statistics data:', error);
@@ -103,7 +103,6 @@ export default function Statistics() {
       .finally(() => {
         setLoadingMoreStatistics(false);
         setShowRangePicker(true);
-        console.log('Finished loading statistics');
       });
   };
 
@@ -118,8 +117,6 @@ export default function Statistics() {
     timeRangeRef.current = range;
     fetchStatisticsData();
   };
-
-  console.log('loading', loadingMoreStatistics);
 
   return (
     <>
