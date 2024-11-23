@@ -151,7 +151,7 @@ const NewTweetInput: React.FC<NewTweetInputProps> = ({
               onPress={onClose}
               iconColor="rgb(255 255 255)"
             />
-            {reply != undefined && reply?.length > 0 && (
+            {reply !== undefined && reply?.length > 0 && (
               <ParsedContent text={reply} color={'rgb(120 120 120)'} fontSize={16} />
             )}
             <Button

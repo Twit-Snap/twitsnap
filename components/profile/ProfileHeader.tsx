@@ -87,7 +87,7 @@ const ProfileHeader = ({ user }: { user: SearchedUser }) => {
       </View>
       <View style={{ flex: 1, flexDirection: 'row' }}>
         {/* If you just check var1 && var2 && ..., it breaks. It must be var1 != undefined && var2 != undefined */}
-        {user?.followersCount != undefined && user?.followingCount != undefined && (
+        {user?.followersCount !== undefined && user?.followingCount != undefined && (
           <>
             <TouchableOpacity
               activeOpacity={canViewList ? 0.4 : 1}
