@@ -14,17 +14,19 @@ const StatisticsChart = ({
   chartType: 'bar' | 'line';
 }) => {
   const screenWidth = Dimensions.get('window').width;
+  const threshold = Math.floor(screenWidth / 50); // Ajusta según el ancho
+  console.log('limite', threshold);
 
   const chartConfig = {
-    backgroundGradientFrom: '#121212',  // Gris oscuro, similar a un fondo oscuro de app
-    backgroundGradientTo: '#1A1A1A',    // Gris aún más oscuro para el degradado
-    color: (opacity = 1) => `rgba(29, 161, 242, ${opacity})`,  // Azul celeste de Twitter
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,  // Blanco para las etiquetas
+    backgroundGradientFrom: '#121212',
+    backgroundGradientTo: '#1A1A1A',
+    color: (opacity = 1) => `rgba(29, 161, 242, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     style: { borderRadius: 16 },
     propsForDots: {
       r: '4',
       strokeWidth: '2',
-      stroke: '#1DA1F2'  // Azul de Twitter para los bordes de los puntos
+      stroke: '#1DA1F2'
     },
     propsForLabels: {
       dy: 3,
@@ -52,6 +54,15 @@ const StatisticsChart = ({
     const dateParts = item.date.split('T')[0].split('-');
     return `${dateParts[2]}-${dateParts[1]}`;
   });
+
+  const formattedLabels = labels.map((label, index) => {
+    const skipRate = Math.max(1, Math.floor(labels.length / threshold));
+    console.log('skipRate', skipRate);
+    console.log('index', index);
+    console.log('alterar etiquetas', index % skipRate === 0 ? label : '');
+    return index % skipRate === 0 ? label : ''; // Alternar etiquetas dinámicamente
+  });
+
   const chartData = data.map((item) => item.amount);
 
   return (
@@ -81,7 +92,7 @@ const StatisticsChart = ({
           ) : (
             <LineChart
               data={{
-                labels,
+                labels: formattedLabels,
                 datasets: [{ data: chartData }]
               }}
               width={screenWidth - 40}
@@ -91,6 +102,7 @@ const StatisticsChart = ({
               fromZero
               yAxisInterval={1}
               //formatXLabel={(value) => (parseInt(value) % 2 === 0 ? value : '')}
+              //formatXLabel={(value: any, index: number) => formatXLabel(value, index)}
               formatYLabel={(value) => parseInt(value).toString()}
               verticalLabelRotation={270}
               style={styles.chart}
