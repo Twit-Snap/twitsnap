@@ -154,11 +154,16 @@ export default function RootLayout() {
             }}
           />
           <Tabs.Screen
-            name="profile/components/statisticsChart"
+            name="statistics"
             options={{
-              tabBarButton: () => null, // Hide the tab
-              header: () => null,
-              headerShown: false
+              title: 'Statistics',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="analytics" size={size} color={color} />
+              ),
+              tabBarHideOnKeyboard: true,
+              tabBarStyle: { display: showTabs ? 'flex' : 'none' },
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
         </Tabs>

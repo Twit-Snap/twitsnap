@@ -16,15 +16,15 @@ const StatisticsChart = ({
   const screenWidth = Dimensions.get('window').width;
 
   const chartConfig = {
-    backgroundGradientFrom: '#1E2923',
-    backgroundGradientTo: '#08130D',
-    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    backgroundGradientFrom: '#121212',  // Gris oscuro, similar a un fondo oscuro de app
+    backgroundGradientTo: '#1A1A1A',    // Gris aún más oscuro para el degradado
+    color: (opacity = 1) => `rgba(29, 161, 242, ${opacity})`,  // Azul celeste de Twitter
+    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,  // Blanco para las etiquetas
     style: { borderRadius: 16 },
     propsForDots: {
-      r: '6',
+      r: '4',
       strokeWidth: '2',
-      stroke: '#ffa726'
+      stroke: '#1DA1F2'  // Azul de Twitter para los bordes de los puntos
     },
     propsForLabels: {
       dy: 3,
@@ -76,6 +76,7 @@ const StatisticsChart = ({
               yAxisSuffix={''}
               yAxisLabel={''}
               withHorizontalLabels={false}
+              verticalLabelRotation={270}
             />
           ) : (
             <LineChart
@@ -89,7 +90,7 @@ const StatisticsChart = ({
               bezier
               fromZero
               yAxisInterval={1}
-              formatXLabel={(value) => (parseInt(value) % 2 === 0 ? value : '')}
+              //formatXLabel={(value) => (parseInt(value) % 2 === 0 ? value : '')}
               formatYLabel={(value) => parseInt(value).toString()}
               verticalLabelRotation={270}
               style={styles.chart}
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     marginRight: 0,
-    writingDirection: 'rtl', // Para rotar texto si es necesario
+    writingDirection: 'rtl',
     transform: [{ rotate: '-90deg' }]
   },
   xAxisLabel: {
