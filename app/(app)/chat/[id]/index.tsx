@@ -102,7 +102,7 @@ const ChatScreen = () => {
       if (typeof user === 'string') {
         console.log('User is a string');
         getUser(user);
-      } else if (user.followCreatedAt != undefined) {
+      } else if (user.followCreatedAt !== undefined) {
         console.log('User from follow');
         getUser(user.username);
       } else {
@@ -230,7 +230,7 @@ const ChatScreen = () => {
           ref={inputRef}
         />
         <IconButton
-          onPress={editRef.current != '' ? handleSubmitEdit : handleSubmit}
+          onPress={editRef.current !== '' ? handleSubmitEdit : handleSubmit}
           icon="send"
           size={30}
           style={{
