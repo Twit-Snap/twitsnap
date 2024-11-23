@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
@@ -59,12 +59,12 @@ const styles = StyleSheet.create({
     borderRadius: 20
   },
   dropdown: {
-    backgroundColor: 'rgb(20 20 20)', // Fondo del menú desplegable
+    backgroundColor: 'rgb(20 20 20)',
     borderRadius: 10
   },
   itemStyle: {
-    backgroundColor: 'rgb(150 150 150)', // Fondo de cada ítem del dropdown
-    color: 'white' // Color del texto de cada ítem
+    backgroundColor: 'rgb(150 150 150)',
+    color: 'white'
   },
   dropdownContainer: {
     height: 10,
@@ -81,21 +81,21 @@ const styles = StyleSheet.create({
     gap: 20
   },
   placeholder: {
-    color: 'rgb(150 150 150)', // Color blanco para el texto del placeholder
-    fontSize: 13 // Tamaño de la fuente para el placeholder
+    color: 'rgb(150 150 150)',
+    fontSize: 13
   },
   dropDownContainer: {
-    backgroundColor: '#222', // Color oscuro para el menú desplegable
-    borderColor: '#444', // Color del borde del menú
-    borderWidth: 1, // Grosor del borde
-    zIndex: 9999 // Asegura que el dropdown esté por encima
+    backgroundColor: '#222',
+    borderColor: '#444',
+    borderWidth: 1,
+    zIndex: 9999
   },
   textStyle: {
-    color: 'white', // Color blanco para el texto de los ítems del dropdown
-    fontSize: 16 // Tamaño de la fuente para los ítems
+    color: 'white',
+    fontSize: 16
   },
   arrowIcon: {
     color: 'white',
-    transform: [{ scale: 1.5 }] // Ajusta el tamaño con transform
+    transform: [{ scale: 1.5 }]
   }
 });
