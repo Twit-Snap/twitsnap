@@ -3,8 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 // @ts-ignore
-export default function RangePicker({ setValue, value, onRangeChange }) {
-  const [open, setOpen] = useState(false);
+export default function RangePicker({ setValue, value, onRangeChange, open, setOpen }) {
   const previousValue = useRef(value);
   const items = [
     { label: 'Week', value: 'week' },
