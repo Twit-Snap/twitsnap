@@ -1,14 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React, { useCallback, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity
-} from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { InteractionAmountData, StatisticsParams } from '@/app/types/statisticType';
@@ -18,15 +11,16 @@ import StatisticsChart from '@/components/statistics/statisticsChart';
 import useAxiosInstance from '@/hooks/useAxios';
 
 export default function Statistics() {
-  const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(false);
+  const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(true);
   const [likeAmountData, setLikeAmountData] = useState<InteractionAmountData[] | null>(null);
   const [twitAmountData, setTwitAmountData] = useState<InteractionAmountData[] | null>(null);
   const [retwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(null);
   const [commentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [value, setValue] = useState('week');
+  const [value, setValue] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [showRangePicker, setShowRangePicker] = useState(false);
 
   const timeRangeRef = useRef<'week' | 'month' | 'year'>('week');
-  //const [selectedRange, setSelectedRange] = useState<'week' | 'month' | 'year'>('week');
   const axiosStatistics = useAxiosInstance('statistics');
 
   const userData = useAtomValue(authenticatedAtom);
@@ -34,85 +28,84 @@ export default function Statistics() {
 
   const resetState = () => {
     timeRangeRef.current = 'week';
-    setLoadingMoreStatistics(false);
+    setLoadingMoreStatistics(true);
+    setValue(null);
+    setOpen(false);
+    setShowRangePicker(false);
   };
 
-  const fetchStatistics = useCallback(
-    async ({
-      queryParams,
-      setData,
-      errorMessage
-    }: {
-      queryParams: StatisticsParams;
-      setData: React.Dispatch<React.SetStateAction<InteractionAmountData[] | null>>;
-      errorMessage: string;
-    }) => {
-      try {
-        const response = await axiosStatistics.get('metrics/', {
-          params: queryParams
-        });
-        setData(response.data.data);
-      } catch (error) {
-        console.error(errorMessage, error);
-      }
-    },
-    [axiosStatistics]
-  );
+  const fetchStatistics = async ({
+    queryParams,
+    setData,
+    errorMessage
+  }: {
+    queryParams: StatisticsParams;
+    setData: React.Dispatch<React.SetStateAction<InteractionAmountData[] | null>>;
+    errorMessage: string;
+  }) => {
+    try {
+      setLoadingMoreStatistics(true);
+      const response = await axiosStatistics.get('metrics/', {
+        params: queryParams
+      });
+      setData(response.data.data);
+    } catch (error) {
+      console.error(errorMessage, error);
+    }
+  };
 
-  const fetchLikesAmountStatistics = useCallback(async () => {
-    fetchStatistics({
+  const fetchLikesAmountStatistics = async () => {
+    await fetchStatistics({
       queryParams: { username: username, dateRange: timeRangeRef.current, type: 'like' },
       setData: setLikeAmountData,
       errorMessage: 'Error fetching li kes statistics:'
     });
-  }, []);
+  };
 
-  const fetchTwitsAmountStatistics = useCallback(async () => {
-    fetchStatistics({
+  const fetchTwitsAmountStatistics = async () => {
+    await fetchStatistics({
       queryParams: { username, dateRange: timeRangeRef.current, type: 'twit' },
       setData: setTwitAmountData,
       errorMessage: 'Error fetching twits statistics:'
     });
-  }, []);
+  };
 
-  const fetchRetwitsAmountStatistics = useCallback(async () => {
-    fetchStatistics({
+  const fetchRetwitsAmountStatistics = async () => {
+    await fetchStatistics({
       queryParams: { username, dateRange: timeRangeRef.current, type: 'retwit' },
       setData: setRetwitAmountData,
       errorMessage: 'Error fetching retwits statistics:'
     });
-  }, []);
+  };
 
-  const fetchCommentsAmountStatistics = useCallback(async () => {
-    fetchStatistics({
+  const fetchCommentsAmountStatistics = async () => {
+    await fetchStatistics({
       queryParams: { username, dateRange: timeRangeRef.current, type: 'comment' },
       setData: setCommentAmountData,
       errorMessage: 'Error fetching comments statistics:'
     });
-  }, []);
+  };
 
-  const fetchStatisticsData = useCallback(async () => {
+  const fetchAll = async () => {
+    await fetchLikesAmountStatistics();
+    await fetchTwitsAmountStatistics();
+    await fetchRetwitsAmountStatistics();
+    await fetchCommentsAmountStatistics();
+  };
+
+  const fetchStatisticsData = async () => {
     setLoadingMoreStatistics(true);
     console.log('Loading statistics...');
-    try {
-      await Promise.all([
-        fetchLikesAmountStatistics(),
-        fetchTwitsAmountStatistics(),
-        fetchRetwitsAmountStatistics(),
-        fetchCommentsAmountStatistics()
-      ]);
-    } catch (error) {
-      console.error('Error fetching statistics data:', error);
-    } finally {
-      setLoadingMoreStatistics(false);
-      console.log('Finished loading statistics');
-    }
-  }, [
-    fetchLikesAmountStatistics,
-    fetchTwitsAmountStatistics,
-    fetchRetwitsAmountStatistics,
-    fetchCommentsAmountStatistics
-  ]);
+    await fetchAll()
+      .catch((error) => {
+        console.error('Error fetching statistics data:', error);
+      })
+      .finally(() => {
+        setLoadingMoreStatistics(false);
+        setShowRangePicker(true);
+        console.log('Finished loading statistics');
+      });
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -125,17 +118,32 @@ export default function Statistics() {
     timeRangeRef.current = range;
     fetchStatisticsData();
   };
+
+  console.log('loading', loadingMoreStatistics);
+
   return (
     <>
       <HomeHeader />
       <View style={styles.container}>
-        {!twitAmountData && !likeAmountData && !commentAmountData && !retwitAmountData ? (
-          <ActivityIndicator size="large" color="rgb(3, 165, 252)" />
+        {/* Título de la sección */}
+        <View style={styles.titleContainer}>
+          <Text style={styles.titleText}>Statistics</Text>
+        </View>
+        {showRangePicker ? (
+          <View style={styles.rangeBar}>
+            <RangePicker
+              setValue={setValue}
+              value={value}
+              onRangeChange={handleTimeRangeChange}
+              open={open}
+              setOpen={setOpen}
+            />
+          </View>
+        ) : null}
+        {loadingMoreStatistics ? (
+          <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
         ) : (
           <>
-            <View style={styles.rangeBar}>
-              <RangePicker setValue={setValue} value={value} onRangeChange={handleTimeRangeChange} />
-            </View>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
               {/* Barra de selección de rango */}
 
@@ -144,7 +152,7 @@ export default function Statistics() {
                 <StatisticsChart
                   title="Twits vs Time"
                   data={twitAmountData ?? []}
-                  chartType="bar"
+                  chartType="line"
                 />
                 <StatisticsChart
                   title="Retwits vs Time"
@@ -175,6 +183,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgb(5 5 5)'
   },
+  titleContainer: {
+    marginTop: 20,
+    marginBottom: 10,
+    marginLeft: 15
+  },
+  titleText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white'
+  },
   scrollContainer: {
     padding: 15
   },
@@ -182,7 +200,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     marginBottom: 20,
-    marginTop: 30
+    marginTop: 10
   },
   picker: {
     backgroundColor: 'rgb(28,28,28)',
