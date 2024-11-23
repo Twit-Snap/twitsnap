@@ -1,7 +1,9 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import useAxiosInstance from '@/hooks/useAxios';
 import { useAtomValue } from 'jotai';
 import React from 'react';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import useAxiosInstance from '@/hooks/useAxios';
+
 import Interaction, { handlerReturn } from '../interaction';
 
 export default function Retwit({

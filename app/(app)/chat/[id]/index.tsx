@@ -1,7 +1,3 @@
-import { IReducedUser } from '@/app/types/publicUser';
-import MessageCard, { IMessage } from '@/components/chat/messageCard';
-import { db } from '@/firebaseConfig';
-import useAxiosInstance from '@/hooks/useAxios';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { onValue, ref } from 'firebase/database';
 import React, { useCallback, useRef, useState } from 'react';
@@ -18,6 +14,11 @@ import {
   View
 } from 'react-native';
 import { ActivityIndicator, IconButton } from 'react-native-paper';
+
+import { IReducedUser } from '@/app/types/publicUser';
+import MessageCard, { IMessage } from '@/components/chat/messageCard';
+import { db } from '@/firebaseConfig';
+import useAxiosInstance from '@/hooks/useAxios';
 
 const window = Dimensions.get('screen');
 
@@ -101,7 +102,7 @@ const ChatScreen = () => {
       if (typeof user === 'string') {
         console.log('User is a string');
         getUser(user);
-      } else if (user.followCreatedAt != undefined) {
+      } else if (user.followCreatedAt !== undefined) {
         console.log('User from follow');
         getUser(user.username);
       } else {
@@ -121,7 +122,7 @@ const ChatScreen = () => {
 
         const data = Object.entries(values).map(([k, v]) => ({
           id: k,
-          ...(v as Object)
+          ...(v as object)
         }));
 
         console.log(`[${chat_id}] Firebase #messages: `, data.length);
@@ -229,7 +230,7 @@ const ChatScreen = () => {
           ref={inputRef}
         />
         <IconButton
-          onPress={editRef.current != '' ? handleSubmitEdit : handleSubmit}
+          onPress={editRef.current !== '' ? handleSubmitEdit : handleSubmit}
           icon="send"
           size={30}
           style={{

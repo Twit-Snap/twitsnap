@@ -153,6 +153,19 @@ export default function RootLayout() {
               headerShown: false
             }}
           />
+          <Tabs.Screen
+            name="statistics"
+            options={{
+              title: 'Statistics',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="analytics" size={size} color={color} />
+              ),
+              tabBarHideOnKeyboard: true,
+              tabBarStyle: { display: showTabs ? 'flex' : 'none' },
+              headerShown: false,
+              tabBarShowLabel: false
+            }}
+          />
         </Tabs>
       </SafeAreaView>
     </>

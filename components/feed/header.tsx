@@ -4,6 +4,7 @@ import React from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+
 import VerifyButton from '../common/verifyButton';
 
 const default_images = {

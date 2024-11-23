@@ -1,11 +1,3 @@
-import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { IReducedUser } from '@/app/types/publicUser';
-import { showTabsAtom } from '@/atoms/showTabsAtom';
-import ChatCard from '@/components/chat/chatCard';
-import HomeHeader from '@/components/feed/header';
-import UserCard from '@/components/profile/userCard';
-import useAxiosInstance from '@/hooks/useAxios';
-import removeDuplicates from '@/utils/removeDup';
 import { useRouter } from 'expo-router';
 import { onValue, ref } from 'firebase/database';
 import { useAtom, useAtomValue } from 'jotai';
@@ -24,6 +16,16 @@ import {
   View
 } from 'react-native';
 import { ActivityIndicator, IconButton } from 'react-native-paper';
+
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { IReducedUser } from '@/app/types/publicUser';
+import { showTabsAtom } from '@/atoms/showTabsAtom';
+import ChatCard from '@/components/chat/chatCard';
+import HomeHeader from '@/components/feed/header';
+import UserCard from '@/components/profile/userCard';
+import useAxiosInstance from '@/hooks/useAxios';
+import removeDuplicates from '@/utils/removeDup';
+
 import { db } from '../../../firebaseConfig';
 
 const window = Dimensions.get('screen');

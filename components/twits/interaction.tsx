@@ -51,7 +51,7 @@ export default function Interaction({
 
         setState(ret.state);
 
-        if (initCount != undefined) {
+        if (initCount !== undefined) {
           setCount(ret.count);
         }
       }}
@@ -62,7 +62,7 @@ export default function Interaction({
         size={20}
         iconColor={icon_alt ? (state ? icon_alt_color : undefined) : undefined}
       />
-      {count != undefined && (
+      {count !== undefined && (
         <Text style={styles.interaction_label}>{parseInteractionCount(count)}</Text>
       )}
     </TouchableOpacity>

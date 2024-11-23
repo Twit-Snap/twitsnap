@@ -4,6 +4,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
@@ -12,7 +13,6 @@ import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { authenticatedAtom } from './authAtoms/authAtom';
 
 type SignUpFormField = {
