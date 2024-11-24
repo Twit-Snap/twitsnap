@@ -36,13 +36,13 @@ export default function FrontPage() {
   useEffect(() => {
     // const handleLocation = async (userSession: UserAuth) => {
     //   if (!userSession.location) {
-    //     router.push('./finish-sign-up');
+    //     router.push('./sign-up-location');
     //   }
     // };
     const loadAuth = async () => {
       if (!authAtom) {
-        const session: string | null = await AsyncStorage.getItem('auth');
-        // const session: string | null = null; //To test sign in
+        // const session: string | null = await AsyncStorage.getItem('auth');
+        const session: string | null = null; //To test sign in
 
         if (!session) {
           setIsLoadingSession(false);
@@ -101,7 +101,7 @@ export default function FrontPage() {
   );
 
   const navigateToSsoSignUp = (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
-    const params: Omit<UserSSORegisterDto, 'birthdate'> = {
+    const params: Omit<UserSSORegisterDto, 'birthdate' | 'phoneNumber'> = {
       uid: userCreds.user.uid,
       token,
       providerId: userCreds.additionalUserInfo?.providerId || '',

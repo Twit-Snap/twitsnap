@@ -52,8 +52,8 @@ const RequestLocationPermissions = () => {
         : null
     );
 
-    // Aquí puedes redirigir a otra pantalla o realizar alguna acción con la ubicación
-    router.replace('/verification'); // Cambia '/next-screen' a la pantalla que desees
+    const registerParams = { inRegistration: 1 };
+    router.replace({ pathname: '/verification', params: registerParams });
   };
 
   return (

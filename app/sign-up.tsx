@@ -204,7 +204,6 @@ const SignUp: () => React.JSX.Element = () => {
     const timeSpent = calculateEventTime();
 
     const formData = getFormProps(form, 'value');
-    console.log('formData', formData);
 
     const expoToken = await registerForPushNotificationsAsync();
 
@@ -220,12 +219,14 @@ const SignUp: () => React.JSX.Element = () => {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setIsAuthenticated(response.data);
         setBlocked(false);
-        alert('Success Registering!');
-        router.push('./finish-sign-up');
+        router.push('./sign-up-location');
       }
     } catch (error: any) {
       if (error.response && error.response.status === 400) {
         alert('Error! Invalid email or username.');
+      } else if (error.response && error.response.status === 409) {
+        const existentField = error.response.data['custom-field'];
+        alert(`${existentField} already in use. Please try another one.`);
       } else {
         alert('Error! Some fields are missing or have incorrect format.');
       }
@@ -236,7 +237,6 @@ const SignUp: () => React.JSX.Element = () => {
 
   const isFormValid = useMemo(() => {
     const formProps = getFormProps(form, 'errorMessage');
-    console.log('formProps', formProps);
     return (
       isFormTouched && Object.values(formProps).every((value) => !value) && !isUploadingPicture
     );
