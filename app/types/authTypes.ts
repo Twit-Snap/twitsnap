@@ -28,3 +28,10 @@ export type UserSSORegisterDto = {
   profilePicture?: string;
   phoneNumber: string;
 };
+
+export type Interest = {
+  id: number;
+  name: string;
+  parentId: number | null;
+  emoji?: string;
+};
