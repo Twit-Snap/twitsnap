@@ -20,6 +20,7 @@ const SignUpInterests = () => {
         const response = (await axiosInstance.get('/public/interests')).data as Interest[];
         setInterests(response);
       } catch (err) {
+        console.error(err);
         setError('Failed to fetch interests');
       } finally {
         setLoading(false);

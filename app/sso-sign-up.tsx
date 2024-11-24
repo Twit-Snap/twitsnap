@@ -88,6 +88,7 @@ const SignUpScreen = () => {
     usernameInput,
     birthdate,
     profilePictureState,
+    phoneNumber.value,
     axiosUsers,
     setAuthAtom,
     setBlocked
