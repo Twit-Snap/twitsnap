@@ -1,8 +1,8 @@
 // screens/VerificationScreen.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSetAtom } from 'jotai';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
 
@@ -13,12 +13,17 @@ import { authenticatedAtom } from '../authAtoms/authAtom';
 
 const window = Dimensions.get('window');
 
-const VerificationScreen: React.FC = () => {
+const VerificationScreen = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const axiosUsers = useAxiosInstance('users');
   const setIsAuthenticated = useSetAtom(authenticatedAtom);
+  const { inRegistration } = useLocalSearchParams<{ inRegistration?: 'true' }>();
 
+  const nextScreen = useMemo(
+    () => (inRegistration ? '/sign-up-interests' : '/home'),
+    [inRegistration]
+  );
   const handleComplete = async (code: string, channel: string): Promise<boolean> => {
     setLoading(true);
 
@@ -27,7 +32,7 @@ const VerificationScreen: React.FC = () => {
       .then(async ({ data }) => {
         await AsyncStorage.setItem('auth', JSON.stringify(data));
         setIsAuthenticated(data);
-        router.replace('/home');
+        router.replace(nextScreen);
         return true;
       })
       .catch((error) => {
@@ -70,7 +75,7 @@ const VerificationScreen: React.FC = () => {
           }}
           buttonColor="white"
           style={{ borderWidth: 1, borderColor: 'rgb(5 5 5)', height: 35, width: 80 }}
-          onPress={() => router.replace('/home')}
+          onPress={() => router.replace(nextScreen)}
         >
           {'Skip'}
         </Button>

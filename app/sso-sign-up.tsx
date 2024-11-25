@@ -63,7 +63,7 @@ const SignUpScreen = () => {
         await AsyncStorage.setItem('auth', JSON.stringify(response.data));
         setAuthAtom(response.data);
         setBlocked(false);
-        router.push('./finish-sign-up'); // Redirige a la nueva pantalla
+        router.push('./sign-up-location'); // Redirige a la nueva pantalla
       }
     } catch (error) {
       console.error('Error en el registro:', JSON.stringify(error, null, 2));
@@ -72,7 +72,7 @@ const SignUpScreen = () => {
         console.error('ErrorData:', JSON.stringify(error.response?.data, null, 2));
         if (error.response && error.response.status === 409) {
           const existentField = error.response.data['custom-field'];
-          alert(`${existentField} already taken. Please try another one.`);
+          alert(`${existentField} already in use. Please try another one.`);
         } else {
           alert('An error occurred. Please try again later.');
         }
@@ -88,6 +88,7 @@ const SignUpScreen = () => {
     usernameInput,
     birthdate,
     profilePictureState,
+    phoneNumber.value,
     axiosUsers,
     setAuthAtom,
     setBlocked

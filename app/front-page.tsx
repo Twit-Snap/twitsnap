@@ -36,7 +36,7 @@ export default function FrontPage() {
   useEffect(() => {
     // const handleLocation = async (userSession: UserAuth) => {
     //   if (!userSession.location) {
-    //     router.push('./finish-sign-up');
+    //     router.push('./sign-up-location');
     //   }
     // };
     const loadAuth = async () => {
@@ -101,7 +101,7 @@ export default function FrontPage() {
   );
 
   const navigateToSsoSignUp = (userCreds: FirebaseAuthTypes.UserCredential, token: string) => {
-    const params: Omit<UserSSORegisterDto, 'birthdate'> = {
+    const params: Omit<UserSSORegisterDto, 'birthdate' | 'phoneNumber'> = {
       uid: userCreds.user.uid,
       token,
       providerId: userCreds.additionalUserInfo?.providerId || '',
@@ -280,7 +280,7 @@ export default function FrontPage() {
               labelStyle={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}
               style={styles.buttonContent}
               onPress={() => {
-                router.push('./sign-up');
+                router.push('/sign-up');
               }}
             >
               Create account
