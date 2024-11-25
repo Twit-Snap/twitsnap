@@ -19,15 +19,18 @@ export default function Statistics() {
   const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(true);
   const [likeAmountData, setLikeAmountData] = useState<InteractionAmountData[] | null>(null);
   const [twitAmountData, setTwitAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [retwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [commentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [retwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(
+    null
+  );
+  const [commentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(
+    null
+  );
   const [followAmountData, setFollowAmountData] = useState<AccountInteractionData | null>(null);
   const [value, setValue] = useState(null);
   const [open, setOpen] = useState(false);
   const [showRangePicker, setShowRangePicker] = useState(false);
 
   const [isActualStatisticsTypeTwit, setctualStatisticsTypeTwit] = useState(true);
-  const [isActualStatisticTypeAccount, setIsActualStatisticTypeAccount] = useState(false);
 
   const timeRangeRef = useRef<'week' | 'month' | 'year'>('week');
   const axiosStatistics = useAxiosInstance('statistics');
@@ -42,8 +45,6 @@ export default function Statistics() {
         handler: async () => {
           resetState();
           setctualStatisticsTypeTwit(true);
-          setIsActualStatisticTypeAccount(false);
-          console.log('Outside fetching twit statistics');
           await fetchTwitsStatisticsData();
         },
         state: true
@@ -52,9 +53,7 @@ export default function Statistics() {
         text: 'Account',
         handler: async () => {
           resetState();
-          setIsActualStatisticTypeAccount(true);
           setctualStatisticsTypeTwit(false);
-          console.log('Outside fetching account statistics');
           await fetchAccountStatistics({
             queryParams: { username, dateRange: timeRangeRef.current, type: 'follow' }
           });
@@ -70,7 +69,7 @@ export default function Statistics() {
     setTwitAmountData(null);
     setRetwitAmountData(null);
     setCommentAmountData(null);
-    setFollowAmountData(null);
+    //setFollowAmountData(null);
     setLoadingMoreStatistics(true);
     setValue(null);
     setOpen(false);
@@ -94,6 +93,23 @@ export default function Statistics() {
       setData(response.data.data);
     } catch (error) {
       console.error(errorMessage, error);
+    }
+  };
+  const fetchAccountStatistics = async ({ queryParams }: { queryParams: StatisticsParams }) => {
+    try {
+      setLoadingMoreStatistics(true);
+      console.log('fetching account statistics');
+      const response = await axiosStatistics.get('metrics/', {
+        params: queryParams
+      });
+      console.log('entre');
+      console.log('response', response.data.data);
+      setFollowAmountData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching follow statistics:', error);
+    } finally {
+      setLoadingMoreStatistics(false);
+      setShowRangePicker(true);
     }
   };
 
@@ -149,27 +165,9 @@ export default function Statistics() {
       });
   };
 
-  const fetchAccountStatistics = async ({ queryParams }: { queryParams: StatisticsParams }) => {
-    try {
-      setLoadingMoreStatistics(true);
-      console.log('fetching account statistics');
-      const response = await axiosStatistics.get('metrics/', {
-        params: queryParams
-      });
-      setFollowAmountData(response.data.data);
-    } catch (error) {
-      console.error('Error fetching follow statistics:', error);
-    } finally {
-      setLoadingMoreStatistics(false);
-      setShowRangePicker(true);
-    }
-  };
-
   useFocusEffect(
     useCallback(() => {
-      console.log('Page in focus, resetting state and fetching data.');
       resetState();
-      setIsActualStatisticTypeAccount(false);
       setctualStatisticsTypeTwit(true);
       fetchTwitsStatisticsData();
     }, [])
@@ -180,15 +178,15 @@ export default function Statistics() {
     if (isActualStatisticsTypeTwit) {
       await fetchTwitsStatisticsData();
     } else {
-      await await fetchAccountStatistics({
+      await fetchAccountStatistics({
         queryParams: { username, dateRange: timeRangeRef.current, type: 'follow' }
       });
     }
   };
 
-  console.log('is Twit ', isActualStatisticsTypeTwit);
-  console.log('is Account', isActualStatisticTypeAccount);
-  console.log('loading', loadingMoreStatistics);
+  //console.log('is Twit ', isActualStatisticsTypeTwit);
+  //console.log('is Account', isActualStatisticTypeAccount);
+  //console.log('loading', loadingMoreStatistics);
 
   const renderTwitStatistics = () =>
     loadingMoreStatistics ? (
@@ -208,15 +206,28 @@ export default function Statistics() {
       </ScrollView>
     );
 
-  const renderOtherStatistics = () =>
+  const renderAccountStatistics = () =>
     loadingMoreStatistics ? (
       <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
     ) : (
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.statisticsContainer}></View>
+        <View style={styles.statisticsContainer}>
+          {/* Seguidores Totales */}
+          <View style={styles.totalFollowersContainer}>
+            <Text style={styles.totalFollowersText}>
+              Total Followers: {followAmountData?.totalFollowers ?? 0}
+            </Text>
+          </View>
+          <StatisticsChart
+            title="Follows vs Time"
+            data={followAmountData?.follows ?? []}
+            chartType="line"
+          />
+        </View>
       </ScrollView>
     );
-
+  //console.log(followAmountData?.interactions);
+  console.log(followAmountData);
   return (
     <>
       <View style={styles.container}>
@@ -236,7 +247,7 @@ export default function Statistics() {
             />
           </View>
         )}
-        {isActualStatisticsTypeTwit ? renderTwitStatistics() : renderOtherStatistics()}
+        {isActualStatisticsTypeTwit ? renderTwitStatistics() : renderAccountStatistics()}
       </View>
     </>
   );
@@ -311,5 +322,14 @@ const styles = StyleSheet.create({
   arrowIcon: {
     color: 'white',
     transform: [{ scale: 1.5 }] // Ajusta el tamaño con transform
+  },
+  totalFollowersContainer: {
+    marginBottom: 10,
+    alignItems: 'center'
+  },
+  totalFollowersText: {
+    color: 'white', // Texto blanco para contraste
+    fontSize: 16,
+    fontWeight: 'bold'
   }
 });
