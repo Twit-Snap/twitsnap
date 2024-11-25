@@ -152,7 +152,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
                 initCount={item.bookmarkCount}
                 twitId={tweet.id}
               />
-              <ShareButton />
+              <ShareButton twitId={tweet.id} />
             </View>
           </View>
         </View>
