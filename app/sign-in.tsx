@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useAtom, useSetAtom } from 'jotai';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -131,6 +131,10 @@ const SignIn: () => React.JSX.Element = () => {
     setEntryTime(new Date());
   };
 
+  const handleForgotPassword = useCallback(() => {
+    console.log('Forgot password');
+  }, []);
+
   return (
     <>
       <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
@@ -246,7 +250,7 @@ const SignIn: () => React.JSX.Element = () => {
               }}
               buttonColor="rgb(5 5 5)"
               style={{ borderWidth: 1, borderColor: 'rgb(80 80 80)', height: 35 }}
-              onPress={() => {}}
+              onPress={() => handleForgotPassword()}
             >
               Forgot password?
             </Button>
