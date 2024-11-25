@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useAtomValue } from 'jotai';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
@@ -10,10 +10,10 @@ import {
   StatisticsParams
 } from '@/app/types/statisticType';
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
+import HomeHeader from '@/components/feed/header';
 import RangePicker from '@/components/statistics/rangePicker';
 import StatisticsChart from '@/components/statistics/statisticsChart';
 import useAxiosInstance from '@/hooks/useAxios';
-import HomeHeader from '@/components/feed/header';
 
 export default function Statistics() {
   const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(true);
