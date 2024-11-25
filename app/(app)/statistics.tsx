@@ -24,9 +24,9 @@ export default function Statistics() {
   const [value, setValue] = useState(null);
   const [open, setOpen] = useState(false);
   const [showRangePicker, setShowRangePicker] = useState(false);
-  const isFirstRenderRef = useRef(true);
   const isActualStatisticsTypeTwitRef = useRef(true);
   const [isActualStatisticsTypeTwit, setActualStatisticsTypeTwit] = useState(true);
+  const [initialTab, setInitialTab] = useState(true);
 
   const timeRangeRef = useRef<'week' | 'month' | 'year'>('week');
   const axiosStatistics = useAxiosInstance('statistics');
@@ -64,10 +64,6 @@ export default function Statistics() {
 
   const resetState = () => {
     timeRangeRef.current = 'week';
-    setLikeAmountData(null);
-    setTwitAmountData(null);
-    setRetwitAmountData(null);
-    setCommentAmountData(null);
     setLoadingMoreStatistics(true);
     setValue(null);
     setOpen(false);
@@ -185,9 +181,12 @@ export default function Statistics() {
 
   useFocusEffect(
     useCallback(() => {
+      console.log(statisticsTypes.items[0].state);
+      console.log(statisticsTypes.items[1].state);
       resetState();
       setActualStatisticsTypeTwit(true);
       isActualStatisticsTypeTwitRef.current = true;
+
       fetchTwitsStatisticsData();
 
       const interval = setInterval(() => {
@@ -214,7 +213,10 @@ export default function Statistics() {
 
   const renderTwitStatistics = () =>
     loadingMoreStatistics ? (
-      <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
+      <>
+        <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
+        <View style={styles.emptySpaceLoading} />
+      </>
     ) : (
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.statisticsContainer}>
@@ -232,7 +234,10 @@ export default function Statistics() {
 
   const renderAccountStatistics = () =>
     loadingMoreStatistics ? (
-      <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
+      <>
+        <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
+        <View style={styles.emptySpaceLoading} />
+      </>
     ) : (
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.statisticsContainer}>
@@ -248,23 +253,9 @@ export default function Statistics() {
             chartType="line"
           />
         </View>
+        <View style={styles.emptySpace} />
       </ScrollView>
     );
-  /*
-            if (!intervals.get('fetchStatistics')) {
-              console.log('Setting interval');
-              if (intervals.get('fetchStatistics')) {
-                console.log('Clearing interval');
-                clearInterval(intervals.get('fetchStatistics'));
-              }
-              intervals.set(
-                'fetchStatistics',
-                setInterval(() => refreshStatistics(), 20000)
-              );
-            }*/
-
-  //console.log('is twit statistics', isActualStatisticsTypeTwit);
-  console.log('is loading', loadingMoreStatistics);
 
   return (
     <>
@@ -296,6 +287,15 @@ export default function Statistics() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'rgb(5 5 5)',
+    alignContent: 'flex-start'
+  },
+  emptySpace: {
+    height: 550,
+    backgroundColor: 'rgb(5 5 5)'
+  },
+  emptySpaceLoading: {
+    height: 560,
     backgroundColor: 'rgb(5 5 5)'
   },
   titleContainer: {
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     padding: 15,
-    paddingTop: 40
+    paddingTop: 20
   },
   rangeBar: {
     flexDirection: 'row',
