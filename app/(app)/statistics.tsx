@@ -236,7 +236,7 @@ export default function Statistics() {
     loadingMoreStatistics ? (
       <>
         <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
-        <View style={styles.emptySpaceLoading} />
+        <View style={styles.emptySpace} />
       </>
     ) : (
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -318,53 +318,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 40
   },
-  picker: {
-    backgroundColor: 'rgb(28,28,28)',
-    borderColor: '#444',
-    borderWidth: 1,
-    borderRadius: 20
-  },
-  dropdown: {
-    backgroundColor: 'rgb(20 20 20)', // Fondo del menú desplegable
-    borderRadius: 10
-  },
-  itemStyle: {
-    backgroundColor: 'rgb(150 150 150)', // Fondo de cada ítem del dropdown
-    color: 'white' // Color del texto de cada ítem
-  },
-  dropdownContainer: {
-    height: 10,
-    width: '80%',
-    backgroundColor: 'rgb(20, 20, 20)',
-    borderRadius: 30,
-    zIndex: 1000
-  },
-  dropdownList: {
-    backgroundColor: 'rgb(30, 30, 30)',
-    borderRadius: 10
-  },
   statisticsContainer: {
     gap: 20,
     flex: 1
-  },
-  placeholder: {
-    color: 'rgb(150 150 150)', // Color blanco para el texto del placeholder
-    fontSize: 10 // Tamaño de la fuente para el placeholder
-  },
-  dropDownContainer: {
-    backgroundColor: '#222',
-    borderColor: '#444',
-    borderWidth: 1,
-    zIndex: 9999 // Asegura que el dropdown esté por encima
   },
   textStyle: {
     color: 'white', // Color blanco para el texto de los ítems del dropdown
     fontSize: 16 // Tamaño de la fuente para los ítems
   },
-  arrowIcon: {
-    color: 'white',
-    transform: [{ scale: 1.5 }] // Ajusta el tamaño con transform
-  },
+
   totalFollowersContainer: {
     marginBottom: 10,
     alignItems: 'center'
