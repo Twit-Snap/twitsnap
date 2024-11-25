@@ -13,6 +13,7 @@ import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import RangePicker from '@/components/statistics/rangePicker';
 import StatisticsChart from '@/components/statistics/statisticsChart';
 import useAxiosInstance, { intervals } from '@/hooks/useAxios';
+import HomeHeader from "@/components/feed/header";
 
 export default function Statistics() {
   const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(true);
@@ -259,6 +260,7 @@ export default function Statistics() {
 
   return (
     <>
+      <HomeHeader />
       <View style={styles.container}>
         <View style={styles.titleContainer}>
           <Text style={styles.titleText}>Statistics</Text>
