@@ -10,6 +10,7 @@ import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 import { validatePreviousDate } from '@/utils/date';
 import { regexEmail } from '@/utils/email';
+import { FormRules } from '@/utils/form';
 import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
@@ -45,15 +46,6 @@ const getFormProps = (form: SignUpForm, prop: keyof SignUpFormField) => {
     profilePicture: form.profilePicture?.[prop],
     phoneNumber: form.phoneNumber[prop]
   };
-};
-
-type FormRules = {
-  required: boolean;
-  pattern?: RegExp;
-  customValidation?: (value: string) => boolean;
-  minLength?: number;
-  maxLength?: number;
-  errorMessage: string;
 };
 
 const validationRules: Record<

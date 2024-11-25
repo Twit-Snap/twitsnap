@@ -310,7 +310,11 @@ export default function FrontPage() {
               style={[styles.buttonContent, { borderColor: 'rgb(100 100 100)', borderWidth: 1 }]}
               onPress={() => {
                 // call login API
-                router.push('/sign-in');
+                // router.push('/sign-in');
+                router.push({
+                  pathname: '/reset-password',
+                  params: { email: 'test@test.com', token: '1234567890' }
+                });
               }}
             >
               Sign in
