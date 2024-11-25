@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useAtomValue } from 'jotai';
-import React, { useCallback, useRef, useState } from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
@@ -24,6 +24,7 @@ export default function Statistics() {
   const [value, setValue] = useState(null);
   const [open, setOpen] = useState(false);
   const [showRangePicker, setShowRangePicker] = useState(false);
+
 
   const [isActualStatisticsTypeTwit, setctualStatisticsTypeTwit] = useState(true);
 
@@ -155,13 +156,20 @@ export default function Statistics() {
       });
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      resetState();
-      setctualStatisticsTypeTwit(true);
-      fetchTwitsStatisticsData();
-    }, [])
-  );
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (isActualStatisticsTypeTwit) {
+        fetchTwitsStatisticsData();
+      } else {
+        fetchAccountStatistics({
+          queryParams: { username, dateRange: timeRangeRef.current, type: 'follow' }
+        });
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [isActualStatisticsTypeTwit, username]);
+
 
   const handleTimeRangeChange = async (range: 'week' | 'month' | 'year') => {
     timeRangeRef.current = range;
