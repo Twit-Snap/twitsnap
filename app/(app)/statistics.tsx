@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useAtomValue } from 'jotai';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
@@ -12,7 +12,7 @@ import {
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import RangePicker from '@/components/statistics/rangePicker';
 import StatisticsChart from '@/components/statistics/statisticsChart';
-import useAxiosInstance from '@/hooks/useAxios';
+import useAxiosInstance, { intervals } from '@/hooks/useAxios';
 
 export default function Statistics() {
   const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(true);
@@ -24,9 +24,9 @@ export default function Statistics() {
   const [value, setValue] = useState(null);
   const [open, setOpen] = useState(false);
   const [showRangePicker, setShowRangePicker] = useState(false);
-
-
-  const [isActualStatisticsTypeTwit, setctualStatisticsTypeTwit] = useState(true);
+  const isFirstRenderRef = useRef(true);
+  const isActualStatisticsTypeTwitRef = useRef(true);
+  const [isActualStatisticsTypeTwit, setActualStatisticsTypeTwit] = useState(true);
 
   const timeRangeRef = useRef<'week' | 'month' | 'year'>('week');
   const axiosStatistics = useAxiosInstance('statistics');
@@ -40,7 +40,8 @@ export default function Statistics() {
         text: 'Twits',
         handler: async () => {
           resetState();
-          setctualStatisticsTypeTwit(true);
+          setActualStatisticsTypeTwit(true);
+          isActualStatisticsTypeTwitRef.current = true;
           await fetchTwitsStatisticsData();
         },
         state: true
@@ -49,7 +50,9 @@ export default function Statistics() {
         text: 'Account',
         handler: async () => {
           resetState();
-          setctualStatisticsTypeTwit(false);
+          setActualStatisticsTypeTwit(false);
+          isActualStatisticsTypeTwitRef.current = false;
+          setLoadingMoreStatistics(true);
           await fetchAccountStatistics({
             queryParams: { username, dateRange: timeRangeRef.current, type: 'follow' }
           });
@@ -81,7 +84,6 @@ export default function Statistics() {
     errorMessage: string;
   }) => {
     try {
-      setLoadingMoreStatistics(true);
       const response = await axiosStatistics.get('metrics/', {
         params: queryParams
       });
@@ -92,7 +94,7 @@ export default function Statistics() {
   };
   const fetchAccountStatistics = async ({ queryParams }: { queryParams: StatisticsParams }) => {
     try {
-      setLoadingMoreStatistics(true);
+      console.log('fetching account statistics');
       const response = await axiosStatistics.get('metrics/', {
         params: queryParams
       });
@@ -146,6 +148,7 @@ export default function Statistics() {
 
   const fetchTwitsStatisticsData = async () => {
     setLoadingMoreStatistics(true);
+    console.log('fetching twits statistics');
     await fetchAllTwitsInteraction()
       .catch((error) => {
         console.error('Error fetching statistics data:', error);
@@ -156,26 +159,53 @@ export default function Statistics() {
       });
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (isActualStatisticsTypeTwit) {
-        fetchTwitsStatisticsData();
-      } else {
-        fetchAccountStatistics({
-          queryParams: { username, dateRange: timeRangeRef.current, type: 'follow' }
-        });
-      }
-    }, 30000);
+  const refreshTwitStatitics = async () => {
+    await fetchAllTwitsInteraction().catch((error) => {
+      console.error('Error fetching statistics data:', error);
+    });
+  };
 
-    return () => clearInterval(interval);
-  }, [isActualStatisticsTypeTwit, username]);
+  const refreshAccountStatistics = async () => {
+    await fetchAccountStatistics({
+      queryParams: { username, dateRange: timeRangeRef.current, type: 'follow' }
+    });
+  };
 
+  const refreshStatistics = async () => {
+    console.log('is twit statistics', isActualStatisticsTypeTwitRef.current);
+    if (isActualStatisticsTypeTwitRef.current) {
+      await refreshTwitStatitics();
+
+      console.log('refreshing twit statistics');
+    } else {
+      await refreshAccountStatistics();
+      console.log('refreshing account statistics');
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      resetState();
+      setActualStatisticsTypeTwit(true);
+      isActualStatisticsTypeTwitRef.current = true;
+      fetchTwitsStatisticsData();
+
+      const interval = setInterval(() => {
+        refreshStatistics();
+      }, 10000);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }, [])
+  );
 
   const handleTimeRangeChange = async (range: 'week' | 'month' | 'year') => {
     timeRangeRef.current = range;
     if (isActualStatisticsTypeTwit) {
       await fetchTwitsStatisticsData();
     } else {
+      setLoadingMoreStatistics(true);
       await fetchAccountStatistics({
         queryParams: { username, dateRange: timeRangeRef.current, type: 'follow' }
       });
@@ -213,13 +243,28 @@ export default function Statistics() {
             </Text>
           </View>
           <StatisticsChart
-              title="Follows vs Time"
-              data={followAmountData?.follows ?? []}
-              chartType="line"
+            title="Follows vs Time"
+            data={followAmountData?.follows ?? []}
+            chartType="line"
           />
         </View>
       </ScrollView>
     );
+  /*
+            if (!intervals.get('fetchStatistics')) {
+              console.log('Setting interval');
+              if (intervals.get('fetchStatistics')) {
+                console.log('Clearing interval');
+                clearInterval(intervals.get('fetchStatistics'));
+              }
+              intervals.set(
+                'fetchStatistics',
+                setInterval(() => refreshStatistics(), 20000)
+              );
+            }*/
+
+  //console.log('is twit statistics', isActualStatisticsTypeTwit);
+  console.log('is loading', loadingMoreStatistics);
 
   return (
     <>
@@ -310,7 +355,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     borderColor: '#444',
     borderWidth: 1,
-    zIndex: 9999, // Asegura que el dropdown esté por encima
+    zIndex: 9999 // Asegura que el dropdown esté por encima
   },
   textStyle: {
     color: 'white', // Color blanco para el texto de los ítems del dropdown
