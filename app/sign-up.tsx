@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 import { validatePreviousDate } from '@/utils/date';
+import { regexEmail } from '@/utils/email';
 import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
@@ -73,7 +74,7 @@ const validationRules: Record<
   },
   email: {
     required: true,
-    pattern: /^\S+@\S+\.\S+$/,
+    pattern: regexEmail,
     errorMessage: 'Please enter a valid email address.'
   },
   phoneNumber: {
