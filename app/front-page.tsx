@@ -41,8 +41,8 @@ export default function FrontPage() {
     // };
     const loadAuth = async () => {
       if (!authAtom) {
-        // const session: string | null = await AsyncStorage.getItem('auth');
-        const session: string | null = null; //To test sign in
+        const session: string | null = await AsyncStorage.getItem('auth');
+        // const session: string | null = null; //To test sign in
 
         if (!session) {
           setIsLoadingSession(false);
@@ -281,7 +281,6 @@ export default function FrontPage() {
               style={styles.buttonContent}
               onPress={() => {
                 router.push('/sign-up');
-                // router.push('/sign-up-interests');
               }}
             >
               Create account
