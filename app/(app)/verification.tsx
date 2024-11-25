@@ -1,6 +1,6 @@
 // screens/VerificationScreen.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSetAtom } from 'jotai';
 import React, { useMemo, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, View } from 'react-native';
@@ -13,12 +13,12 @@ import { authenticatedAtom } from '../authAtoms/authAtom';
 
 const window = Dimensions.get('window');
 
-const VerificationScreen: React.FC<{ params: { inRegistration?: 1 } }> = ({ params }) => {
+const VerificationScreen = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const axiosUsers = useAxiosInstance('users');
   const setIsAuthenticated = useSetAtom(authenticatedAtom);
-  const { inRegistration } = params;
+  const { inRegistration } = useLocalSearchParams<{ inRegistration?: 'true' }>();
 
   const nextScreen = useMemo(
     () => (inRegistration ? '/sign-up-interests' : '/home'),

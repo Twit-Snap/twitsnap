@@ -280,8 +280,8 @@ export default function FrontPage() {
               labelStyle={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}
               style={styles.buttonContent}
               onPress={() => {
-                // router.push('./sign-up');
-                router.push('/sign-up-interests');
+                router.push('/sign-up');
+                // router.push('/sign-up-interests');
               }}
             >
               Create account

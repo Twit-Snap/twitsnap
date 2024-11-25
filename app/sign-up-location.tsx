@@ -52,8 +52,8 @@ const RequestLocationPermissions = () => {
         : null
     );
 
-    const registerParams = { inRegistration: 1 };
-    router.replace({ pathname: '/verification', params: registerParams });
+    const registerParams = { inRegistration: 'true' };
+    router.push({ pathname: '/verification', params: registerParams });
   };
 
   return (
