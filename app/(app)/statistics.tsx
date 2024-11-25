@@ -9,22 +9,17 @@ import {
   InteractionAmountData,
   StatisticsParams
 } from '@/app/types/statisticType';
-import HomeHeader from '@/components/feed/header';
+import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import RangePicker from '@/components/statistics/rangePicker';
 import StatisticsChart from '@/components/statistics/statisticsChart';
 import useAxiosInstance from '@/hooks/useAxios';
-import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 
 export default function Statistics() {
   const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(true);
   const [likeAmountData, setLikeAmountData] = useState<InteractionAmountData[] | null>(null);
   const [twitAmountData, setTwitAmountData] = useState<InteractionAmountData[] | null>(null);
-  const [retwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(
-    null
-  );
-  const [commentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(
-    null
-  );
+  const [retwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [commentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(null);
   const [followAmountData, setFollowAmountData] = useState<AccountInteractionData | null>(null);
   const [value, setValue] = useState(null);
   const [open, setOpen] = useState(false);
@@ -69,7 +64,6 @@ export default function Statistics() {
     setTwitAmountData(null);
     setRetwitAmountData(null);
     setCommentAmountData(null);
-    //setFollowAmountData(null);
     setLoadingMoreStatistics(true);
     setValue(null);
     setOpen(false);
@@ -98,12 +92,9 @@ export default function Statistics() {
   const fetchAccountStatistics = async ({ queryParams }: { queryParams: StatisticsParams }) => {
     try {
       setLoadingMoreStatistics(true);
-      console.log('fetching account statistics');
       const response = await axiosStatistics.get('metrics/', {
         params: queryParams
       });
-      console.log('entre');
-      console.log('response', response.data.data);
       setFollowAmountData(response.data.data);
     } catch (error) {
       console.error('Error fetching follow statistics:', error);
@@ -154,7 +145,6 @@ export default function Statistics() {
 
   const fetchTwitsStatisticsData = async () => {
     setLoadingMoreStatistics(true);
-    console.log('fetching twits statistics');
     await fetchAllTwitsInteraction()
       .catch((error) => {
         console.error('Error fetching statistics data:', error);
@@ -183,10 +173,6 @@ export default function Statistics() {
       });
     }
   };
-
-  //console.log('is Twit ', isActualStatisticsTypeTwit);
-  //console.log('is Account', isActualStatisticTypeAccount);
-  //console.log('loading', loadingMoreStatistics);
 
   const renderTwitStatistics = () =>
     loadingMoreStatistics ? (
@@ -219,23 +205,23 @@ export default function Statistics() {
             </Text>
           </View>
           <StatisticsChart
-            title="Follows vs Time"
-            data={followAmountData?.follows ?? []}
-            chartType="line"
+              title="Follows vs Time"
+              data={followAmountData?.follows ?? []}
+              chartType="line"
           />
         </View>
       </ScrollView>
     );
-  //console.log(followAmountData?.interactions);
-  console.log(followAmountData);
+
   return (
     <>
       <View style={styles.container}>
-        {/* Título y otras partes */}
         <View style={styles.titleContainer}>
           <Text style={styles.titleText}>Statistics</Text>
         </View>
         <FeedType {...statisticsTypes} />
+
+        {/* Agrupa RangePicker y estadísticas */}
         {showRangePicker && (
           <View style={styles.rangeBar}>
             <RangePicker
@@ -247,6 +233,7 @@ export default function Statistics() {
             />
           </View>
         )}
+        {/* Renderizado de estadísticas */}
         {isActualStatisticsTypeTwit ? renderTwitStatistics() : renderAccountStatistics()}
       </View>
     </>
@@ -269,12 +256,13 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   scrollContainer: {
-    padding: 15
+    padding: 15,
+    paddingTop: 40
   },
   rangeBar: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginBottom: 20,
+    marginBottom: 10,
     marginTop: 40
   },
   picker: {
@@ -303,17 +291,18 @@ const styles = StyleSheet.create({
     borderRadius: 10
   },
   statisticsContainer: {
-    gap: 20
+    gap: 20,
+    flex: 1
   },
   placeholder: {
     color: 'rgb(150 150 150)', // Color blanco para el texto del placeholder
     fontSize: 10 // Tamaño de la fuente para el placeholder
   },
   dropDownContainer: {
-    backgroundColor: '#222', // Color oscuro para el menú desplegable
-    borderColor: '#444', // Color del borde del menú
-    borderWidth: 1, // Grosor del borde
-    zIndex: 9999 // Asegura que el dropdown esté por encima
+    backgroundColor: '#222',
+    borderColor: '#444',
+    borderWidth: 1,
+    zIndex: 9999, // Asegura que el dropdown esté por encima
   },
   textStyle: {
     color: 'white', // Color blanco para el texto de los ítems del dropdown
