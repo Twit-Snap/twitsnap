@@ -12,8 +12,8 @@ import {
 import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 import RangePicker from '@/components/statistics/rangePicker';
 import StatisticsChart from '@/components/statistics/statisticsChart';
-import useAxiosInstance, { intervals } from '@/hooks/useAxios';
-import HomeHeader from "@/components/feed/header";
+import useAxiosInstance from '@/hooks/useAxios';
+import HomeHeader from '@/components/feed/header';
 
 export default function Statistics() {
   const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(true);
@@ -95,6 +95,7 @@ export default function Statistics() {
       const response = await axiosStatistics.get('metrics/', {
         params: queryParams
       });
+      console.log(response.data.data);
       setFollowAmountData(response.data.data);
     } catch (error) {
       console.error('Error fetching follow statistics:', error);
@@ -169,7 +170,6 @@ export default function Statistics() {
   };
 
   const refreshStatistics = async () => {
-    console.log('is twit statistics', isActualStatisticsTypeTwitRef.current);
     if (isActualStatisticsTypeTwitRef.current) {
       await refreshTwitStatitics();
 
@@ -182,8 +182,6 @@ export default function Statistics() {
 
   useFocusEffect(
     useCallback(() => {
-      console.log(statisticsTypes.items[0].state);
-      console.log(statisticsTypes.items[1].state);
       resetState();
       setActualStatisticsTypeTwit(true);
       isActualStatisticsTypeTwitRef.current = true;
@@ -245,7 +243,7 @@ export default function Statistics() {
           {/* Seguidores Totales */}
           <View style={styles.totalFollowersContainer}>
             <Text style={styles.totalFollowersText}>
-              Total Followers: {followAmountData?.totalFollowers ?? 0}
+              Total Followers: {followAmountData?.total ?? 0}
             </Text>
           </View>
           <StatisticsChart
