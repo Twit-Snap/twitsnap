@@ -1,11 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { Button } from 'react-native-paper';
 
 import useAxiosInstance from '@/hooks/useAxios';
 
 import { Interest } from './types/authTypes';
-
-const defaultEmoji = '😊'; // Default emoji to use if none is provided
 
 const SignUpInterests = () => {
   const [interests, setInterests] = useState<Interest[]>([]);
@@ -14,21 +21,21 @@ const SignUpInterests = () => {
   const [selectedInterests, setSelectedInterests] = useState<Interest[]>([]);
   const axiosInstance = useAxiosInstance('users');
 
-  useEffect(() => {
-    const fetchInterests = async () => {
-      try {
-        const response = (await axiosInstance.get('/public/interests')).data as Interest[];
-        setInterests(response);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to fetch interests');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchInterests = useCallback(async () => {
+    try {
+      const response = (await axiosInstance.get('/public/interests')).data as Interest[];
+      setInterests(response);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch interests');
+    } finally {
+      setLoading(false);
+    }
+  }, [axiosInstance]);
 
+  useEffect(() => {
     !interests.length && fetchInterests();
-  }, [axiosInstance, interests.length]);
+  }, [fetchInterests, interests.length]);
 
   if (loading) {
     return (
@@ -42,7 +49,22 @@ const SignUpInterests = () => {
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.errorText}>Oops! Something went wrong.</Text>
+        <Text style={styles.errorMessage}>{error}</Text>
+        <Text style={styles.errorSuggestion}>
+          Please check your internet connection and try again.
+        </Text>
+        <Button
+          mode="contained"
+          onPress={() => {
+            setError(null); // Clear the error
+            setSelectedInterests([]);
+            fetchInterests(); // Retry fetching interests
+          }}
+          style={styles.retryButton}
+        >
+          Retry
+        </Button>
       </View>
     );
   }
@@ -55,32 +77,74 @@ const SignUpInterests = () => {
     }
   };
 
+  const handleSaveInterests = async () => {
+    try {
+      await axiosInstance.post('/users/interests', {
+        interests: selectedInterests.map((interest) => interest.id)
+      });
+      console.log('Interests saved successfully');
+      router.replace('/home');
+    } catch (err) {
+      console.error(err);
+      setError('Failed to save interests');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select Your Interests</Text>
       <Text style={styles.explanationText}>
         We ask for your interests to improve the content we offer you.
       </Text>
-      <View style={styles.badgeContainer}>
-        {interests
-          .sort((a, b) => (a.parentId ?? 0) - (b.parentId ?? 0))
-          .map(
-            (interest) =>
-              (interest.parentId === null ||
-                selectedInterests.some((i) => i.id === interest.parentId)) && (
-                <TouchableOpacity
-                  key={interest.id}
-                  style={[
-                    styles.badge,
-                    selectedInterests.some((i) => i.id === interest.id) && styles.selectedBadge
-                  ]}
-                  onPress={() => handleInterestSelected(interest)}
-                >
-                  <Text style={styles.emoji}>{interest.emoji ? interest.emoji : defaultEmoji}</Text>
-                  <Text style={styles.badgeText}>{interest.name}</Text>
-                </TouchableOpacity>
-              )
-          )}
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.badgeContainer}>
+          {interests
+            .sort((a, b) => (a.parentId ?? 0) - (b.parentId ?? 0))
+            .map(
+              (interest) =>
+                // If the interest is a parent or a child that has been selected or is a child of a
+                // selected interest, show it
+                (interest.parentId === null ||
+                  selectedInterests.some(
+                    (i) => i.id === interest.parentId || i.id === interest.id
+                  )) && (
+                  <TouchableOpacity
+                    key={interest.id}
+                    style={[
+                      styles.badge,
+                      selectedInterests.some((i) => i.id === interest.id) && styles.selectedBadge
+                    ]}
+                    onPress={() => handleInterestSelected(interest)}
+                  >
+                    <Text style={styles.emoji}>{interest.emoji ?? ''}</Text>
+                    <Text style={styles.badgeText}>{interest.name}</Text>
+                  </TouchableOpacity>
+                )
+            )}
+        </View>
+      </ScrollView>
+      <View style={styles.footer}>
+        <Button
+          labelStyle={{
+            color: selectedInterests.length === 0 ? 'gray' : 'black',
+            fontWeight: 'bold',
+            fontSize: 16,
+            lineHeight: 16,
+            marginBottom: 1
+          }}
+          disabled={selectedInterests.length === 0}
+          buttonColor={selectedInterests.length === 0 ? 'rgba(255, 255, 255, 0.5)' : 'white'}
+          style={{
+            borderWidth: 1,
+            borderColor: 'rgb(5 5 5)',
+            height: 35,
+            width: 80,
+            opacity: selectedInterests.length === 0 ? 0.5 : 1
+          }}
+          onPress={handleSaveInterests}
+        >
+          {'Save'}
+        </Button>
       </View>
     </View>
   );
@@ -116,11 +180,32 @@ const styles = StyleSheet.create({
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: 'rgb(5, 5, 5)'
   },
   errorText: {
     color: 'red',
-    fontSize: 18
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10
+  },
+  errorMessage: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10
+  },
+  errorSuggestion: {
+    color: 'gray',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20
+  },
+  retryButton: {
+    backgroundColor: 'rgb(3, 165, 252)',
+    padding: 10,
+    borderRadius: 5
   },
   badgeContainer: {
     flexDirection: 'row',
@@ -150,6 +235,16 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     textAlign: 'center'
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginTop: 10
+  },
+  scrollView: {
+    flexGrow: 1
   }
 });
 
