@@ -4,11 +4,16 @@ import React, { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
-import { InteractionAmountData, StatisticsParams } from '@/app/types/statisticType';
+import {
+  AccountInteractionData,
+  InteractionAmountData,
+  StatisticsParams
+} from '@/app/types/statisticType';
 import HomeHeader from '@/components/feed/header';
 import RangePicker from '@/components/statistics/rangePicker';
 import StatisticsChart from '@/components/statistics/statisticsChart';
 import useAxiosInstance from '@/hooks/useAxios';
+import FeedType, { IFeedTypeProps } from '@/components/feed/feed_type';
 
 export default function Statistics() {
   const [loadingMoreStatistics, setLoadingMoreStatistics] = useState(true);
@@ -16,9 +21,13 @@ export default function Statistics() {
   const [twitAmountData, setTwitAmountData] = useState<InteractionAmountData[] | null>(null);
   const [retwitAmountData, setRetwitAmountData] = useState<InteractionAmountData[] | null>(null);
   const [commentAmountData, setCommentAmountData] = useState<InteractionAmountData[] | null>(null);
+  const [followAmountData, setFollowAmountData] = useState<AccountInteractionData | null>(null);
   const [value, setValue] = useState(null);
   const [open, setOpen] = useState(false);
   const [showRangePicker, setShowRangePicker] = useState(false);
+
+  const [isActualStatisticsTypeTwit, setctualStatisticsTypeTwit] = useState(true);
+  const [isActualStatisticTypeAccount, setIsActualStatisticTypeAccount] = useState(false);
 
   const timeRangeRef = useRef<'week' | 'month' | 'year'>('week');
   const axiosStatistics = useAxiosInstance('statistics');
@@ -26,8 +35,42 @@ export default function Statistics() {
   const userData = useAtomValue(authenticatedAtom);
   const username = userData?.username;
 
+  const statisticsTypes: IFeedTypeProps = {
+    items: [
+      {
+        text: 'Twits',
+        handler: async () => {
+          resetState();
+          setctualStatisticsTypeTwit(true);
+          setIsActualStatisticTypeAccount(false);
+          console.log('Outside fetching twit statistics');
+          await fetchTwitsStatisticsData();
+        },
+        state: true
+      },
+      {
+        text: 'Account',
+        handler: async () => {
+          resetState();
+          setIsActualStatisticTypeAccount(true);
+          setctualStatisticsTypeTwit(false);
+          console.log('Outside fetching account statistics');
+          await fetchAccountStatistics({
+            queryParams: { username, dateRange: timeRangeRef.current, type: 'follow' }
+          });
+        },
+        state: false
+      }
+    ]
+  };
+
   const resetState = () => {
     timeRangeRef.current = 'week';
+    setLikeAmountData(null);
+    setTwitAmountData(null);
+    setRetwitAmountData(null);
+    setCommentAmountData(null);
+    setFollowAmountData(null);
     setLoadingMoreStatistics(true);
     setValue(null);
     setOpen(false);
@@ -58,7 +101,7 @@ export default function Statistics() {
     await fetchStatistics({
       queryParams: { username: username, dateRange: timeRangeRef.current, type: 'like' },
       setData: setLikeAmountData,
-      errorMessage: 'Error fetching li kes statistics:'
+      errorMessage: 'Error fetching likes statistics:'
     });
   };
 
@@ -86,17 +129,17 @@ export default function Statistics() {
     });
   };
 
-  const fetchAll = async () => {
+  const fetchAllTwitsInteraction = async () => {
     await fetchLikesAmountStatistics();
     await fetchTwitsAmountStatistics();
     await fetchRetwitsAmountStatistics();
     await fetchCommentsAmountStatistics();
   };
 
-  const fetchStatisticsData = async () => {
+  const fetchTwitsStatisticsData = async () => {
     setLoadingMoreStatistics(true);
-
-    await fetchAll()
+    console.log('fetching twits statistics');
+    await fetchAllTwitsInteraction()
       .catch((error) => {
         console.error('Error fetching statistics data:', error);
       })
@@ -106,27 +149,83 @@ export default function Statistics() {
       });
   };
 
+  const fetchAccountStatistics = async ({ queryParams }: { queryParams: StatisticsParams }) => {
+    try {
+      setLoadingMoreStatistics(true);
+      console.log('fetching account statistics');
+      const response = await axiosStatistics.get('metrics/', {
+        params: queryParams
+      });
+      setFollowAmountData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching follow statistics:', error);
+    } finally {
+      setLoadingMoreStatistics(false);
+      setShowRangePicker(true);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
+      console.log('Page in focus, resetting state and fetching data.');
       resetState();
-      fetchStatisticsData();
+      setIsActualStatisticTypeAccount(false);
+      setctualStatisticsTypeTwit(true);
+      fetchTwitsStatisticsData();
     }, [])
   );
 
-  const handleTimeRangeChange = (range: 'week' | 'month' | 'year') => {
+  const handleTimeRangeChange = async (range: 'week' | 'month' | 'year') => {
     timeRangeRef.current = range;
-    fetchStatisticsData();
+    if (isActualStatisticsTypeTwit) {
+      await fetchTwitsStatisticsData();
+    } else {
+      await await fetchAccountStatistics({
+        queryParams: { username, dateRange: timeRangeRef.current, type: 'follow' }
+      });
+    }
   };
+
+  console.log('is Twit ', isActualStatisticsTypeTwit);
+  console.log('is Account', isActualStatisticTypeAccount);
+  console.log('loading', loadingMoreStatistics);
+
+  const renderTwitStatistics = () =>
+    loadingMoreStatistics ? (
+      <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
+    ) : (
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.statisticsContainer}>
+          <StatisticsChart title="Twits vs Time" data={twitAmountData ?? []} chartType="line" />
+          <StatisticsChart title="Retwits vs Time" data={retwitAmountData ?? []} chartType="line" />
+          <StatisticsChart
+            title="Comments vs Time"
+            data={commentAmountData ?? []}
+            chartType="line"
+          />
+          <StatisticsChart title="Likes vs Time" data={likeAmountData ?? []} chartType="line" />
+        </View>
+      </ScrollView>
+    );
+
+  const renderOtherStatistics = () =>
+    loadingMoreStatistics ? (
+      <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
+    ) : (
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.statisticsContainer}></View>
+      </ScrollView>
+    );
 
   return (
     <>
-      <HomeHeader />
       <View style={styles.container}>
-        {/* Título de la sección */}
+        {/* Título y otras partes */}
         <View style={styles.titleContainer}>
           <Text style={styles.titleText}>Statistics</Text>
         </View>
-        {showRangePicker ? (
+        <FeedType {...statisticsTypes} />
+        {showRangePicker && (
           <View style={styles.rangeBar}>
             <RangePicker
               setValue={setValue}
@@ -136,40 +235,8 @@ export default function Statistics() {
               setOpen={setOpen}
             />
           </View>
-        ) : null}
-        {loadingMoreStatistics ? (
-          <ActivityIndicator size={60} color={'rgb(3, 165, 252)'} style={{ marginTop: 30 }} />
-        ) : (
-          <>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-              {/* Barra de selección de rango */}
-
-              {/* Gráficos de estadísticas */}
-              <View style={styles.statisticsContainer}>
-                <StatisticsChart
-                  title="Twits vs Time"
-                  data={twitAmountData ?? []}
-                  chartType="line"
-                />
-                <StatisticsChart
-                  title="Retwits vs Time"
-                  data={retwitAmountData ?? []}
-                  chartType="line"
-                />
-                <StatisticsChart
-                  title="Comments vs Time"
-                  data={commentAmountData ?? []}
-                  chartType="line"
-                />
-                <StatisticsChart
-                  title="Likes vs Time"
-                  data={likeAmountData ?? []}
-                  chartType="line"
-                />
-              </View>
-            </ScrollView>
-          </>
         )}
+        {isActualStatisticsTypeTwit ? renderTwitStatistics() : renderOtherStatistics()}
       </View>
     </>
   );
@@ -197,7 +264,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     marginBottom: 20,
-    marginTop: 10
+    marginTop: 40
   },
   picker: {
     backgroundColor: 'rgb(28,28,28)',

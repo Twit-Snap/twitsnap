@@ -4,6 +4,11 @@ export interface InteractionAmountData {
   amount: number;
 }
 
+export interface AccountInteractionData {
+  totalFollowers: number;
+  interactions: InteractionAmountData[];
+}
+
 export type StatisticsParams = {
   type: string;
   username: string | undefined;
