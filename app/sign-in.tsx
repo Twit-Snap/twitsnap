@@ -132,7 +132,7 @@ const SignIn: () => React.JSX.Element = () => {
   };
 
   const handleForgotPassword = useCallback(() => {
-    console.log('Forgot password');
+    router.push('/forgot-password');
   }, []);
 
   return (
