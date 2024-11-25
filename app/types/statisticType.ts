@@ -5,7 +5,7 @@ export interface InteractionAmountData {
 }
 
 export interface AccountInteractionData {
-  totalFollowers: number;
+  total: number;
   follows: InteractionAmountData[];
 }
 
