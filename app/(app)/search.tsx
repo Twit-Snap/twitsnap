@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Divider } from 'react-native-paper';
 
+import MenuSearchBar from '@/components/search/menuSearchBar';
 import TopicCard from '@/components/search/topicCard';
 import useAxiosInstance from '@/hooks/useAxios';
 
@@ -29,6 +30,7 @@ export default function SearchScreen() {
 
   return (
     <>
+      <MenuSearchBar />
       <View style={styles.trendingContainer}>
         <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginLeft: 5 }}>
           Now Trending
