@@ -26,7 +26,7 @@ import { twitsAtom } from './twitsAtom';
 
 const window = Dimensions.get('screen');
 const intervalMinutes = 10 * 60 * 1000;
-// const intervalMinutes = 10 * 1000;
+//const intervalMinutes = 10 * 1000;
 
 export default function FeedScreen() {
   const newTwits = useRef<TwitSnap[] | null>(null);
@@ -214,8 +214,10 @@ export default function FeedScreen() {
         twits = response.data.data;
 
         if (twits.length > 0) {
-          const currentTwitsIds = tweets?.map(({ id }) => id);
-          twits = twits.filter(({ id }) => !currentTwitsIds?.includes(id));
+          const currentTwitsIds = [...(tweets || []), ...(newTwits.current || [])].map(
+            ({ id }) => id
+          );
+          twits = twits.filter(({ id }) => !currentTwitsIds.includes(id));
         }
       })
       .catch((error) => {
