@@ -59,40 +59,48 @@ export default function SearchScreen() {
       <ScrollView>
         <MenuSearchBar />
         <View style={styles.trendingContainer}>
-          <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginLeft: 5 }}>
-            Now Trending
-          </Text>
-          <Divider />
-          <View style={{ flexDirection: 'column', marginVertical: 10 }}>
-            <FlatList<{ [key: string]: number }>
-              data={trendingTopics}
-              renderItem={({ item }) => {
-                const topicName = Object.keys(item)[0];
-                const count = item[topicName];
-                return <TopicCard topic={{ topicName, count }} />;
-              }}
-              scrollEnabled={false}
-            />
-          </View>
-          <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginLeft: 5 }}>
-            Who to follow next
-          </Text>
-          <View
-            style={{
-              paddingHorizontal: 10,
-              paddingTop: 10,
-              borderWidth: 1,
-              borderBottomColor: 'rgb(40 40 40)'
-            }}
-          >
-            <FlatList
-              style={{ paddingVertical: 10 }}
-              horizontal={true}
-              data={suggestedAccounts}
-              renderItem={({ item }) => <LargeUserCard item={item} />}
-              keyExtractor={(item) => item.id.toString()}
-            />
-          </View>
+          {trendingTopics.length > 0 && (
+            <>
+              <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginLeft: 5 }}>
+                Now Trending
+              </Text>
+              <Divider />
+              <View style={{ flexDirection: 'column', marginVertical: 10 }}>
+                <FlatList<{ [key: string]: number }>
+                  data={trendingTopics}
+                  renderItem={({ item }) => {
+                    const topicName = Object.keys(item)[0];
+                    const count = item[topicName];
+                    return <TopicCard topic={{ topicName, count }} />;
+                  }}
+                  scrollEnabled={false}
+                />
+              </View>
+            </>
+          )}
+          {suggestedAccounts.length > 0 && (
+            <>
+              <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginLeft: 5 }}>
+                Who to follow next
+              </Text>
+              <View
+                style={{
+                  paddingHorizontal: 10,
+                  paddingTop: 10,
+                  borderWidth: 1,
+                  borderBottomColor: 'rgb(40 40 40)'
+                }}
+              >
+                <FlatList
+                  style={{ paddingVertical: 10 }}
+                  horizontal={true}
+                  data={suggestedAccounts}
+                  renderItem={({ item }) => <LargeUserCard item={item} />}
+                  keyExtractor={(item) => item.id.toString()}
+                />
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
     </>
