@@ -30,6 +30,7 @@ import ThreeDotMenu from '@/components/twits/ThreeDotMenu';
 import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance from '@/hooks/useAxios';
+
 import { twitsAtom } from '../home/twitsAtom';
 
 const default_images = {
