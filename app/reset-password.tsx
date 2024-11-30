@@ -1,6 +1,6 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRootNavigationState, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
 
 import useAxiosInstance from '@/hooks/useAxios';
@@ -36,6 +36,7 @@ const ResetPassword: () => React.JSX.Element = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isFormTouched, setIsFormTouched] = useState(false);
+  const rootNavigationState = useRootNavigationState();
 
   const [form, setForm] = useState<ResetPasswordForm>({
     password: { value: '' },
@@ -135,11 +136,16 @@ const ResetPassword: () => React.JSX.Element = () => {
   }, [form, isFormTouched]);
 
   useEffect(() => {
+    console.log('effect', email, token);
     if (!email || !token) {
-      Alert.alert('Invalid link', 'The reset password link is invalid or expired.');
-      router.push('/'); // Redirect to home or another appropriate page
+      console.log('invalid link');
+      if (rootNavigationState?.key) {
+        // Check if mounted before navigating
+        console.log('pushing to home');
+        //router.push('/'); // Redirect to home or another appropriate page
+      }
     }
-  }, [email, router, token]);
+  }, [email, router, token, rootNavigationState]);
 
   return (
     <View style={styles.container}>
