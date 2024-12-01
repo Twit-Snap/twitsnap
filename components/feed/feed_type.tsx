@@ -9,7 +9,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: 'rgb(5 5 5)'
+    backgroundColor: 'rgb(5 5 5)',
+    marginBottom: 5
   },
   feed_type_container: {
     flex: 1,
