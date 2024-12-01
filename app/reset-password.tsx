@@ -52,7 +52,7 @@ const ResetPassword: () => React.JSX.Element = () => {
     try {
       const response = await axiosUsers.post(
         `auth/reset-password`,
-        { email, token, newPassword: form.password.value },
+        { email, token, password: form.password.value },
         {
           headers: { 'Content-Type': 'application/json' }
         }

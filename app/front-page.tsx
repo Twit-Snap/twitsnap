@@ -41,8 +41,8 @@ export default function FrontPage() {
     // };
     const loadAuth = async () => {
       if (!authAtom) {
-        // const session: string | null = await AsyncStorage.getItem('auth');
-        const session: string | null = null; //To test sign in
+        const session: string | null = await AsyncStorage.getItem('auth');
+        // const session: string | null = null; //To test sign in
 
         if (!session) {
           setIsLoadingSession(false);
@@ -309,12 +309,7 @@ export default function FrontPage() {
               labelStyle={{ color: 'rgb(3, 165, 252)', fontSize: 18, fontWeight: 'bold' }}
               style={[styles.buttonContent, { borderColor: 'rgb(100 100 100)', borderWidth: 1 }]}
               onPress={() => {
-                // call login API
-                // router.push('/sign-in');
-                router.push({
-                  pathname: '/reset-password',
-                  params: { email: 'test@test.com', token: '1234567890' }
-                });
+                router.push('/sign-in');
               }}
             >
               Sign in
