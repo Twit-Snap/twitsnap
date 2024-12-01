@@ -1,14 +1,26 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { format } from 'date-fns';
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
+import { useAtom } from 'jotai/index';
 import React, { useRef, useState } from 'react';
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import {
+  Animated,
+  Dimensions,
+  Image,
+  Keyboard,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { Divider, IconButton } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { SearchedUser } from '@/app/types/publicUser';
+import { showTabsAtom } from '@/atoms/showTabsAtom';
+import ThreeDotMenuProfile from '@/components/profile/ThreeDotMenuProfile';
 
-import EditButton from './editButton';
 import FollowButton from './followButton';
 
 const windowWidth = Dimensions.get('window').width;
@@ -35,16 +47,49 @@ const ProfileHeader = ({ user }: { user: SearchedUser }) => {
         : false;
   };
 
+  const window = Dimensions.get('screen');
+
   const [canViewList, setCanViewList] = useState<boolean>(
     canViewFollowList(user?.following ? user.following : false)
   );
   const followersCount = useRef<number>(user?.followersCount ? user.followersCount : 0);
   const [followersCountRendered, refreshCount] = useState<number>(followersCount.current);
+  const [animatedValueThreeDot] = useState(new Animated.Value(window.height));
+
+  const [showTabs, setShowTabs] = useAtom(showTabsAtom);
+
+  const [isExpandedThreeDot, setIsExpandedThreeDot] = useState(false);
+  const isExpandedRefThreeDot = useRef(false);
+
+  const [, setIsAuthenticated] = useAtom(authenticatedAtom);
 
   const setFollowingCount = (nowFollowing: boolean) => {
     nowFollowing ? followersCount.current++ : followersCount.current--;
     refreshCount(followersCount.current);
     setCanViewList(canViewFollowList(nowFollowing));
+  };
+
+  const handlePressThreeDot = () => {
+    setShowTabs(!showTabs);
+    Animated.timing(animatedValueThreeDot, {
+      toValue: isExpandedThreeDot ? window.height : 0, // Adjust the height as needed
+      duration: 300, // Animation duration in milliseconds
+      useNativeDriver: true
+    }).start(() => {
+      setIsExpandedThreeDot(!isExpandedThreeDot);
+    });
+    Keyboard.dismiss();
+  };
+
+  const handleLogOut = async () => {
+    try {
+      await AsyncStorage.removeItem('auth');
+      setIsAuthenticated(null);
+      console.log('Log out successful');
+      router.replace('/home');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   return (
@@ -68,7 +113,16 @@ const ProfileHeader = ({ user }: { user: SearchedUser }) => {
       <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
         {user?.id ? (
           user.username === authUser?.username ? (
-            <EditButton />
+            <IconButton
+              icon="cog"
+              style={{ position: 'absolute', left: window.width - 80 }}
+              size={30}
+              onPress={() => {
+                isExpandedRefThreeDot.current = !isExpandedRefThreeDot.current;
+                setIsExpandedThreeDot(isExpandedRefThreeDot.current);
+                handlePressThreeDot();
+              }}
+            />
           ) : (
             <FollowButton extraCallback={setFollowingCount} user={user} />
           )
@@ -130,6 +184,36 @@ const ProfileHeader = ({ user }: { user: SearchedUser }) => {
           </>
         )}
       </View>
+      <Animated.View
+        style={[
+          {
+            backgroundColor: 'rgb(5 5 5)',
+            zIndex: 50,
+            position: 'absolute',
+            bottom: 0,
+            top: 0,
+            paddingTop: 35,
+            width: window.width
+          },
+          {
+            transform: [{ translateY: animatedValueThreeDot }],
+            top: '30%'
+          }
+        ]}
+      >
+        <View style={{ borderRadius: 30 }}>
+          <Divider
+            style={{
+              height: 2,
+              width: '30%',
+              backgroundColor: 'rgb(194,187,187)',
+              marginLeft: '35%',
+              marginRight: '35%'
+            }}
+          />
+          <ThreeDotMenuProfile handleLogOut={handleLogOut} onCloseOrFinish={handlePressThreeDot} />
+        </View>
+      </Animated.View>
     </>
   );
 };
@@ -158,6 +242,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 24,
+    marginTop: 30,
     color: 'white',
     fontWeight: 'bold'
   },
