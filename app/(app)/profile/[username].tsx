@@ -211,7 +211,7 @@ export default function PublicProfileScreen() {
         {twits ? (
           twits.length > 0 ? (
             <FlatList<TwitSnap>
-              style={{ marginTop: 5 }}
+              style={{ marginTop: 0 }}
               data={twits}
               renderItem={({ item }) => {
                 return <TweetCard item={item} />;
