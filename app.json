@@ -23,7 +23,7 @@
       },
       "package": "com.lescalante14.twitsnap",
       "googleServicesFile": "./google-services.json",
-      "permissions": ["INTERNET"]
+      "permissions": ["INTERNET", "USE_FINGERPRINT"]
     },
     "web": {
       "bundler": "metro",
@@ -49,6 +49,12 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
         }
       ]
     ],
