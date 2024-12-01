@@ -82,7 +82,8 @@ export default function RootLayout() {
             options={{
               tabBarButton: () => null, // Hide the tab
               header: () => null,
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
@@ -90,7 +91,8 @@ export default function RootLayout() {
             options={{
               tabBarButton: () => null, // Hide the tab
               header: () => null,
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
@@ -98,7 +100,8 @@ export default function RootLayout() {
             options={{
               tabBarButton: () => null, // Hide the tab
               header: () => null,
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
@@ -106,7 +109,8 @@ export default function RootLayout() {
             options={{
               tabBarButton: () => null, // Hide the tab
               header: () => null,
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
@@ -141,7 +145,8 @@ export default function RootLayout() {
               tabBarButton: () => null, // Hide the tab
               header: () => null,
               tabBarStyle: { display: 'none' },
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
@@ -150,7 +155,8 @@ export default function RootLayout() {
               tabBarButton: () => null, // Hide the tab
               header: () => null,
               tabBarStyle: { display: 'none' },
-              headerShown: false
+              headerShown: false,
+              tabBarShowLabel: false
             }}
           />
           <Tabs.Screen
