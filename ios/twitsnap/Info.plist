@@ -27,7 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>myapp</string>
+          <string>twitsnap</string>
           <string>com.lescalante14.twitsnap</string>
         </array>
       </dict>

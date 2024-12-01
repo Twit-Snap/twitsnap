@@ -27,7 +27,7 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="myapp"/>
+        <data android:scheme="twitsnap"/>
         <data android:scheme="com.lescalante14.twitsnap"/>
         <data android:scheme="exp+twitsnap"/>
       </intent-filter>
