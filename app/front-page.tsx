@@ -309,7 +309,6 @@ export default function FrontPage() {
               labelStyle={{ color: 'rgb(3, 165, 252)', fontSize: 18, fontWeight: 'bold' }}
               style={[styles.buttonContent, { borderColor: 'rgb(100 100 100)', borderWidth: 1 }]}
               onPress={() => {
-                // call login API
                 router.push('/sign-in');
               }}
             >

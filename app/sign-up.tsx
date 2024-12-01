@@ -9,6 +9,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { blockedAtom } from '@/atoms/blockedAtom';
 import useAxiosInstance from '@/hooks/useAxios';
 import { validatePreviousDate } from '@/utils/date';
+import { regexEmail } from '@/utils/email';
+import { FormRules } from '@/utils/form';
 import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import ImagePicker from '../components/common/ImagePicker';
@@ -46,15 +48,6 @@ const getFormProps = (form: SignUpForm, prop: keyof SignUpFormField) => {
   };
 };
 
-type FormRules = {
-  required: boolean;
-  pattern?: RegExp;
-  customValidation?: (value: string) => boolean;
-  minLength?: number;
-  maxLength?: number;
-  errorMessage: string;
-};
-
 const validationRules: Record<
   keyof Omit<SignUpForm, 'profilePicture' | 'registrationTime'>,
   FormRules
@@ -73,7 +66,7 @@ const validationRules: Record<
   },
   email: {
     required: true,
-    pattern: /^\S+@\S+\.\S+$/,
+    pattern: regexEmail,
     errorMessage: 'Please enter a valid email address.'
   },
   phoneNumber: {
