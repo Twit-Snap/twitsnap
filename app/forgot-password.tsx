@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -25,6 +25,23 @@ const ForgotPassword: () => React.JSX.Element = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const emailRef = useRef<RNTextInput | null>(null);
+  const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
+  const [countdown, setCountdown] = useState(30);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0 && isButtonDisabled) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setIsButtonDisabled(false);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [countdown, isButtonDisabled]);
 
   const closeInput = () => {
     Keyboard.dismiss();
@@ -56,6 +73,8 @@ const ForgotPassword: () => React.JSX.Element = () => {
       if (response.status === 200) {
         setMessage('A reset link has been sent to your email.');
         setErrorMessage(null); // Clear any previous error messages
+        setIsButtonDisabled(true);
+        setCountdown(30);
       } else {
         setMessage(null);
         setErrorMessage('Failed to send reset link. Please try again.');
@@ -122,13 +141,24 @@ const ForgotPassword: () => React.JSX.Element = () => {
             {message && (
               <Text
                 style={{
-                  color: 'rgb(255 100 100)',
+                  color: 'gray',
                   fontSize: 22,
                   fontWeight: 'bold',
                   textAlign: 'center'
                 }}
               >
                 {message}
+              </Text>
+            )}
+            {isButtonDisabled && (
+              <Text
+                style={{
+                  color: 'gray',
+                  fontSize: 16,
+                  textAlign: 'center'
+                }}
+              >
+                Please wait {countdown} seconds before resending the email.
               </Text>
             )}
           </View>
@@ -144,8 +174,9 @@ const ForgotPassword: () => React.JSX.Element = () => {
               buttonColor="white"
               style={{ borderWidth: 1, borderColor: 'rgb(5 5 5)', height: 35, width: '100%' }}
               onPress={handleSubmit}
+              disabled={isButtonDisabled}
             >
-              Send Reset Link
+              {isButtonDisabled ? 'Resend email' : 'Send Reset Link'}
             </Button>
           </View>
         </SafeAreaView>
