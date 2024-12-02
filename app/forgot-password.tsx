@@ -27,6 +27,12 @@ const ForgotPassword: () => React.JSX.Element = () => {
   const emailRef = useRef<RNTextInput | null>(null);
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
   const [countdown, setCountdown] = useState(30);
+  const [entryTime, setEntryTime] = useState<Date>(new Date());
+
+  const calculateEventTime = () => {
+    const now = new Date();
+    return now.getTime() - entryTime.getTime();
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -55,6 +61,8 @@ const ForgotPassword: () => React.JSX.Element = () => {
   const handleSubmit = async () => {
     closeInput();
 
+    const timeSpent = calculateEventTime();
+
     // Validate email
     if (!email.match(regexEmail)) {
       setErrorMessage('Please enter a valid email.');
@@ -64,7 +72,7 @@ const ForgotPassword: () => React.JSX.Element = () => {
     try {
       const response = await axiosUsers.post(
         `auth/forgot-password`,
-        { email },
+        { email, forgotPasswordTime: timeSpent },
         {
           headers: { 'Content-Type': 'application/json' }
         }
@@ -83,6 +91,7 @@ const ForgotPassword: () => React.JSX.Element = () => {
       console.error('Error:', error);
       setMessage(null);
       setErrorMessage('An error occurred. Please try again later.');
+      setEntryTime(new Date());
     }
   };
 
