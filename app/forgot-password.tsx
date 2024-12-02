@@ -34,7 +34,6 @@ const ForgotPassword: () => React.JSX.Element = () => {
     return now.getTime() - entryTime.getTime();
   };
 
-
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdown > 0 && isButtonDisabled) {
