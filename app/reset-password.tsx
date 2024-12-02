@@ -31,17 +31,29 @@ const validationRules: Record<keyof ResetPasswordForm, FormRules> = {
 
 const ResetPassword: () => React.JSX.Element = () => {
   const router = useRouter();
-  const { email, token } = useLocalSearchParams<{ email: string; token: string }>();
+  const { email, username, token, forgotPasswordTime } = useLocalSearchParams<{
+    email: string;
+    username: string;
+    token: string;
+    forgotPasswordTime: string;
+  }>();
   const axiosUsers = useAxiosInstance('users');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isFormTouched, setIsFormTouched] = useState(false);
   const rootNavigationState = useRootNavigationState();
+  const [entryTime, setEntryTime] = useState<Date>(new Date());
 
   const [form, setForm] = useState<ResetPasswordForm>({
     password: { value: '' },
     repeatPassword: { value: '' }
   });
+
+  const calculateEventTime = (forgotPasswordTime: string) => {
+    const timeAlreadyPass = parseInt(forgotPasswordTime);
+    const now = new Date();
+    return now.getTime() - entryTime.getTime() + timeAlreadyPass;
+  };
 
   const handleResetPassword = async () => {
     if (form.password.value !== form.repeatPassword.value) {
@@ -49,10 +61,11 @@ const ResetPassword: () => React.JSX.Element = () => {
       return;
     }
 
+    const timeSpent = calculateEventTime(forgotPasswordTime);
     try {
       const response = await axiosUsers.post(
         `auth/reset-password`,
-        { email, token, password: form.password.value },
+        { email, username, token, password: form.password.value, resetPasswordTime: timeSpent },
         {
           headers: { 'Content-Type': 'application/json' }
         }
@@ -68,6 +81,7 @@ const ResetPassword: () => React.JSX.Element = () => {
     } catch (error: any) {
       console.error('Error:', error);
       setErrorMessage('An error occurred. Please try again later.');
+      setEntryTime(new Date());
     }
   };
 
