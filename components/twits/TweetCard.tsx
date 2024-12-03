@@ -14,6 +14,7 @@ import Interaction from './interaction';
 import Bookmark from './Interactions/bookmark';
 import Like from './Interactions/like';
 import Retwit from './Interactions/retwit';
+import ShareButton from './ShareButton';
 
 const default_images = {
   default_profile_picture: require('../../assets/images/no-profile-picture.png')
@@ -151,6 +152,7 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
                 initCount={item.bookmarkCount}
                 twitId={tweet.id}
               />
+              <ShareButton />
             </View>
           </View>
         </View>
