@@ -330,7 +330,7 @@ const TwitView: React.FC = () => {
               <Retwit initState={tweet.userRetwitted} initCount={undefined} twitId={tweet.id} />
               <Like initState={tweet.userLiked} initCount={undefined} twitId={tweet.id} />
               <Bookmark initState={tweet.userBookmarked} initCount={undefined} twitId={tweet.id} />
-              <ShareButton />
+              <ShareButton twitId={tweet.id} />
             </View>
             <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(60 60 60)' }} />
             <>
