@@ -31,6 +31,7 @@ import TweetBoxFeed from '@/components/twits/TweetBoxFeed';
 import TweetCard from '@/components/twits/TweetCard';
 import useAxiosInstance from '@/hooks/useAxios';
 
+import ShareButton from '@/components/twits/ShareButton';
 import { twitsAtom } from '../home/twitsAtom';
 
 const default_images = {
@@ -329,6 +330,7 @@ const TwitView: React.FC = () => {
               <Retwit initState={tweet.userRetwitted} initCount={undefined} twitId={tweet.id} />
               <Like initState={tweet.userLiked} initCount={undefined} twitId={tweet.id} />
               <Bookmark initState={tweet.userBookmarked} initCount={undefined} twitId={tweet.id} />
+              <ShareButton twitId={tweet.id} />
             </View>
             <Divider style={{ height: 1, width: '100%', backgroundColor: 'rgb(60 60 60)' }} />
             <>
