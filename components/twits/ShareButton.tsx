@@ -11,7 +11,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ twitId }) => {
   const onShare = async () => {
     try {
       const result = await Share.open({
-        message: `¡Check out this twitsnap!\n\nmyapp://twits/${twitId}`,
+        message: `¡Check out this twitsnap!\n\n${process.env.EXPO_PUBLIC_TWITS_SERVICE_URL}twitShare/${twitId}`,
         showAppsToView: true
       });
     } catch (error: any) {
