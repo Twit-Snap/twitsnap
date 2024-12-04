@@ -105,6 +105,15 @@ export default function RootLayout() {
             }}
           />
           <Tabs.Screen
+            name="profile/[username]/edit"
+            options={{
+              tabBarButton: () => null, // Hide the tab
+              header: () => null,
+              headerShown: false,
+              tabBarShowLabel: false
+            }}
+          />
+          <Tabs.Screen
             name="twits/[id]"
             options={{
               tabBarButton: () => null, // Hide the tab

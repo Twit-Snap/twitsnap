@@ -35,3 +35,13 @@ export interface IReducedUser {
   expoToken?: string;
   followCreatedAt?: string;
 }
+
+export interface ModifiableUser {
+  username?: string;
+  name?: string;
+  lastname?: string;
+  birthdate?: string;
+  profilePicture?: string;
+  backgroundPicture?: string;
+  isPrivate?: boolean;
+}

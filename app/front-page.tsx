@@ -19,7 +19,7 @@ import useAxiosInstance from '@/hooks/useAxios';
 import { registerForPushNotificationsAsync } from '@/utils/notifications';
 
 import { authenticatedAtom } from './authAtoms/authAtom';
-import { UserSSORegisterDto } from './types/authTypes';
+import { UserAuth, UserSSORegisterDto } from './types/authTypes';
 
 GoogleSignin.configure({
   webClientId: '224360780470-maj4ma0cdjlm1o2376lv28m45rvm2e8e.apps.googleusercontent.com'
@@ -48,8 +48,10 @@ export default function FrontPage() {
           setIsLoadingSession(false);
           return;
         }
-
-        router.replace('/biometric-login');
+        const userSession = JSON.parse(session) as UserAuth;
+        setAuthAtom(userSession);
+        router.replace(`/profile/${userSession.username}/edit`);
+        // router.replace('/biometric-login');
       } else {
         setIsLoadingSession(false);
         // handleLocation(authAtom);
