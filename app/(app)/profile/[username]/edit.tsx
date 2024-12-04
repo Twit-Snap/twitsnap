@@ -1,9 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button, IconButton } from 'react-native-paper';
 
 import { ModifiableUser } from '@/app/types/publicUser';
+import ImagePicker from '@/components/common/ImagePicker';
 import useAxiosInstance from '@/hooks/useAxios';
 
 const EditProfileScreen = () => {
@@ -63,7 +64,6 @@ const EditProfileScreen = () => {
           icon="arrow-left"
           iconColor="white"
           onPress={() => {
-            // eslint-disable-next-line no-unused-expressions
             router.canGoBack() ? router.back() : router.replace(`/profile/${username}`);
           }}
         />
@@ -72,16 +72,19 @@ const EditProfileScreen = () => {
           Save
         </Button>
       </View>
-      <View style={styles.profileImageContainer}>
-        <Image
-          source={{ uri: userData?.profilePicture || 'default_image_url' }}
-          style={styles.profileImage}
+      <View style={styles.bannerImageContainer}>
+        <ImagePicker
+          isBanner={true}
+          imageUri={userData?.backgroundPicture}
+          username={username}
+          onImagePicked={(uri) => handleInputChange('backgroundPicture', uri)}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Background Picture URL"
-          value={userData?.backgroundPicture || ''}
-          onChangeText={(value) => handleInputChange('backgroundPicture', value)}
+      </View>
+      <View style={styles.profileImageContainer}>
+        <ImagePicker
+          imageUri={userData?.profilePicture}
+          username={username}
+          onImagePicked={(uri) => handleInputChange('profilePicture', uri)}
         />
       </View>
       <TextInput
@@ -116,7 +119,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    // paddingVertical: 2,
     borderBottomWidth: 1,
     borderBottomColor: 'gray'
   },
@@ -129,18 +131,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: 'rgb(3, 165, 252)'
   },
+  bannerImageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
   profileImageContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: 'white',
-    marginRight: 20
+    alignItems: 'center'
   },
   input: {
     height: 40,
