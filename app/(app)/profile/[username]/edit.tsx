@@ -93,10 +93,10 @@ const EditProfileScreen = () => {
   const axiosUsers = useAxiosInstance('users');
   const [originalUserData, setUserData] = useState<ModifiableUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isFormTouched, setIsFormTouched] = useState(false);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const [authAtom, setAuthAtom] = useAtom(authenticatedAtom);
+  const [updateIsLoading, setUpdateIsLoading] = useState(false);
 
   const [form, setForm] = useState<ModifiableUserForm>({
     name: { value: '' },
@@ -122,7 +122,7 @@ const EditProfileScreen = () => {
         });
       } catch (err) {
         console.error(err);
-        setError('Failed to load user data');
+        alert('Failed to load user data. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -182,13 +182,18 @@ const EditProfileScreen = () => {
   const handleSubmit = async () => {
     if (originalUserData) {
       try {
+        setUpdateIsLoading(true);
         const updatedUserData = extractUserChanges(originalUserData, form);
         console.log(updatedUserData);
         await axiosUsers.patch(`users/${username}`, updatedUserData);
         updateStorageUser(form);
+        alert('User data updated successfully.');
+        router.replace(`/profile/${username}`);
       } catch (err) {
         console.error(err);
-        setError('Failed to update user data');
+        alert('Failed to update user data. Please try again later.');
+      } finally {
+        setUpdateIsLoading(false);
       }
     }
   };
@@ -222,10 +227,6 @@ const EditProfileScreen = () => {
     return <ActivityIndicator size="large" color="blue" />;
   }
 
-  if (error) {
-    return <Text style={styles.errorText}>{error}</Text>;
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -242,7 +243,8 @@ const EditProfileScreen = () => {
           mode="contained"
           onPress={handleSubmit}
           style={styles.headerButton}
-          disabled={!isFormValid}
+          disabled={!isFormValid || updateIsLoading}
+          loading={updateIsLoading}
         >
           Save
         </Button>
