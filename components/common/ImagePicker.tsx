@@ -35,7 +35,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
   onLoadingChange,
   isBanner
 }) => {
-  const [profilePicture, setprofilePicture] = useState<string | undefined>(imageUri);
+  const [pictureUri, setPictureUri] = useState<string | undefined>(imageUri);
   const [isLoading, setIsLoading] = useState(false);
 
   const pickImage = useCallback(async () => {
@@ -79,7 +79,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
 
         const uploadTask = await reference.put(blob); // Sube la imagens
         const url = await uploadTask.ref.getDownloadURL();
-        setprofilePicture(url); // Actualiza el estado con la URI de la imagen seleccionada
+        setPictureUri(url); // Actualiza el estado con la URI de la imagen seleccionada
         onImagePicked(url); // Llama al callback con la URI de la imagen
         console.log('Image uploaded to Firebase Storage', url);
         setIsLoading(false);
@@ -99,12 +99,10 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
       <View>
         <TouchableOpacity onPress={handleImagePick}>
           {isLoading ? (
-            <ActivityIndicator size="small" color="white" />
+            <ActivityIndicator size="small" color="white" style={bannerStyles.bannerPhoto} />
           ) : (
             <Image
-              source={
-                profilePicture ? { uri: profilePicture } : default_images.default_banner_picture
-              }
+              source={pictureUri ? { uri: pictureUri } : default_images.default_banner_picture}
               style={bannerStyles.bannerPhoto}
             />
           )}
@@ -119,12 +117,10 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
     <View style={styles.container}>
       <TouchableOpacity onPress={handleImagePick}>
         {isLoading ? (
-          <ActivityIndicator size="small" color="white" />
+          <ActivityIndicator size="small" color="white" style={styles.profilePicture} />
         ) : (
           <Image
-            source={
-              profilePicture ? { uri: profilePicture } : default_images.default_profile_picture
-            }
+            source={pictureUri ? { uri: pictureUri } : default_images.default_profile_picture}
             style={styles.profilePicture}
           />
         )}
