@@ -5,6 +5,7 @@ import { useSetAtom } from 'jotai';
 import React, { useCallback, useState } from 'react';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
+import DatePickerModal from 'react-native-paper-dates/lib/typescript/Date/DatePickerModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
@@ -26,6 +27,7 @@ const SignUpScreen = () => {
     useLocalSearchParams<Omit<UserSSORegisterDto, 'birthdate'>>();
   const setAuthAtom = useSetAtom(authenticatedAtom);
   const [birthdate, setBirthdate] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [usernameInput, setUsernameInput] = useState(username);
   const [phoneNumber, setPhoneNumber] = useState<SignUpFormField>({ value: '' });
   const setBlocked = useSetAtom(blockedAtom);
@@ -107,6 +109,15 @@ const SignUpScreen = () => {
     return true;
   };
 
+  const handleDateChange = (date: any) => {
+    if (date) {
+      const dateString = date.date.toISOString().split('T')[0];
+      console.log('dateString', dateString);
+      setBirthdate(dateString);
+    }
+    setShowDatePicker(false);
+  };
+
   return (
     <>
       <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
@@ -129,9 +140,25 @@ const SignUpScreen = () => {
             mode="outlined"
             label="Birthdate"
             onChangeText={setBirthdate}
+            onFocus={() => setShowDatePicker(true)}
             style={styles.input}
             placeholder="YYYY-MM-DD"
             theme={inputTheme}
+          />
+          <DatePickerModal
+            locale="en"
+            label="Select a date"
+            mode="single"
+            visible={showDatePicker}
+            onDismiss={() => setShowDatePicker(false)}
+            date={birthdate ? new Date(birthdate) : undefined}
+            onConfirm={handleDateChange}
+            validRange={{
+              startDate: new Date('1900-01-01'),
+              endDate: new Date()
+            }}
+            startYear={1900}
+            endYear={new Date().getFullYear()}
           />
           <View style={styles.inputContainer}>
             <TextInput
