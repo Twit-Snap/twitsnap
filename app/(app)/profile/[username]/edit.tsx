@@ -1,5 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Switch, Text, View } from 'react-native';
 import { Button, HelperText, IconButton, TextInput } from 'react-native-paper';
@@ -95,7 +96,7 @@ const EditProfileScreen = () => {
   const [error, setError] = useState<string | null>(null);
   const [isFormTouched, setIsFormTouched] = useState(false);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
-  const setAuthAtom = useSetAtom(authenticatedAtom);
+  const [authAtom, setAuthAtom] = useAtom(authenticatedAtom);
 
   const [form, setForm] = useState<ModifiableUserForm>({
     name: { value: '' },
@@ -184,21 +185,23 @@ const EditProfileScreen = () => {
         const updatedUserData = extractUserChanges(originalUserData, form);
         console.log(updatedUserData);
         await axiosUsers.patch(`users/${username}`, updatedUserData);
-        setAuthAtom(
-          (prev) =>
-            ({
-              ...prev,
-              name: form.name.value,
-              lastname: form.lastname.value,
-              birthdate: form.birthdate.value,
-              profilePicture: form.profilePicture?.value
-            }) as UserAuth
-        );
+        updateStorageUser(form);
       } catch (err) {
         console.error(err);
         setError('Failed to update user data');
       }
     }
+  };
+  const updateStorageUser = (formData: ModifiableUserForm) => {
+    const updatedUserData = {
+      ...authAtom,
+      name: formData.name.value,
+      lastname: formData.lastname.value,
+      birthdate: formData.birthdate.value,
+      profilePicture: formData.profilePicture?.value || ''
+    } as UserAuth;
+    setAuthAtom(updatedUserData);
+    AsyncStorage.setItem('auth', JSON.stringify(updatedUserData));
   };
 
   const isFormValid = useMemo(() => {
