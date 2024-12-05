@@ -5,7 +5,7 @@ import { useSetAtom } from 'jotai';
 import React, { useCallback, useState } from 'react';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
-import DatePickerModal from 'react-native-paper-dates/lib/typescript/Date/DatePickerModal';
+import { DatePickerModal } from 'react-native-paper-dates';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';

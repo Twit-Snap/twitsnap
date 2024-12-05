@@ -62,20 +62,17 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
 
     if (result && !result.canceled) {
       // Subir la imagen a Firebase Storage
-      console.log(username);
-      console.log(result.assets);
+      console.log('asset selected by user', username, result.assets);
 
       try {
         setIsLoading(true);
         onLoadingChange?.(true);
         // option 1 with blob
         const response = await fetch(result.assets[0].uri);
-        console.log(response);
         const blob = await response.blob();
         const fileName = `${username}_${new Date().getTime()}`;
         const directory = isBanner ? 'bannerPictures' : 'profilePictures';
         const reference = firebase.storage().ref().child(`${directory}/${fileName}`);
-        console.log(reference);
 
         const uploadTask = await reference.put(blob); // Sube la imagens
         const url = await uploadTask.ref.getDownloadURL();
