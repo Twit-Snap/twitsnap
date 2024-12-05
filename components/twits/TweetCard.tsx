@@ -80,10 +80,13 @@ const TweetCard: React.FC<TweetCardProps> = ({ item, showReply = true }) => {
             <Text style={{ color: 'rgb(120 120 120)', fontWeight: 'bold' }}>
               {
                 <ParsedContent
-                  text={`Replying to @${tweet.user.username}`}
+                  text={`Replying to @${item.parent.user.username}`}
                   color={'rgb(120 120 120)'}
                   fontSize={13}
-                  entities={{ hashtags: [], userMentions: [{ username: tweet.user.username }] }}
+                  entities={{
+                    hashtags: [],
+                    userMentions: [{ username: item.parent.user.username }]
+                  }}
                 />
               }
             </Text>
