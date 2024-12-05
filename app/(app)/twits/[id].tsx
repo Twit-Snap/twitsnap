@@ -106,6 +106,7 @@ const TwitView: React.FC = () => {
         }
       );
       console.log('Twit sent: ', response.data);
+      setComments((current) => [response.data.data, ...(current || [])]);
     } catch (error: any) {
       console.error('Error:', error);
       alert('An error occurred. Please try again later.');
