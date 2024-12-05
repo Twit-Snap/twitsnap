@@ -57,22 +57,49 @@ const validationRules: Record<keyof ModifiableUserFormInputs, FormRules> = {
   }
 };
 
+const extractUserChanges = (originalUserData: ModifiableUser, newUserData: ModifiableUserForm) => {
+  const changes: Partial<ModifiableUser> = {
+    name: newUserData.name.value === originalUserData.name ? undefined : newUserData.name.value,
+    lastname:
+      newUserData.lastname.value === originalUserData.lastname
+        ? undefined
+        : newUserData.lastname.value,
+    birthdate:
+      newUserData.birthdate.value === originalUserData.birthdate
+        ? undefined
+        : newUserData.birthdate.value,
+    isPrivate:
+      newUserData.isPrivate.value === originalUserData.isPrivate?.toString()
+        ? undefined
+        : newUserData.isPrivate.value === 'true',
+    profilePicture:
+      newUserData.profilePicture?.value === originalUserData.profilePicture
+        ? undefined
+        : newUserData.profilePicture?.value,
+    backgroundPicture:
+      newUserData.backgroundPicture?.value === originalUserData.backgroundPicture
+        ? undefined
+        : newUserData.backgroundPicture?.value
+  };
+  return changes;
+};
+
 const EditProfileScreen = () => {
   const { username } = useLocalSearchParams<{ username: string }>();
   const axiosUsers = useAxiosInstance('users');
-  const [userData, setUserData] = useState<ModifiableUser | null>(null);
+  const [originalUserData, setUserData] = useState<ModifiableUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFormTouched, setIsFormTouched] = useState(false);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
 
   const [form, setForm] = useState<ModifiableUserForm>({
-    name: { value: userData?.name || '' },
-    lastname: { value: userData?.lastname || '' },
-    birthdate: { value: userData?.birthdate || '' },
-    isPrivate: { value: userData?.isPrivate?.toString() || 'false' },
-    profilePicture: { value: userData?.profilePicture || '' },
-    backgroundPicture: { value: userData?.backgroundPicture || '' }
+    name: { value: originalUserData?.name || '' },
+    lastname: { value: originalUserData?.lastname || '' },
+    birthdate: { value: originalUserData?.birthdate || '' },
+    isPrivate: { value: originalUserData?.isPrivate?.toString() || 'false' },
+    profilePicture: { value: originalUserData?.profilePicture || '' },
+    backgroundPicture: { value: originalUserData?.backgroundPicture || '' }
   });
 
   useEffect(() => {
@@ -80,6 +107,12 @@ const EditProfileScreen = () => {
       try {
         const response = await axiosUsers.get(`users/${username}`);
         setUserData(response.data.data);
+        setForm({
+          name: { value: response.data.data.name },
+          lastname: { value: response.data.data.lastname },
+          birthdate: { value: response.data.data.birthdate },
+          isPrivate: { value: response.data.data.isPrivate.toString() }
+        });
       } catch (err) {
         console.error(err);
         setError('Failed to load user data');
@@ -140,9 +173,11 @@ const EditProfileScreen = () => {
     [form]
   );
   const handleSubmit = async () => {
-    if (userData) {
+    if (originalUserData) {
       try {
-        await axiosUsers.put(`users/${username}`, userData);
+        const updatedUserData = extractUserChanges(originalUserData, form);
+        console.log(updatedUserData);
+        await axiosUsers.patch(`users/${username}`, updatedUserData);
         // Optionally navigate back or show success message
       } catch (err) {
         console.error(err);
@@ -190,7 +225,7 @@ const EditProfileScreen = () => {
       <View style={styles.bannerImageContainer}>
         <ImagePicker
           isBanner={true}
-          imageUri={userData?.backgroundPicture}
+          imageUri={form.backgroundPicture?.value}
           username={username}
           onImagePicked={(uri) => handleChange('backgroundPicture', uri)}
           onLoadingChange={setIsUploadingPicture}
@@ -198,7 +233,7 @@ const EditProfileScreen = () => {
       </View>
       <View style={styles.profileImageContainer}>
         <ImagePicker
-          imageUri={userData?.profilePicture}
+          imageUri={form.profilePicture?.value}
           username={username}
           onImagePicked={(uri) => handleChange('profilePicture', uri)}
           onLoadingChange={setIsUploadingPicture}
