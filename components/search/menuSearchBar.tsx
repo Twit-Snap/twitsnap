@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 import { useAtomValue } from 'jotai';
-import { useState } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Dimensions, Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
@@ -83,7 +82,7 @@ export default function MenuSearchBar() {
             source={
               userData?.profilePicture
                 ? { uri: userData.profilePicture }
-                : require('@/assets/images/messi.jpg')
+                : require('@/assets/images/no-profile-picture.png')
             }
           />
         </TouchableOpacity>
