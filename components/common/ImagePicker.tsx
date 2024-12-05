@@ -73,7 +73,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
         console.log(response);
         const blob = await response.blob();
         const fileName = `${username}_${new Date().getTime()}`;
-        const reference = firebase.storage().ref().child(`profilePictures/${fileName}`);
+        const directory = isBanner ? 'bannerPictures' : 'profilePictures';
+        const reference = firebase.storage().ref().child(`${directory}/${fileName}`);
         console.log(reference);
 
         const uploadTask = await reference.put(blob); // Sube la imagens
@@ -91,7 +92,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
         );
       }
     }
-  }, [username, onImagePicked, pickImage, onLoadingChange]);
+  }, [pickImage, username, onLoadingChange, isBanner, onImagePicked]);
 
   if (isBanner) {
     return (

@@ -58,7 +58,9 @@ const ProfileHeader = ({ user }: { user: SearchedUser }) => {
         onPress={router.back}
       />
       <Image
-        source={user?.backgroundImage ? { uri: user.backgroundImage } : default_images.bannerPhoto}
+        source={
+          user?.backgroundPicture ? { uri: user.backgroundPicture } : default_images.bannerPhoto
+        }
         style={styles.bannerPhoto}
       />
       <Image

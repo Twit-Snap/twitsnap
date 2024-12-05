@@ -1,8 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { useSetAtom } from 'jotai';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Switch, Text, View } from 'react-native';
 import { Button, HelperText, IconButton, TextInput } from 'react-native-paper';
 
+import { authenticatedAtom } from '@/app/authAtoms/authAtom';
+import { UserAuth } from '@/app/types/authTypes';
 import { ModifiableUser } from '@/app/types/publicUser';
 import ImagePicker from '@/components/common/ImagePicker';
 import useAxiosInstance from '@/hooks/useAxios';
@@ -92,14 +95,15 @@ const EditProfileScreen = () => {
   const [error, setError] = useState<string | null>(null);
   const [isFormTouched, setIsFormTouched] = useState(false);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const setAuthAtom = useSetAtom(authenticatedAtom);
 
   const [form, setForm] = useState<ModifiableUserForm>({
-    name: { value: originalUserData?.name || '' },
-    lastname: { value: originalUserData?.lastname || '' },
-    birthdate: { value: originalUserData?.birthdate || '' },
-    isPrivate: { value: originalUserData?.isPrivate?.toString() || 'false' },
-    profilePicture: { value: originalUserData?.profilePicture || '' },
-    backgroundPicture: { value: originalUserData?.backgroundPicture || '' }
+    name: { value: '' },
+    lastname: { value: '' },
+    birthdate: { value: '' },
+    isPrivate: { value: 'false' },
+    profilePicture: { value: '' },
+    backgroundPicture: { value: '' }
   });
 
   useEffect(() => {
@@ -111,7 +115,9 @@ const EditProfileScreen = () => {
           name: { value: response.data.data.name },
           lastname: { value: response.data.data.lastname },
           birthdate: { value: response.data.data.birthdate },
-          isPrivate: { value: response.data.data.isPrivate.toString() }
+          isPrivate: { value: response.data.data.isPrivate.toString() },
+          profilePicture: { value: response.data.data.profilePicture },
+          backgroundPicture: { value: response.data.data.backgroundPicture }
         });
       } catch (err) {
         console.error(err);
@@ -178,7 +184,16 @@ const EditProfileScreen = () => {
         const updatedUserData = extractUserChanges(originalUserData, form);
         console.log(updatedUserData);
         await axiosUsers.patch(`users/${username}`, updatedUserData);
-        // Optionally navigate back or show success message
+        setAuthAtom(
+          (prev) =>
+            ({
+              ...prev,
+              name: form.name.value,
+              lastname: form.lastname.value,
+              birthdate: form.birthdate.value,
+              profilePicture: form.profilePicture?.value
+            }) as UserAuth
+        );
       } catch (err) {
         console.error(err);
         setError('Failed to update user data');
@@ -187,11 +202,18 @@ const EditProfileScreen = () => {
   };
 
   const isFormValid = useMemo(() => {
+    if (!originalUserData) return false;
     const formProps = getFormProps(form, 'errorMessage');
-    return (
-      isFormTouched && Object.values(formProps).every((value) => !value) && !isUploadingPicture
+    const hasChanges = Object.values(extractUserChanges(originalUserData, form)).some(
+      (value) => value !== undefined
     );
-  }, [form, isFormTouched, isUploadingPicture]);
+    return (
+      isFormTouched &&
+      Object.values(formProps).every((value) => !value) &&
+      !isUploadingPicture &&
+      hasChanges
+    );
+  }, [form, isFormTouched, isUploadingPicture, originalUserData]);
 
   if (loading) {
     return <ActivityIndicator size="large" color="blue" />;

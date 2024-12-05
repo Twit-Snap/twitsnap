@@ -12,7 +12,7 @@ export interface SearchedUser {
   birthdate: string;
   createdAt: string;
   profilePicture: string;
-  backgroundImage: string;
+  backgroundPicture: string;
   twits: TwitSnap[];
   following: boolean;
   followingCount: number;
