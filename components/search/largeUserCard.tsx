@@ -58,11 +58,11 @@ export default function LargeUserCard({ item }: { item: SearchedUser }) {
         {item && <Text style={styles.name}>{item.name}</Text>}
         {item && <Text style={styles.username}>@{item.username}</Text>}
 
-        <Text style={styles.description} numberOfLines={4} ellipsizeMode="tail">
+        {/* <Text style={styles.description} numberOfLines={4} ellipsizeMode="tail">
           {item.description
             ? item.description
             : 'Había una vez una pequeña niña llamada Caperucita Roja que vivía en un bosque muy bonito. Un día, su abuelita enfermó y le pidió que le llevara una cesta con comida.'}
-        </Text>
+        </Text> */}
       </View>
     </TouchableOpacity>
   );
@@ -72,8 +72,8 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 10,
     borderRadius: 10,
-    minHeight: windowHeight * 0.35,
-    maxHeight: windowHeight * 0.35,
+    minHeight: windowHeight * 0.3,
+    maxHeight: windowHeight * 0.3,
     minWidth: windowWidth * 0.7,
     maxWidth: windowWidth * 0.7,
     borderWidth: 1,
