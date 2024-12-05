@@ -1,8 +1,7 @@
 import { parseISO } from 'date-fns';
-import { useFocusEffect, useLocalSearchParams, useSegments } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useExpoRouter } from 'expo-router/build/global-state/router-store';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { useAtom } from 'jotai/index';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -20,7 +19,6 @@ import { Divider, IconButton } from 'react-native-paper';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { TwitSnap } from '@/app/types/TwitSnap';
-import { showTabsAtom } from '@/atoms/showTabsAtom';
 import ParsedContent from '@/components/common/parsedContent';
 import Interaction from '@/components/twits/interaction';
 import Bookmark from '@/components/twits/Interactions/bookmark';
@@ -37,10 +35,6 @@ import { twitsAtom } from '../home/twitsAtom';
 const default_images = {
   default_profile_picture: require('../../../assets/images/no-profile-picture.png')
 };
-
-interface TweetCardProps {
-  tweet: TwitSnap;
-}
 
 const window = Dimensions.get('screen');
 
@@ -72,7 +66,6 @@ const TwitView: React.FC = () => {
 
   const userData = useAtomValue(authenticatedAtom);
   const router = useExpoRouter();
-  const segments = useSegments(); // Obtener la ruta actual
 
   const [animatedValueComment] = useState(new Animated.Value(window.height));
   const [animatedValueThreeDot] = useState(new Animated.Value(window.height));
@@ -82,8 +75,6 @@ const TwitView: React.FC = () => {
 
   const [isExpandedThreeDot, setIsExpandedThreeDot] = useState(false);
   const isExpandedRefThreeDot = useRef(false);
-
-  const [showTabs, setShowTabs] = useAtom(showTabsAtom);
 
   const [comments, setComments] = useState<TwitSnap[] | null>(null);
 
@@ -123,7 +114,6 @@ const TwitView: React.FC = () => {
 
   const handlePressComment = () => {
     isExpandedCommentRef.current = !isExpandedCommentRef.current;
-    setShowTabs(!showTabs);
     Animated.timing(animatedValueComment, {
       toValue: isExpandedComment ? window.height : 0, // Adjust the height as needed
       duration: 300, // Animation duration in milliseconds
@@ -135,7 +125,6 @@ const TwitView: React.FC = () => {
   };
 
   const handlePressThreeDot = () => {
-    setShowTabs(!showTabs);
     Animated.timing(animatedValueThreeDot, {
       toValue: isExpandedThreeDot ? window.height : 0, // Adjust the height as needed
       duration: 300, // Animation duration in milliseconds
@@ -238,6 +227,8 @@ const TwitView: React.FC = () => {
         setComments(null);
         setTweet(null);
         setError('');
+        setIsExpandedComment(false);
+        setIsExpandedThreeDot(false);
       };
     }, [id, openComment])
   );
