@@ -28,17 +28,17 @@ const default_images = {
 
 const ChatScreen = () => {
   const chat_id = useLocalSearchParams<{ id: string; user: string }>().id;
+  const userParam = useLocalSearchParams<{ id: string; user: string }>().user;
 
-  const getUserParam = (): IReducedUser | string => {
-    const userParam = useLocalSearchParams<{ id: string; user: string }>().user;
+  const getUserParam = (uParam: string): IReducedUser | string => {
     try {
-      return JSON.parse(userParam);
+      return JSON.parse(uParam);
     } catch {
-      return userParam;
+      return uParam;
     }
   };
 
-  const user = getUserParam();
+  const user = getUserParam(userParam);
   const userRef = useRef<IReducedUser>({} as IReducedUser);
 
   const [messages, setMessages] = useState<IMessage[] | null>(null);
