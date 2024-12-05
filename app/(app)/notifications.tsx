@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useRef, useState } from 'react';
-import { FlatList, ScrollView } from 'react-native';
+import { FlatList, ScrollView, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 
 import HomeHeader from '@/components/feed/header';
@@ -43,7 +43,9 @@ export default function NotificationsList() {
 
   return (
     <>
-      <HomeHeader />
+      <View style={{ minHeight: 50 }}>
+        <HomeHeader />
+      </View>
       <ScrollView
         contentContainerStyle={{
           justifyContent: 'center'
