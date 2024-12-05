@@ -74,10 +74,6 @@ const ThreeDotMenu: React.FC<ThreeDotProps> = ({
               <Icon name="pencil" size={20} color="white" />
               <Text style={styles.menuText}>Edit</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
-              <Icon name="direction" size={20} color="white" />
-              <Text style={styles.menuText}>Share</Text>
-            </TouchableOpacity>
           </View>
           <Animated.View
             style={[
@@ -110,23 +106,7 @@ const ThreeDotMenu: React.FC<ThreeDotProps> = ({
           </Animated.View>
         </>
       );
-    } else {
-      return (
-        <View style={styles.menu}>
-          <IconButton
-            icon="close"
-            size={25}
-            style={{ margin: 0 }}
-            onPress={onCloseOrFinish}
-            iconColor="rgb(255 255 255)"
-          />
-          <TouchableOpacity style={styles.menuItem}>
-            <Icon name="direction" size={20} color="white" />
-            <Text style={styles.menuText}>Share</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
+    } 
   };
 
   return <View>{getTwitMenu()}</View>;
