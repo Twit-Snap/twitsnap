@@ -12,8 +12,16 @@ import NotificationCard, {
 export default function NotificationsList() {
   const [notifications, setNotifications] = useState<Notifications.Notification[] | null>(null);
 
+  const setNotificationsWithoutDups = async (notifs: Notifications.Notification[]) => {
+    setNotifications((current) => {
+      const ids = new Set<string>([...(current || []), ...notifs].map((n) => n.request.identifier));
+
+      return [...(current || []), ...notifs].filter((n) => ids.has(n.request.identifier));
+    });
+  };
+
   const fetchNotifications = async () => {
-    setNotifications(await Notifications.getPresentedNotificationsAsync());
+    setNotificationsWithoutDups(await Notifications.getPresentedNotificationsAsync());
   };
 
   const receiverListener = useRef<Notifications.Subscription>();
@@ -21,7 +29,7 @@ export default function NotificationsList() {
   useFocusEffect(
     useCallback(() => {
       receiverListener.current = Notifications.addNotificationReceivedListener((notification) => {
-        setNotifications((current) => (current ? [notification, ...current] : [notification]));
+        setNotificationsWithoutDups([notification]);
       });
 
       fetchNotifications();
