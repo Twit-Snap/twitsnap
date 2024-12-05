@@ -48,7 +48,6 @@ export default function FrontPage() {
           setIsLoadingSession(false);
           return;
         }
-
         router.replace('/biometric-login');
       } else {
         setIsLoadingSession(false);

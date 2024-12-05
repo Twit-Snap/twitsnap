@@ -33,7 +33,7 @@ export default function LargeUserCard({ item }: { item: SearchedUser }) {
     >
       <Image
         source={
-          item.backgroundImage ? { uri: item.backgroundImage } : default_images.backgroundImage
+          item.backgroundPicture ? { uri: item.backgroundPicture } : default_images.backgroundImage
         }
         style={styles.backgroundImage}
       />

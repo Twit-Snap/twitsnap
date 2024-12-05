@@ -12,7 +12,7 @@ export interface SearchedUser {
   birthdate: string;
   createdAt: string;
   profilePicture: string;
-  backgroundImage: string;
+  backgroundPicture: string;
   twits: TwitSnap[];
   following: boolean;
   followingCount: number;
@@ -34,4 +34,14 @@ export interface IReducedUser {
   profilePicture: string;
   expoToken?: string;
   followCreatedAt?: string;
+}
+
+export interface ModifiableUser {
+  username?: string;
+  name?: string;
+  lastname?: string;
+  birthdate?: string;
+  profilePicture?: string;
+  backgroundPicture?: string;
+  isPrivate?: boolean;
 }

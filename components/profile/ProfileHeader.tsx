@@ -58,7 +58,9 @@ const ProfileHeader = ({ user }: { user: SearchedUser }) => {
         onPress={router.back}
       />
       <Image
-        source={user?.backgroundImage ? { uri: user.backgroundImage } : default_images.bannerPhoto}
+        source={
+          user?.backgroundPicture ? { uri: user.backgroundPicture } : default_images.bannerPhoto
+        }
         style={styles.bannerPhoto}
       />
       <Image
@@ -68,7 +70,7 @@ const ProfileHeader = ({ user }: { user: SearchedUser }) => {
       <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
         {user?.id ? (
           user.username === authUser?.username ? (
-            <EditButton />
+            <EditButton handler={() => router.push(`../profile/${user.username}/edit`)} />
           ) : (
             <FollowButton extraCallback={setFollowingCount} user={user} />
           )

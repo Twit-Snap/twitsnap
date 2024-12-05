@@ -1,12 +1,20 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'; // Importa el icono
 import * as ImagePickerOS from 'expo-image-picker'; // Importa la librería para seleccionar imágenes
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 import { firebase } from '../../firebaseConfig';
 
 const default_images = {
-  default_profile_picture: require('../../assets/images/no-profile-picture.png')
+  default_profile_picture: require('../../assets/images/no-profile-picture.png'),
+  default_banner_picture: require('../../assets/images/kanagawa.jpg')
 };
 
 interface ImagePickerProps {
@@ -14,15 +22,20 @@ interface ImagePickerProps {
   username: string; // User ID for storage reference
   onImagePicked: (uri: string) => void; // Callback to pass the selected image URI
   onLoadingChange?: (isLoading: boolean) => void; // Callback to pass the loading state
+  isBanner?: boolean;
 }
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const ImagePicker: React.FC<ImagePickerProps> = ({
   imageUri,
   username,
   onImagePicked,
-  onLoadingChange
+  onLoadingChange,
+  isBanner
 }) => {
-  const [profilePicture, setprofilePicture] = useState<string | undefined>(imageUri);
+  const [pictureUri, setPictureUri] = useState<string | undefined>(imageUri);
   const [isLoading, setIsLoading] = useState(false);
 
   const pickImage = useCallback(async () => {
@@ -60,12 +73,13 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
         console.log(response);
         const blob = await response.blob();
         const fileName = `${username}_${new Date().getTime()}`;
-        const reference = firebase.storage().ref().child(`profilePictures/${fileName}`);
+        const directory = isBanner ? 'bannerPictures' : 'profilePictures';
+        const reference = firebase.storage().ref().child(`${directory}/${fileName}`);
         console.log(reference);
 
         const uploadTask = await reference.put(blob); // Sube la imagens
         const url = await uploadTask.ref.getDownloadURL();
-        setprofilePicture(url); // Actualiza el estado con la URI de la imagen seleccionada
+        setPictureUri(url); // Actualiza el estado con la URI de la imagen seleccionada
         onImagePicked(url); // Llama al callback con la URI de la imagen
         console.log('Image uploaded to Firebase Storage', url);
         setIsLoading(false);
@@ -78,18 +92,35 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
         );
       }
     }
-  }, [username, onImagePicked, pickImage, onLoadingChange]);
+  }, [pickImage, username, onLoadingChange, isBanner, onImagePicked]);
 
+  if (isBanner) {
+    return (
+      <View>
+        <TouchableOpacity onPress={handleImagePick}>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="white" style={bannerStyles.bannerPhoto} />
+          ) : (
+            <Image
+              source={pictureUri ? { uri: pictureUri } : default_images.default_banner_picture}
+              style={bannerStyles.bannerPhoto}
+            />
+          )}
+          <View style={styles.iconContainer}>
+            <MaterialCommunityIcons name="pencil" size={18} color="white" />
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={handleImagePick}>
         {isLoading ? (
-          <ActivityIndicator size="small" color="white" />
+          <ActivityIndicator size="small" color="white" style={styles.profilePicture} />
         ) : (
           <Image
-            source={
-              profilePicture ? { uri: profilePicture } : default_images.default_profile_picture
-            }
+            source={pictureUri ? { uri: pictureUri } : default_images.default_profile_picture}
             style={styles.profilePicture}
           />
         )}
@@ -104,7 +135,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginVertical: 20
+    marginVertical: 10
   },
   profilePicture: {
     width: 100,
@@ -114,11 +145,21 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     position: 'absolute',
-    bottom: 5,
-    right: 5,
+    bottom: 8,
+    right: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semi-transparente
     borderRadius: 15,
     padding: 5
+  }
+});
+
+const bannerStyles = StyleSheet.create({
+  bannerPhoto: {
+    minHeight: windowHeight / 6,
+    maxHeight: windowHeight / 6,
+    width: windowWidth - 20,
+    resizeMode: 'cover',
+    borderRadius: 5
   }
 });
 

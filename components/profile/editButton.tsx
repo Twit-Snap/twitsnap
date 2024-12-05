@@ -2,9 +2,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
 
-export default function EditButton() {
-  const handler = () => {};
-
+export default function EditButton({ handler }: { handler: () => void }) {
   return (
     <Button
       compact={true}
