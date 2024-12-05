@@ -4,7 +4,7 @@
     "slug": "twitsnap",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo1024.png",
     "scheme": "twitsnap",
     "userInterfaceStyle": "automatic",
     "splash": {

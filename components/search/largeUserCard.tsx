@@ -13,7 +13,7 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const default_images = {
-  profilePhoto: require('../../assets/images/messi.jpg'),
+  profilePhoto: require('../../assets/images/no-profile-picture.png'),
   backgroundImage: require('../../assets/images/kanagawa.jpg')
 };
 
