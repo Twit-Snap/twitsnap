@@ -4,6 +4,7 @@ import { useAtom } from 'jotai';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Switch, Text, View } from 'react-native';
 import { Button, HelperText, IconButton, TextInput } from 'react-native-paper';
+import { DatePickerModal } from 'react-native-paper-dates';
 
 import { authenticatedAtom } from '@/app/authAtoms/authAtom';
 import { UserAuth } from '@/app/types/authTypes';
@@ -97,7 +98,7 @@ const EditProfileScreen = () => {
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const [authAtom, setAuthAtom] = useAtom(authenticatedAtom);
   const [updateIsLoading, setUpdateIsLoading] = useState(false);
-
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [form, setForm] = useState<ModifiableUserForm>({
     name: { value: '' },
     lastname: { value: '' },
@@ -111,6 +112,9 @@ const EditProfileScreen = () => {
     const fetchUserData = async () => {
       try {
         const response = await axiosUsers.get(`users/${username}`);
+        response.data.data.birthdate = new Date(response.data.data.birthdate)
+          .toISOString()
+          .split('T')[0];
         setUserData(response.data.data);
         setForm({
           name: { value: response.data.data.name },
@@ -223,6 +227,16 @@ const EditProfileScreen = () => {
     );
   }, [form, isFormTouched, isUploadingPicture, originalUserData]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleDateChange = (date: any) => {
+    if (date) {
+      const dateString = date.date.toISOString().split('T')[0];
+      console.log('dateString', dateString);
+      handleChange('birthdate', dateString);
+    }
+    setShowDatePicker(false);
+  };
+
   if (loading) {
     return <ActivityIndicator size="large" color="blue" />;
   }
@@ -300,11 +314,25 @@ const EditProfileScreen = () => {
           label="Birthdate"
           value={form.birthdate.value}
           mode="outlined"
-          onChangeText={(value) => handleChange('birthdate', value)}
-          onBlur={() => onBlurValidate('birthdate')}
+          onFocus={() => setShowDatePicker(true)}
           error={!!form.birthdate.errorMessage}
           placeholder="Birthdate (YYYY-MM-DD)"
           theme={inputTheme}
+        />
+        <DatePickerModal
+          locale="en"
+          label="Select a date"
+          mode="single"
+          visible={showDatePicker}
+          onDismiss={() => setShowDatePicker(false)}
+          date={form.birthdate.value ? new Date(form.birthdate.value) : undefined}
+          onConfirm={handleDateChange}
+          validRange={{
+            startDate: new Date('1900-01-01'),
+            endDate: new Date()
+          }}
+          startYear={1900}
+          endYear={new Date().getFullYear()}
         />
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>

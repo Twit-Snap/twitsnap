@@ -4,6 +4,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
+import { DatePickerModal } from 'react-native-paper-dates';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { blockedAtom } from '@/atoms/blockedAtom';
@@ -104,6 +105,7 @@ const SignUp: () => React.JSX.Element = () => {
   const [entryTime, setEntryTime] = useState<Date>(new Date());
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const [isFormTouched, setIsFormTouched] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [form, setForm] = useState<SignUpForm>({
     name: { value: '' },
@@ -235,6 +237,16 @@ const SignUp: () => React.JSX.Element = () => {
     );
   }, [form, isUploadingPicture, isFormTouched]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleDateChange = (date: any) => {
+    if (date) {
+      const dateString = date.date.toISOString().split('T')[0];
+      console.log('dateString', dateString);
+      handleChange('birthdate', dateString);
+    }
+    setShowDatePicker(false);
+  };
+
   return (
     <>
       <StatusBar backgroundColor={'rgb(5 5 5)'} barStyle={'light-content'} />
@@ -331,9 +343,7 @@ const SignUp: () => React.JSX.Element = () => {
               label="Birthdate"
               value={form.birthdate.value}
               mode="outlined"
-              onChangeText={(value) => handleChange('birthdate', value)}
-              placeholder="YYYY-MM-DD"
-              onBlur={() => onBlurValidate('birthdate')}
+              onFocus={() => setShowDatePicker(true)}
               error={!!form.birthdate.errorMessage}
               theme={inputTheme}
             />
@@ -343,6 +353,21 @@ const SignUp: () => React.JSX.Element = () => {
               </HelperText>
             )}
           </View>
+          <DatePickerModal
+            locale="en"
+            label="Select a date"
+            mode="single"
+            visible={showDatePicker}
+            onDismiss={() => setShowDatePicker(false)}
+            date={form.birthdate.value ? new Date(form.birthdate.value) : undefined}
+            onConfirm={handleDateChange}
+            validRange={{
+              startDate: new Date('1900-01-01'),
+              endDate: new Date()
+            }}
+            startYear={1900}
+            endYear={new Date().getFullYear()}
+          />
           <View style={styles.inputContainer}>
             <TextInput
               value={form.password.value}
